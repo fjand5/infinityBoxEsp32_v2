@@ -1,4 +1,5 @@
 #pragma once
+#include "voca_env.h"
 #define DEFAULT_USERNAME "admin"
 #define DEFAULT_PASSWORD "12345678"
 #define CONFIG_FILE "/config.txt"
@@ -6,6 +7,7 @@
 #include <LITTLEFS.h>
 #include <map>
 #include <list>
+#include <WS2812FX.h>
 
 void saveConfigFile();
 void setValue(String key, String value, bool save = true);

@@ -1,3 +1,4 @@
+#include "voca_env.h"
 #include "voca_webserver.h"
 void setupSystem(){
     addHttpApi("/reset",[](){

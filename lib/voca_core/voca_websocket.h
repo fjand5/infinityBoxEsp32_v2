@@ -1,4 +1,5 @@
 #pragma once
+#include "voca_env.h"
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 
@@ -103,13 +104,14 @@ void setupWebSocket()
     xTaskCreatePinnedToCore(
         [](void *param)
         {
+            log_w("loopSocket is running on core: %d", xPortGetCoreID());
             webSocket.begin();
             webSocket.onEvent(webSocketEvent);
             websocket_sem = xSemaphoreCreateBinary();
             xSemaphoreGive(websocket_sem);
             SET_FLAG(FLAG_WEBSOCKET_READY);
             WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY);
-            log_w("Socket is running on core: %d",xPortGetCoreID());
+            log_w("loopSocket is running on core: %d", xPortGetCoreID());
 
             while (1)
             {
@@ -118,11 +120,11 @@ void setupWebSocket()
             }
         },
         "loopSocket",
-        20000,
+        10000,
         NULL,
         2,
         NULL,
-        0);
+        VOCA_CORE_CPU);
 }
 
 void loopWebSocket()

@@ -1,4 +1,5 @@
 #pragma once
+#include "voca_env.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "voca_websocket.h"

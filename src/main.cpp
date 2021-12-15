@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include "voca_core.h"
+#include "render/render.h"
 // #include "button.h"
-// #include "box/box.h"
+#include "box/box.h"
 
 void setup(void)
 {
@@ -9,10 +10,11 @@ void setup(void)
 
   setup_voca();
   log_i("setup_voca");
-  // setup_box();
+  delay(3000);
+  setup_box();
   log_i("setup_box");
-
-  // vTaskDelete(NULL);
+  setup_render();
+  vTaskDelete(NULL);
 }
 
 void loop(void)

@@ -2,6 +2,7 @@
   To upload through terminal you can use: curl -F "image=@firmware.bin" esp8266-webupdate.local/update
 */
 #pragma once
+#include "voca_env.h"
 #include "webserver.h"
 #include <WiFi.h>
 #include <WiFiClient.h>

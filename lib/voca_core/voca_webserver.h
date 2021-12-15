@@ -1,5 +1,5 @@
 #pragma once
-
+#include "voca_env.h"
 #include "voca_dist.h"
 #include <WebServer.h>
 #include <ArduinoJson.h>
@@ -194,13 +194,11 @@ void setupWebserver()
                     }
                   });
         server.begin();
-        Serial.print("loopWebserver is running on core ");
-        Serial.println(xPortGetCoreID());
+        log_w("loopWebserver is running on core: %d", xPortGetCoreID());
         http_request_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(http_request_sem);
         SET_FLAG(FLAG_WEBSERVER_READY);
         WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY);
-        log_w("Webserver is running on core: %d",xPortGetCoreID());
 
         while (1)
         {
@@ -213,5 +211,5 @@ void setupWebserver()
       NULL,
       1,
       NULL,
-      0);
+      VOCA_CORE_CPU);
 }

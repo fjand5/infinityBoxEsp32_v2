@@ -30,10 +30,11 @@ void PBox::setup()
          ++vBox)
     {
         vBox->init();
-        vBox->setBrightness(64);
+        vBox->setBrightness(255);
         vBox->start();
         vBox->setCustomShow(physShow);
     }
+    init();
     setBrightness(255);
     setSegment(0, 0);
     start();
@@ -46,13 +47,15 @@ void physShow()
     for (uint16_t i = 0; i < Box.getNumBytes(); i++)
     {
         float sumPixelsValue = 0;
+        float count =0;
         for (auto vBox = (*_vBoxes).begin();
              vBox != (*_vBoxes).end();
              ++vBox)
         {
+            count ++;
             sumPixelsValue += vBox->getPixels()[i];
         }
-        Box.getPixels()[i] = sumPixelsValue / (*_vBoxes).size();
+        Box.getPixels()[i] = sumPixelsValue / count;
     }
     // Box.show();
     rmt_write_sample(RMT_CHANNEL, Box.getPixels(), Box.getNumBytes(), false); // channel 0

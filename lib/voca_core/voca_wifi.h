@@ -1,4 +1,5 @@
 #pragma once
+#include "voca_env.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "voca_store.h"
@@ -22,7 +23,7 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
     while (WiFi.status() != WL_CONNECTED && millis() < 30000)
     {
       delay(500);
-      Serial.print(".");
+      log_d(".");
     }
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -78,6 +79,29 @@ void setupWifi(void)
                {
                  LITTLEFS.format();
                });
+    renderColorPicker("Color", "_color", R"({
+    "name":"Xóa dữ liệu",
+    "description":"",
+    "span":6
+  })",
+               [](String key, String value)
+               {
+                 setValue(key,value);
+
+                 log_d("key: %s; value: %s",key.c_str(), value.c_str());
+               });
+    renderSelect("Color", "_select", R"({
+    "name":"Lựa chọn",
+    "description":"",
+    "options":["một","hai","ba","bốn"],
+    "span":6
+  })",
+               [](String key, String value)
+               {
+                 setValue(key,value);
+
+                 log_d("key: %s; value: %s",key.c_str(), value.c_str());
+               });
   WiFi.mode(WIFI_AP_STA);
   if (checkKey("_apid") && checkKey("_appw"))
   {
@@ -99,26 +123,22 @@ void setupWifi(void)
     while (WiFi.status() != WL_CONNECTED && millis() < 30000)
     {
       delay(500);
-      Serial.print(".");
+      log_d(".");
     }
   }
   // WiFi.begin("Vong Cat-Hide", "78787878");
-
-  Serial.println("");
 
   // Wait for connection
   if (WiFi.status() != WL_CONNECTED)
   {
     WiFi.mode(WIFI_AP);
-    Serial.println("Only AP mode");
+    log_d("Only AP mode");
   }
   else
   {
-    Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(getValue("_ssid"));
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
+    log_d("");
+    log_d("Connected to ");
+    log_d("%s",getValue("_ssid").c_str());
     WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
     SET_FLAG(FLAG_CONNECTED_STA);
   }
@@ -144,17 +164,17 @@ void scanWifi()
   bool hidden;
   int scanResult;
 
-  Serial.println(F("Starting WiFi scan..."));
+  log_d("Starting WiFi scan...");
 
   scanResult = WiFi.scanNetworks(/*async=*/false, /*hidden=*/true);
 
   if (scanResult == 0)
   {
-    Serial.println(F("No networks found"));
+    log_d("No networks found");
   }
   else if (scanResult > 0)
   {
-    Serial.printf(PSTR("%d networks found:\n"), scanResult);
+    // Serial.printf(PSTR("%d networks found:\n"), scanResult);
 
     // Print unsorted scan results
     for (int8_t i = 0; i < scanResult; i++)
@@ -164,21 +184,21 @@ void scanWifi()
       nestedObj["ssid"] = WiFi.SSID(i);
       nestedObj["rssi"] = WiFi.RSSI(i);
 
-      Serial.printf(PSTR("  %02d: [CH %02d] [%02X:%02X:%02X:%02X:%02X:%02X] %ddBm %c %c %s\n"),
-                    i,
-                    channel,
-                    bssid[0], bssid[1], bssid[2],
-                    bssid[3], bssid[4], bssid[5],
-                    rssi,
-                    WiFi.encryptionType(i) ? ' ' : '*',
-                    hidden ? 'H' : 'V',
-                    ssid.c_str());
+      // Serial.printf(PSTR("  %02d: [CH %02d] [%02X:%02X:%02X:%02X:%02X:%02X] %ddBm %c %c %s\n"),
+      //               i,
+      //               channel,
+      //               bssid[0], bssid[1], bssid[2],
+      //               bssid[3], bssid[4], bssid[5],
+      //               rssi,
+      //               WiFi.encryptionType(i) ? ' ' : '*',
+      //               hidden ? 'H' : 'V',
+      //               ssid.c_str());
       delay(0);
     }
   }
   else
   {
-    Serial.printf(PSTR("WiFi scan error %d"), scanResult);
+    // Serial.printf(PSTR("WiFi scan error %d"), scanResult);
   }
   String ret;
   serializeJson(array, ret);
