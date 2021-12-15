@@ -8,6 +8,8 @@ VBox layer3(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 void boxHandle(void *params)
 {
     // Box.addVBox(layer1);
+    log_w("boxHandle is running on core: %d",xPortGetCoreID());
+
     Box.addVBox(layer2);
     Box.addVBox(layer3);
     Box.setup();

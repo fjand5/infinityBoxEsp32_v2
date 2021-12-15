@@ -109,6 +109,8 @@ void setupWebSocket()
             xSemaphoreGive(websocket_sem);
             SET_FLAG(FLAG_WEBSOCKET_READY);
             WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY);
+            log_w("Socket is running on core: %d",xPortGetCoreID());
+
             while (1)
             {
                 webSocket.loop();

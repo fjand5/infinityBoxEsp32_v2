@@ -1,17 +1,18 @@
 #include <Arduino.h>
-// #include "voca_core.h"
+#include "voca_core.h"
 // #include "button.h"
-#include "box/box.h"
+// #include "box/box.h"
 
 void setup(void)
 {
   delay(555);
 
-  // setup_voca();
-  // log_i("main is running on core: %d",xPortGetCoreID());
-  setup_box();
+  setup_voca();
+  log_i("setup_voca");
+  // setup_box();
+  log_i("setup_box");
 
-  vTaskDelete(NULL);
+  // vTaskDelete(NULL);
 }
 
 void loop(void)

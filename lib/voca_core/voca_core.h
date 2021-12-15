@@ -9,12 +9,19 @@
 
 void setup_voca()
 {
+    log_i("settupStatus");
     settupStatus();
+    log_i("setupStore");
     setupStore();
+    log_i("setupWifi");
     setupWifi();
+    log_i("setupWebserver");
     setupWebserver();
+    log_i("setupWebSocket");
     setupWebSocket();
+    log_i("setupSystem");
     setupSystem();
+    log_i("setupRender");
     setupRender();
     
 }
