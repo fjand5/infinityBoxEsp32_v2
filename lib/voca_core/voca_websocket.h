@@ -51,7 +51,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         case WStype_TEXT:
         {
 
-            DynamicJsonDocument _doc(10000);
+            DynamicJsonDocument _doc(2048);
             deserializeJson(_doc, payload, length);
             JsonObject obj = _doc.as<JsonObject>();
             String ret;
@@ -106,9 +106,10 @@ void setupWebSocket()
     xTaskCreatePinnedToCore(
         [](void *param)
         {
+            WebSocketsServer* _webSocket = (WebSocketsServer*)param;
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
-            webSocket.begin();
-            webSocket.onEvent(webSocketEvent);
+            _webSocket->begin();
+            _webSocket->onEvent(webSocketEvent);
             websocket_sem = xSemaphoreCreateBinary();
             xSemaphoreGive(websocket_sem);
             SET_FLAG(FLAG_WEBSOCKET_READY);
@@ -117,13 +118,13 @@ void setupWebSocket()
 
             while (1)
             {
-                webSocket.loop();
+                _webSocket->loop();
                 delay(10);
             }
         },
         "loopSocket",
-        15000,
-        NULL,
+        50000,
+        (void *) &webSocket,
         2,
         NULL,
         VOCA_CORE_CPU);

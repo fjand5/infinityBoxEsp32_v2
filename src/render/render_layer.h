@@ -1,4 +1,4 @@
-#include "box/box.h"
+#include "box/box_controler.h"
 #include "voca_render.h"
 
 void setup_render_layer()
@@ -14,7 +14,13 @@ void setup_render_layer()
   })",
                      [](String key, String value)
                      {
-                         setValue(key, value);
+                         int li;
+                         key.replace("en_layer_", "");
+                         li = key.toInt();
+                         if (value == "true")
+                             box_resume(li);
+                         else
+                             box_pause(li);
                      });
     }
 };

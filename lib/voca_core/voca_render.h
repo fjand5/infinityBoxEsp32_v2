@@ -8,7 +8,7 @@
 #include <list>
 
 String getRender();
-DynamicJsonDocument docRender(20000);
+DynamicJsonDocument docRender(10000);
 JsonArray arrayRender = docRender.to<JsonArray>();
 typedef void (*OnEvent)(String key, String value);
 std::list<OnEvent> OnEvents;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "voca_env.h"
 #include "voca_status.h"
 #include "voca_wifi.h"
