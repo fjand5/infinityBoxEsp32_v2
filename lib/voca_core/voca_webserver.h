@@ -56,7 +56,7 @@ void handleIndex()
 }
 void setupWebserver()
 {
-
+  WAIT_FLAG_SET(FLAG_SETUP_WIFI_DONE);
   xTaskCreatePinnedToCore(
       [](void *param)
       {
@@ -207,7 +207,7 @@ void setupWebserver()
         }
       },
       "loopWebserver",
-      100000,
+      80000,
       NULL,
       1,
       NULL,

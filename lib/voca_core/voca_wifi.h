@@ -146,6 +146,8 @@ void setupWifi(void)
   addHttpApi("scanWifi", scanWifi);
   addHttpApi("setWifi", setWifi);
   addHttpApi("getWifi", getWifi);
+  SET_FLAG(FLAG_SETUP_WIFI_DONE);
+
 }
 
 void loopWifi(void)

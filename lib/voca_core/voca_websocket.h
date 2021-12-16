@@ -101,6 +101,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
 void setupWebSocket()
 {
+    
+    WAIT_FLAG_SET(FLAG_SETUP_WIFI_DONE);
     xTaskCreatePinnedToCore(
         [](void *param)
         {
@@ -120,7 +122,7 @@ void setupWebSocket()
             }
         },
         "loopSocket",
-        10000,
+        15000,
         NULL,
         2,
         NULL,

@@ -6,14 +6,16 @@
 
 void setup(void)
 {
-  delay(555);
+  log_w("main starting: %d", xPortGetCoreID());
 
+  delay(555);
   setup_voca();
+  // delay(5000);
+
   log_i("setup_voca");
-  delay(3000);
   setup_box();
   log_i("setup_box");
-  setup_render();
+  render();
   vTaskDelete(NULL);
 }
 

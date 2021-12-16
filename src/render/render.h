@@ -1,6 +1,6 @@
 #pragma once
 #include "render_layer.h"
-void setup_render()
+void render()
 {
     setup_render_layer();
 }

@@ -23,6 +23,7 @@ void boxHandle(void *params)
     while (1)
     {
         Box.service_handle();
+        delay(10);
     }
 }
 void setup_box()
@@ -33,7 +34,7 @@ void setup_box()
     xReturned = xTaskCreatePinnedToCore(
         boxHandle,            /* Task function. */
         "boxHandle",          /* name of task. */
-        50000,                /* Stack size of task */
+        10000,                /* Stack size of task */
         NULL,                 /* parameter of the task */
         configMAX_PRIORITIES, /* priority of the task */
         NULL,                 /* Task handle to keep track of created task */

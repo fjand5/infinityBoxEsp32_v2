@@ -34,7 +34,6 @@ void loadFileIntoConfig(String content)
     content.remove(0, curLine.length() + 1);
   }
   xSemaphoreGive(configContent_sem);
-  xEventGroupSetBits(system_status, FLAG_INITIALIZED_STORE);
 }
 // Kiểm tra key có tồn tại không
 bool checkKey(String key)
@@ -294,6 +293,7 @@ void setupStore()
     cfg_file.close();
     xSemaphoreGive(spiffs_sem);
   }
+  SET_FLAG(FLAG_INITIALIZED_STORE);
 }
 
 void loopConfig()

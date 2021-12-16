@@ -11,10 +11,10 @@ void setup_voca()
 {
     settupStatus();
     setupStore();
+    setupRender();
     setupWifi();
     setupWebserver();
     setupWebSocket();
     setupSystem();
-    setupRender();
-    
+    WAIT_VOCA_READY;
 }
