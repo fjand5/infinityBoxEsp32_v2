@@ -192,7 +192,7 @@ void getValuesByObject(JsonObject objectValues)
 // Gán giá trị cho key
 void setValue(String key, String value, bool save)
 {
-
+  log_d("setValue: key: %s; value: %s",key.c_str(), value.c_str());
   bool noChange = ConfigContent[key] == value;
   if (!noChange)
   {

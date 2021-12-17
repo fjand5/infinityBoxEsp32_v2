@@ -79,29 +79,29 @@ void setupWifi(void)
                {
                  LITTLEFS.format();
                });
-    renderColorPicker("Color", "_color", R"({
-    "name":"Xóa dữ liệu",
-    "description":"",
-    "span":6
-  })",
-               [](String key, String value)
-               {
-                 setValue(key,value);
+  //   renderColorPicker("Color", "_color", R"({
+  //   "name":"Xóa dữ liệu",
+  //   "description":"",
+  //   "span":6
+  // })",
+  //              [](String key, String value)
+  //              {
+  //                setValue(key,value);
 
-                 log_d("key: %s; value: %s",key.c_str(), value.c_str());
-               });
-    renderSelect("Color", "_select", R"({
-    "name":"Lựa chọn",
-    "description":"",
-    "options":["một","hai","ba","bốn"],
-    "span":6
-  })",
-               [](String key, String value)
-               {
-                 setValue(key,value);
+  //                log_d("key: %s; value: %s",key.c_str(), value.c_str());
+  //              });
+  //   renderSelect("Color", "_select", R"({
+  //   "name":"Lựa chọn",
+  //   "description":"",
+  //   "options":["một","hai","ba","bốn"],
+  //   "span":6
+  // })",
+  //              [](String key, String value)
+  //              {
+  //                setValue(key,value);
 
-                 log_d("key: %s; value: %s",key.c_str(), value.c_str());
-               });
+  //                log_d("key: %s; value: %s",key.c_str(), value.c_str());
+  //              });
   WiFi.mode(WIFI_AP_STA);
   if (checkKey("_apid") && checkKey("_appw"))
   {

@@ -2,6 +2,8 @@
 #include "box_env.h"
 #include "ESP32_RMT_Driver.h"
 #include "v_box.h"
+#define FLAG_BOX_READY (1 << 0)
+
 #define RMT_CHANNEL RMT_CHANNEL_0
 VBox layers[NUM_OF_LAYER] = {VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
@@ -9,8 +11,9 @@ VBox layers[NUM_OF_LAYER] = {VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
 
 WS2812FX box = WS2812FX(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 SemaphoreHandle_t control_layer_sem;
+EventGroupHandle_t box_status;
 
-void boxShow()
+static void IRAM_ATTR boxShow()
 {
     for (uint16_t i = 0; i < box.getNumBytes(); i++)
     {
@@ -26,6 +29,8 @@ void boxShow()
         }
         if (count != 0)
             box.getPixels()[i] = sumPixelsValue / count;
+        else
+            box.getPixels()[i] = 0;
     }
     rmt_write_sample(RMT_CHANNEL, box.getPixels(), box.getNumBytes(), false); // channel 0
 }
@@ -52,13 +57,13 @@ void boxHandle(void *params)
     _layers[0].setMode(FX_MODE_COLOR_WIPE);
     _layers[0].setColor(GREEN);
     // layer1.setMode(FX_MODE_RUNNING_RANDOM);
-    _layers[1].setMode(FX_MODE_FADE);
-    _layers[2].setColor(BLUE);
+    _layers[1].setMode(FX_MODE_BREATH);
     _layers[1].setSpeed(300);
+    _layers[1].setColor(BLUE);
     _layers[2].setMode(FX_MODE_BLINK);
     _layers[2].setColor(RED);
     _layers[2].setSpeed(300);
-
+    xEventGroupSetBits(box_status, FLAG_BOX_READY);
     while (1)
     {
         for (size_t i = 0; i < NUM_OF_LAYER; i++)
@@ -71,15 +76,16 @@ void setup_box()
 {
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
+    box_status = xEventGroupCreate();
 
     xReturned = xTaskCreatePinnedToCore(
-        boxHandle,            /* Task function. */
-        "boxHandle",          /* name of task. */
-        50000,                /* Stack size of task */
-        (void *)layers,       /* parameter of the task */
-        0, /* priority of the task */
-        NULL,                 /* Task handle to keep track of created task */
-        BOX_CORE_CPU);        /* pin task to core 0 */
+        boxHandle,      /* Task function. */
+        "boxHandle",    /* name of task. */
+        50000,          /* Stack size of task */
+        (void *)layers, /* parameter of the task */
+        1,              /* priority of the task */
+        NULL,           /* Task handle to keep track of created task */
+        BOX_CORE_CPU);  /* pin task to core 0 */
     control_layer_sem = xSemaphoreCreateBinary();
     xSemaphoreGive(control_layer_sem);
     if (xReturned == pdPASS)
