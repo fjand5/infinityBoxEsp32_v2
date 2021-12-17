@@ -8,20 +8,9 @@ void setup_render_layer()
         String tab_name;
         tab_name = String("Layer ") + i;
 
-        String tmp;
-        tmp = String("en_layer_") + i;
-        if (getValue(tmp, "true") == "true")
-        {
-            log_i("cmd: %s", tmp.c_str());
-            box_enable(i);
-        }
-        else
-        {
-            log_i("cmd: %s", tmp.c_str());
-            box_disable(i);
-        }
         renderSwitch(tab_name, String("en_layer_") + i, R"({
     "name":"Chạy",
+    "newLine":true
   })",
                      [](String key, String value)
                      {
@@ -32,6 +21,19 @@ void setup_render_layer()
                              box_enable(li);
                          else
                              box_disable(li);
+                     });
+        renderSlider(tab_name, String("brig_layer_") + i, R"({
+    "name":"Độ sáng",
+    "min":0,
+    "max":255,
+    "newLine":true
+  })",
+                     [](String key, String value)
+                     {
+                         int li;
+                         key.replace("brig_layer_", "");
+                         li = key.toInt();
+                         box_setBrightness(li, value.toInt());
                      });
     };
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
@@ -44,16 +46,56 @@ void setup_render_layer()
         renderColorPicker(tab_name, String("color0_layer_") + i, R"({
     "name":"Màu 0",
   })",
+                          [](String key, String value)
+                          {
+                              int li;
+                              key.replace("color0_layer_", "");
+                              li = key.toInt();
+                              box_setColor(li, 0, value);
+                          });
+
+        tmp = String("color1_layer_") + i;
+        renderColorPicker(tab_name, String("color1_layer_") + i, R"({
+    "name":"Màu 1",
+  })",
+                          [](String key, String value)
+                          {
+                              int li;
+                              key.replace("color1_layer_", "");
+                              li = key.toInt();
+                              box_setColor(li, 1, value);
+                          });
+
+        tmp = String("color2_layer_") + i;
+        renderColorPicker(tab_name, String("color2_layer_") + i, R"({
+    "name":"Màu 2",
+    "newLine":true
+  })",
+                          [](String key, String value)
+                          {
+                              int li;
+                              key.replace("color2_layer_", "");
+                              li = key.toInt();
+                              box_setColor(li, 2, value);
+                          });
+    };
+    for (size_t i = 0; i < NUM_OF_LAYER; i++)
+    {
+        String tab_name;
+        tab_name = String("Layer ") + i;
+
+        String tmp;
+        tmp = String("mode_layer_") + i;
+        renderSelect(tab_name, String("mode_layer_") + i, R"({
+    "name":"Hiệu ứng",
+    "options":["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"],
+  })",
                      [](String key, String value)
                      {
                          int li;
-                         key.replace("color0_layer_", "");
+                         key.replace("mode_layer_", "");
                          li = key.toInt();
-                         if (value == "true")
-                             box_enable(li);
-                         else
-                             box_disable(li);
+                         box_setMode(li, value.toInt());
                      });
     };
-
 };

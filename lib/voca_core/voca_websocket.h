@@ -123,7 +123,7 @@ void setupWebSocket()
             }
         },
         "loopSocket",
-        50000,
+        20000,
         (void *) &webSocket,
         2,
         NULL,

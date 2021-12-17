@@ -26,6 +26,11 @@ void VBox::disable()
 }
 void VBox::setColorByIndex(uint8_t index, uint32_t color)
 {
+    for (int i = 0; i < getNumSegments(); i++)
+    {
+        uint32_t *colors = getColors(i);
+        colors[index] = color;
+    }
 }
 void VBox::handler()
 {

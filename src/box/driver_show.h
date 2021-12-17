@@ -1,4 +1,10 @@
+#pragma once
+
+#include "box_env.h"
+#include "v_box.h"
+
 #include "driver/rmt.h"
+#define RMT_CHANNEL RMT_CHANNEL_0
 
 #define APB_CLK_MHZ 80 // default RMT CLK source (80MHz)
 #define RMT_CLK_DIV  2 // RMT CLK divider
@@ -10,7 +16,8 @@
 #define T2_TICKS      625 / RMT_TICK // 625ns
 #define T3_TICKS      375 / RMT_TICK // 375ns
 #define RESET_TICKS 50000 / RMT_TICK // 50us
-
+extern WS2812FX box;
+extern VBox layers[];
 /*
  * Convert uint8_t type of data to rmt format data.
  */
@@ -68,4 +75,26 @@ static void rmt_tx_int(rmt_channel_t channel, uint8_t gpio) {
     rmt_config(&config);
     rmt_driver_install(config.channel, 0, 0);
     rmt_translator_init(config.channel, u8_to_rmt);
+}
+
+static void IRAM_ATTR boxShow()
+{
+    for (uint16_t i = 0; i < box.getNumBytes(); i++)
+    {
+        uint32_t sumPixelsValue = 0;
+        uint32_t count = 0;
+        for (size_t li = 0; li < NUM_OF_LAYER; li++)
+        {
+            if (layers[li].isRunning())
+            {
+                count++;
+                sumPixelsValue += layers[li].getPixels()[i];
+            }
+        }
+        if (count != 0)
+            box.getPixels()[i] = sumPixelsValue / count;
+        else
+            box.getPixels()[i] = 0;
+    }
+    rmt_write_sample(RMT_CHANNEL, box.getPixels(), box.getNumBytes(), false); // channel 0
 }

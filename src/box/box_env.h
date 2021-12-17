@@ -1,4 +1,8 @@
 #define NUM_OF_LAYER 3
 #define LED_COUNT 288
+#define LED_NUM_OF_SEG 24
+#define LED_COUNT_ONE_SEG LED_COUNT / LED_NUM_OF_SEG
 #define LED_PIN 23
+
+
 #define BOX_CORE_CPU 1

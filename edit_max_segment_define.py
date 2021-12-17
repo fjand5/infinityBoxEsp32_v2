@@ -12,7 +12,9 @@ class bcolors:
 # access to global construction environment
 def before_upload(source, target, env):
     print(bcolors.FAIL + bcolors.BOLD +"before_upload===================================================================================================")
-    WS2812FX_PATH = env['PROJECT_LIBDEPS_DIR'] + "\\" +  "\\node32s\WS2812FX\\src\\WS2812FX.h"
+
+
+    WS2812FX_PATH = env['PROJECT_LIBDEPS_DIR'] + "\\" +  "\\nodemcuv2\WS2812FX\\src\\WS2812FX.h"
     try:
         print(bcolors.WARNING + bcolors.BOLD + "Đang hiệu chỉnh file WS2812FX.h" + bcolors.ENDC)
 
@@ -22,9 +24,9 @@ def before_upload(source, target, env):
 
         for i, line in enumerate(lines):
             if(line.startswith("#define MAX_NUM_SEGMENTS")):
-                lines[i] = "#define MAX_NUM_SEGMENTS \t 48\n"
+                lines[i] = "#define MAX_NUM_SEGMENTS \t 24\n"
             if(line.startswith("#define MAX_NUM_ACTIVE_SEGMENTS")):
-                lines[i] = "#define MAX_NUM_ACTIVE_SEGMENTS \t 48\n"
+                lines[i] = "#define MAX_NUM_ACTIVE_SEGMENTS \t 24\n"
         f = open(WS2812FX_PATH, "w")
         f.writelines(lines)
         f.close()
