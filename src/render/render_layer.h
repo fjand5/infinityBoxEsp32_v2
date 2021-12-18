@@ -44,7 +44,7 @@ void setup_render_layer()
         String tmp;
         tmp = String("color0_layer_") + i;
         renderColorPicker(tab_name, String("color0_layer_") + i, R"({
-    "name":"Màu 0",
+    "name":"Màu 0"
   })",
                           [](String key, String value)
                           {
@@ -56,7 +56,7 @@ void setup_render_layer()
 
         tmp = String("color1_layer_") + i;
         renderColorPicker(tab_name, String("color1_layer_") + i, R"({
-    "name":"Màu 1",
+    "name":"Màu 1"
   })",
                           [](String key, String value)
                           {
@@ -88,14 +88,14 @@ void setup_render_layer()
         tmp = String("mode_layer_") + i;
         renderSelect(tab_name, String("mode_layer_") + i, R"({
     "name":"Hiệu ứng",
-    "options":["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"],
+    "options":["Static","Blink","Breath","Color Wipe","Color Wipe Inverse","Color Wipe Reverse","Color Wipe Reverse Inverse","Color Wipe Random","Random Color","Single Dynamic","Multi Dynamic","Rainbow","Rainbow Cycle","Scan","Dual Scan","Fade","Theater Chase","Theater Chase Rainbow","Running Lights","Twinkle","Twinkle Random","Twinkle Fade","Twinkle Fade Random","Sparkle","Flash Sparkle","Hyper Sparkle","Strobe","Strobe Rainbow","Multi Strobe","Blink Rainbow","Chase White","Chase Color","Chase Random","Chase Rainbow","Chase Flash","Chase Flash Random","Chase Rainbow White","Chase Blackout","Chase Blackout Rainbow","Color Sweep Random","Running Color","Running Red Blue","Running Random","Larson Scanner","Comet","Fireworks","Fireworks Random","Merry Christmas","Fire Flicker","Fire Flicker soft","Fire Flicker intense","Circus Combustus","Halloween","Bicolor Chase","Tricolor Chase","TwinkleFOX","Rain","Custom 0","Custom 1","Custom 2","Custom 3","Custom 4","Custom 5","Custom 6","Custom 7"]
   })",
                      [](String key, String value)
                      {
                          int li;
                          key.replace("mode_layer_", "");
                          li = key.toInt();
-                         box_setMode(li, value.toInt());
+                         box_setMode(li, value);
                      });
     };
 };

@@ -38,3 +38,11 @@ void VBox::handler()
     service();
     affterService();
 }
+uint8_t VBox::getNumModeName(String name){
+    for (uint8_t i = 0; i < getModeCount(); i++)
+    {
+       if (String(_names[i]) == name)
+        return i;
+    }
+    return 0;
+};

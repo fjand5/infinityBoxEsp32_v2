@@ -18,6 +18,7 @@ void boxHandle(void *params)
 {
     log_w("boxHandle is running on core: %d", xPortGetCoreID());
     VBox *_layers = (VBox *)params;
+    WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         _layers[i].init();
@@ -72,7 +73,6 @@ void setup_box()
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
     box_status = xEventGroupCreate();
-
     xReturned = xTaskCreatePinnedToCore(
         boxHandle,      /* Task function. */
         "boxHandle",    /* name of task. */

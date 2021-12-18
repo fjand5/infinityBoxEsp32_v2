@@ -16,4 +16,5 @@ public:
     void enable();
     void disable();
     void setColorByIndex(uint8_t index, uint32_t color);
+    uint8_t getNumModeName(String name);
 };

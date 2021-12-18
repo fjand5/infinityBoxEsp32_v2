@@ -3,6 +3,7 @@
         "istream": "cpp",
         "ostream": "cpp",
         "exception": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "memory": "cpp"
     }
 }

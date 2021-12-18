@@ -8,7 +8,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_font_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -17,7 +17,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_font_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -26,7 +26,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_font_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -35,13 +35,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_font_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_font_face", R"({
     "name":"View Font Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -52,7 +52,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_back_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -61,7 +61,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_back_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -70,7 +70,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_back_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -79,13 +79,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_back_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_back_face", R"({
     "name":"View Back Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -95,7 +95,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_top_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -104,7 +104,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_top_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -113,7 +113,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_top_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -122,13 +122,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_top_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_top_face", R"({
     "name":"View Top Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -138,7 +138,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_bottom_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -147,7 +147,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_bottom_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -156,7 +156,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_bottom_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -165,13 +165,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_bottom_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_bottom_face", R"({
     "name":"View Bottom Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -181,7 +181,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_left_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -190,7 +190,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_left_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -199,7 +199,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_left_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -208,13 +208,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_left_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_left_face", R"({
     "name":"View Left Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -224,7 +224,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_right_1_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -233,7 +233,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_right_2_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -242,7 +242,7 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_right_3_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
@@ -251,13 +251,13 @@ void setup_render_config()
                 [](String key, String value) {
                 });
     renderSwitch("Config", "seg_right_4_rev", R"({
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });
     renderButton("Config", "done_config_right_face", R"({
     "name":"View Right Face",
-    "newLine":true,
+    "newLine":true
   })",
                  [](String key, String value) {
                  });

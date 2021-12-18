@@ -7,8 +7,7 @@
 #include <map>
 #include <list>
 
-String getRender();
-DynamicJsonDocument docRender(10000);
+DynamicJsonDocument docRender(20000);
 JsonArray arrayRender = docRender.to<JsonArray>();
 typedef void (*OnEvent)(String key, String value);
 std::list<OnEvent> OnEvents;
@@ -21,7 +20,9 @@ void setupRender()
 {
   addHttpApi("/render", []()
              {
-               server.send_P(200, "application/json", getRender().c_str());
+               String ret;
+               serializeJson(docRender, ret);
+               server.send_P(200, "application/json", ret.c_str());
              });
   setOnWSTextIncome([](JsonObject obj)
                     {
@@ -43,10 +44,7 @@ void renderComponent(String compt, String tab, String espKey, String props)
   comptObj["type"] = compt;
   comptObj["tab"] = tab;
   comptObj["espKey"] = espKey;
-
-  DynamicJsonDocument _docProps(2048);
-  deserializeJson(_docProps, props);
-  comptObj["props"] = _docProps.as<JsonObject>();
+  comptObj["props"] =serialized(props);
 }
 
 /*
@@ -60,15 +58,15 @@ option.offset : số cột component dịch sang phải (những components phí
 option.pull : di chuyển component sang phải (những components khác KHÔNG bị dịch theo)
 option.push : di chuyển component sang trái
 */
-void renderInput(String tab, String espKey, String option, OnEvent event){
+void renderInput(String tab, String espKey, String option, OnEvent event)
+{
   setOnEvents(espKey, event);
   renderComponent("EspInput", tab, espKey, option);
-
 }
-void renderSlider(String tab, String espKey, String option, OnEvent event){
+void renderSlider(String tab, String espKey, String option, OnEvent event)
+{
   setOnEvents(espKey, event);
   renderComponent("EspSlider", tab, espKey, option);
-
 }
 void renderSwitch(String tab, String espKey, String option, OnEvent event)
 {
@@ -100,9 +98,3 @@ void renderSelect(String tab, String espKey, String option, OnEvent event)
 
 // }
 
-String getRender()
-{
-  String ret;
-  serializeJson(docRender, ret);
-  return ret;
-}

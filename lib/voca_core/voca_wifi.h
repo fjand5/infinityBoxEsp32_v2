@@ -50,8 +50,7 @@ void setupWifi(void)
     "name":"Mật khẩu wifi",
     "description":"",
     "newLine":true,
-    "password":true,
-      
+    "password":true
   })",
                [](String key, String value)
                {
@@ -72,7 +71,6 @@ void setupWifi(void)
     "description":"",
     "confirm":"Bạn có chắc muốn xóa toàn bộ dữ liệu không?",
     "span":{
-      
     }
   })",
                [](String key, String value)
