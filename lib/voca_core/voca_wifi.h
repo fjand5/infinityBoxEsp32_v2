@@ -34,45 +34,45 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 void setupWifi(void)
 {
   WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
-  renderInput("System", "_apid", R"({
+  renderInput(F("System"), F("_apid"), F(R"({
     "name":"Tên wifi",
     "description":"",
     "newLine":true,
     "span":{
       
     }
-  })",
+  })"),
                [](String key, String value)
                {
                  setValue(key,value);
                });
-  renderInput("System", "_appw", R"({
+  renderInput(F("System"), F("_appw"), F(R"({
     "name":"Mật khẩu wifi",
     "description":"",
     "newLine":true,
     "password":true
-  })",
+  })"),
                [](String key, String value)
                {
                  setValue(key,value);
                });
-  renderButton("System", "_reset", R"({
+  renderButton(F("System"), F("_reset"), F(R"({
     "name":"Khởi động lại",
     "description":"",
     "confirm":"Bạn có chắc muốn khởi động lại hệ thống không?",
     "span":{}
-  })",
+  })"),
                [](String key, String value)
                {
                  ESP.restart();
                });
-    renderButton("System", "_format", R"({
+    renderButton(F("System"), F("_format"), F(R"({
     "name":"Xóa dữ liệu",
     "description":"",
     "confirm":"Bạn có chắc muốn xóa toàn bộ dữ liệu không?",
     "span":{
     }
-  })",
+  })"),
                [](String key, String value)
                {
                  LITTLEFS.format();

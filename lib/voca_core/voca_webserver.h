@@ -11,10 +11,10 @@ SemaphoreHandle_t http_request_sem;
 typedef void (*Response)(void);
 void comHeader()
 {
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
-  server.sendHeader("Access-Control-Allow-Headers", "*");
-  server.sendHeader("Access-Control-Expose-Headers", "*");
+  server.sendHeader(F("Access-Control-Allow-Origin"), "*");
+  server.sendHeader(F("Access-Control-Allow-Methods"), "PUT,POST,GET,OPTIONS");
+  server.sendHeader(F("Access-Control-Allow-Headers"), "*");
+  server.sendHeader(F("Access-Control-Expose-Headers"), "*");
 }
 void addHttpApi(String url, Response response)
 {
@@ -207,7 +207,7 @@ void setupWebserver()
         }
       },
       "loopWebserver",
-      50000,
+      40000,
       NULL,
       1,
       NULL,

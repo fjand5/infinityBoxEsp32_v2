@@ -79,7 +79,7 @@ void box_nextMode(){
    if(_nm >= MODE_COUNT){
        _nm = 0;
    }
-//    box_setMode(0,_m);
+   box_setMode(0, _l.getModeName(_m));
 }
 void box_setColor(int8_t layer, int8_t iColor, String color)
 {

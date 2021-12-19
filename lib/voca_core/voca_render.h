@@ -6,9 +6,8 @@
 #include "voca_webserver.h"
 #include <map>
 #include <list>
-
-DynamicJsonDocument docRender(20000);
-JsonArray arrayRender = docRender.to<JsonArray>();
+String renderData;
+SemaphoreHandle_t renderData_sem;
 typedef void (*OnEvent)(String key, String value);
 std::list<OnEvent> OnEvents;
 std::map<String, OnEvent> EventWithKeys;
@@ -18,12 +17,10 @@ void setOnEvents(String key, OnEvent cb)
 }
 void setupRender()
 {
+  renderData_sem = xSemaphoreCreateBinary();
+  xSemaphoreGive(renderData_sem);
   addHttpApi("/render", []()
-             {
-               String ret;
-               serializeJson(docRender, ret);
-               server.send_P(200, "application/json", ret.c_str());
-             });
+             { server.send_P(200, "application/json", renderData.c_str()); });
   setOnWSTextIncome([](JsonObject obj)
                     {
                       for (std::pair<String, OnEvent> e : EventWithKeys)
@@ -39,12 +36,31 @@ void setupRender()
 }
 void renderComponent(String compt, String tab, String espKey, String props)
 {
+  if (xSemaphoreTake(renderData_sem, portMAX_DELAY) == pdTRUE)
+  {
+    DynamicJsonDocument docRender(20000);
+    DeserializationError err = deserializeJson(docRender, renderData);
+    
+    renderData = "";
+    JsonArray arrayRender;
+    if (err)
+    {
+      arrayRender = docRender.to<JsonArray>();
+    }
+    else
+    {
+      arrayRender = docRender.as<JsonArray>();
+    }
 
-  JsonObject comptObj = arrayRender.createNestedObject();
-  comptObj["type"] = compt;
-  comptObj["tab"] = tab;
-  comptObj["espKey"] = espKey;
-  comptObj["props"] =serialized(props);
+    JsonObject comptObj = arrayRender.createNestedObject();
+    comptObj["type"] = compt;
+    comptObj["tab"] = tab;
+    comptObj["espKey"] = espKey;
+    comptObj["props"] = serialized(props);
+
+    serializeJson(docRender, renderData);
+    xSemaphoreGive(renderData_sem);
+  }
 }
 
 /*
@@ -97,4 +113,3 @@ void renderSelect(String tab, String espKey, String option, OnEvent event)
 //   renderComponent("password", tab, key, name, option);
 
 // }
-
