@@ -45,18 +45,24 @@ void doubleClick()
 void buttonHandle(void *params)
 {
     WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
-    EasyButton* button = (EasyButton*)params ;
-    int brightness = 0;       // how bright the LED is
-    int fadeAmount = 10;      // how many points to fade the LED by
+    EasyButton *button = (EasyButton *)params;
+    int brightness = 0;  // how bright the LED is
+    int fadeAmount = 10; // how many points to fade the LED by
 
-    
     button->begin();
     button->onPressed([]()
-                     { lastClickTime = millis(); });
+                      { lastClickTime = millis(); });
     button->onPressedFor(PRESS_TIME, onPressed);
     button->onSequence(2, DOUBLE_CLICK_DURATION, doubleClick);
     while (1)
     {
+                static UBaseType_t lastUxHighWaterMark = 0;
+                UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+                if (lastUxHighWaterMark != uxHighWaterMark)
+                {
+                    lastUxHighWaterMark = uxHighWaterMark;
+                    log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
+                }
         vTaskDelay(50 / portTICK_PERIOD_MS);
         if (digitalRead(BUTTON_PIN) == 0)
         {
@@ -98,7 +104,7 @@ void setup_button()
         buttonHandle,     /* Task function. */
         "buttonHandle",   /* name of task. */
         4096,             /* Stack size of task */
-        (void*)&button,             /* parameter of the task */
+        (void *)&button,  /* parameter of the task */
         1,                /* priority of the task */
         NULL,             /* Task handle to keep track of created task */
         BUTTON_CORE_CPU); /* pin task to core 0 */

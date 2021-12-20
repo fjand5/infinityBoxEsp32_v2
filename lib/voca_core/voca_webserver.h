@@ -207,7 +207,7 @@ void setupWebserver()
         }
       },
       "loopWebserver",
-      40000,
+      4096,
       NULL,
       1,
       NULL,

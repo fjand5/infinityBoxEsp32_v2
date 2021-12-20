@@ -6,12 +6,31 @@
 
 #define FLAG_BOX_READY (1 << 0)
 
+#define BOX_ENABLE 1
+#define BOX_DISABLE 2
+#define BOX_SET_MODE 3
+#define BOX_GET_MODE 4
+#define BOX_SET_COLOR 5
+#define BOX_SET_BRIGHTNESS 6
+#define SEND_COMMAND_TO_BOX(command) \
+    command.id = millis();           \
+    xQueueSend(boxCommandQueue, (void *)&command, portMAX_DELAY);
+#define BOX_RESPONSE_COMMAND(command) xQueueSend(boxCommandResoponseQueue, (void *)&command, portMAX_DELAY);
+QueueHandle_t boxCommandQueue;
+QueueHandle_t boxCommandResoponseQueue;
+struct BoxCommand
+{
+    uint32_t id;
+    int8_t cmd;
+    int8_t layer;
+    int8_t option;
+    void *p;
+};
+
 VBox layers[NUM_OF_LAYER] = {VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800)};
-
 WS2812FX box = WS2812FX(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-SemaphoreHandle_t control_layer_sem;
 EventGroupHandle_t box_status;
 
 void boxHandle(void *params)
@@ -51,17 +70,66 @@ void boxHandle(void *params)
         setLayerColor(&_layers[i], 2, color);
 
         tmp = String("en_layer_") + i;
-        if (getValue(tmp, "true") == "true"){
+        if (getValue(tmp, "true") == "true")
+        {
             _layers[i].enable();
-        }else{
+        }
+        else
+        {
             _layers[i].disable();
         }
         tmp = String("brig_layer_") + i;
-        setLayerBrightness(&_layers[i],getValue(tmp, "50").toInt());
+        setLayerBrightness(&_layers[i], getValue(tmp, "50").toInt());
     }
     xEventGroupSetBits(box_status, FLAG_BOX_READY);
+    boxCommandQueue = xQueueCreate(8, sizeof(BoxCommand));
+    boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
+    BoxCommand rxBoxCmd;
     while (1)
     {
+
+        if (xQueueReceive(boxCommandQueue,
+                          &rxBoxCmd, 0))
+        {
+            if (rxBoxCmd.cmd == BOX_ENABLE)
+            {
+                layers[rxBoxCmd.layer].enable();
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+            else if (rxBoxCmd.cmd == BOX_DISABLE)
+            {
+                layers[rxBoxCmd.layer].disable();
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+            else if (rxBoxCmd.cmd == BOX_GET_MODE)
+            {
+                uint8_t modeInt = _layers[rxBoxCmd.layer].getMode();
+                BoxCommand res;
+                res.id = rxBoxCmd.id;
+                res.p = &modeInt;
+                BOX_RESPONSE_COMMAND(res);
+            }
+            else if (rxBoxCmd.cmd == BOX_SET_MODE)
+            {
+                char *modeStr = (char *)rxBoxCmd.p;
+                uint8_t modeInt = _layers[rxBoxCmd.layer].getNumModeName(String(modeStr));
+                for (int i = 0; i < _layers[rxBoxCmd.layer].getNumSegments(); i++)
+                {
+                    _layers[rxBoxCmd.layer].setMode(i, modeInt);
+                };
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+            else if (rxBoxCmd.cmd == BOX_SET_COLOR)
+            {
+                _layers[rxBoxCmd.layer].setColorByIndex(rxBoxCmd.option, *((uint32_t *)rxBoxCmd.p));
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+            else if (rxBoxCmd.cmd == BOX_SET_BRIGHTNESS)
+            {
+                _layers[rxBoxCmd.layer].setBrightness(*((uint8_t *)rxBoxCmd.p));
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+        }
         for (size_t i = 0; i < NUM_OF_LAYER; i++)
         {
             _layers[i].service();
@@ -81,8 +149,6 @@ void setup_box()
         1,              /* priority of the task */
         NULL,           /* Task handle to keep track of created task */
         BOX_CORE_CPU);  /* pin task to core 0 */
-    control_layer_sem = xSemaphoreCreateBinary();
-    xSemaphoreGive(control_layer_sem);
     if (xReturned == pdPASS)
     {
         /* The task was created.  Use the task's handle to delete the task. */

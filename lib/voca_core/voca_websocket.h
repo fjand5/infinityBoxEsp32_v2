@@ -101,12 +101,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
 void setupWebSocket()
 {
-    
+
     WAIT_FLAG_SET(FLAG_SETUP_WIFI_DONE);
     xTaskCreatePinnedToCore(
         [](void *param)
         {
-            WebSocketsServer* _webSocket = (WebSocketsServer*)param;
+            WebSocketsServer *_webSocket = (WebSocketsServer *)param;
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
             _webSocket->begin();
             _webSocket->onEvent(webSocketEvent);
@@ -123,8 +123,8 @@ void setupWebSocket()
             }
         },
         "loopSocket",
-        20000,
-        (void *) &webSocket,
+        5000,
+        (void *)&webSocket,
         2,
         NULL,
         VOCA_CORE_CPU);
