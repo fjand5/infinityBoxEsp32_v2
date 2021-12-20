@@ -1,5 +1,7 @@
 #pragma once
 #include "voca_env.h"
+#include "voca_store.h"
+
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 
@@ -65,10 +67,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
                 String _key = obj["espKey"];
                 obj = _doc.to<JsonObject>();
                 getValueByObject(_key, obj);
-
-                String tmp;
-                serializeJsonPretty(_doc, tmp);
-                log_d("serializeJsonPretty: %s", tmp.c_str());
             }
             else if (obj["cmd"] == "gal")
             {
@@ -113,11 +111,30 @@ void setupWebSocket()
             websocket_sem = xSemaphoreCreateBinary();
             xSemaphoreGive(websocket_sem);
             SET_FLAG(FLAG_WEBSOCKET_READY);
-            WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY);
+            WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY | FLAG_INITIALIZED_STORE);
+
+            setOnStoreChange([](String key, String value, void *p)
+                             {
+                                 WebSocketsServer *_ws= (WebSocketsServer *)p;
+                                 DynamicJsonDocument _doc(2048);
+                                 JsonObject obj = _doc.to<JsonObject>();
+                                 getValueByObject(key, obj);
+                                 String ret;
+                                 serializeJson(_doc, ret);
+                                 _ws->broadcastTXT(ret);
+                             },
+                             (void *)_webSocket);
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
 
             while (1)
             {
+                // static UBaseType_t lastUxHighWaterMark = 0;
+                // UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+                // if (lastUxHighWaterMark != uxHighWaterMark)
+                // {
+                //     lastUxHighWaterMark = uxHighWaterMark;
+                //     log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
+                // }
                 _webSocket->loop();
                 delay(10);
             }

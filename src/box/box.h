@@ -35,14 +35,14 @@ EventGroupHandle_t box_status;
 
 void boxHandle(void *params)
 {
-    log_w("boxHandle is running on core: %d", xPortGetCoreID());
     VBox *_layers = (VBox *)params;
     WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
+    log_w("boxHandle is running on core: %d", xPortGetCoreID());
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         _layers[i].init();
         _layers[i].setBrightness(255);
-        _layers[i].setSegment(0, 0, LED_COUNT - 1, FX_MODE_RAINBOW_CYCLE, BLACK, 1000, NO_OPTIONS);
+        splitSegment(&_layers[i]);
         _layers[i].start();
     }
 
@@ -52,9 +52,20 @@ void boxHandle(void *params)
     {
         _layers[i].setCustomShow(boxShow);
         String tmp;
-        splitSegment(&_layers[i]);
+        
+        tmp = String("en_layer_") + i;
+        if (getValue(tmp, "true") == "true")
+        {
+            _layers[i].enable();
+        }
+        else
+        {
+            _layers[i].disable();
+        }
+
         tmp = String("mode_layer_") + i;
-        setLayerMode(&_layers[i], getValue(tmp, "1").toInt());
+        uint8_t modeInt = _layers[i].getNumModeName(getValue(tmp, "1"));
+        setLayerMode(&_layers[i], modeInt);
 
         tmp = String("color0_layer_") + i;
         uint32_t color;
@@ -69,15 +80,6 @@ void boxHandle(void *params)
         color = stringToColor(getValue(tmp, "0x0000ff"));
         setLayerColor(&_layers[i], 2, color);
 
-        tmp = String("en_layer_") + i;
-        if (getValue(tmp, "true") == "true")
-        {
-            _layers[i].enable();
-        }
-        else
-        {
-            _layers[i].disable();
-        }
         tmp = String("brig_layer_") + i;
         setLayerBrightness(&_layers[i], getValue(tmp, "50").toInt());
     }
@@ -93,12 +95,12 @@ void boxHandle(void *params)
         {
             if (rxBoxCmd.cmd == BOX_ENABLE)
             {
-                layers[rxBoxCmd.layer].enable();
+                _layers[rxBoxCmd.layer].enable();
                 BOX_RESPONSE_COMMAND(rxBoxCmd);
             }
             else if (rxBoxCmd.cmd == BOX_DISABLE)
             {
-                layers[rxBoxCmd.layer].disable();
+                _layers[rxBoxCmd.layer].disable();
                 BOX_RESPONSE_COMMAND(rxBoxCmd);
             }
             else if (rxBoxCmd.cmd == BOX_GET_MODE)

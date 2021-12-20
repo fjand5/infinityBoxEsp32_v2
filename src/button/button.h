@@ -8,8 +8,6 @@
 #include <EasyButton.h>
 #include <Arduino.h>
 #include <LITTLEFS.h>
-
-#define DOUBLE_CLICK_DURATION 300
 EasyButton button(BUTTON_PIN);
 uint32_t lastClickTime = 0;
 
@@ -36,6 +34,7 @@ void onClick()
 void onPressed()
 {
     log_d(" onPressed");
+    resetFactory();
 }
 void doubleClick()
 {
@@ -56,31 +55,7 @@ void buttonHandle(void *params)
     button->onSequence(2, DOUBLE_CLICK_DURATION, doubleClick);
     while (1)
     {
-                static UBaseType_t lastUxHighWaterMark = 0;
-                UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-                if (lastUxHighWaterMark != uxHighWaterMark)
-                {
-                    lastUxHighWaterMark = uxHighWaterMark;
-                    log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
-                }
         vTaskDelay(50 / portTICK_PERIOD_MS);
-        if (digitalRead(BUTTON_PIN) == 0)
-        {
-            countToFactoryReset++;
-            if (countToFactoryReset >= 200)
-            {
-                countToFactoryReset = 200;
-                brightness = 0;
-                for (size_t i = 0; i < 20; i++)
-                {
-                    ledcWrite(LEDC_CHANNEL_0, 0);
-                    vTaskDelay(100 / portTICK_PERIOD_MS);
-                    ledcWrite(LEDC_CHANNEL_0, 250);
-                    vTaskDelay(100 / portTICK_PERIOD_MS);
-                }
-                resetFactory();
-            }
-        }
         button->read();
 
         if (lastClickTime != 0 && millis() - lastClickTime > DOUBLE_CLICK_DURATION)
@@ -103,7 +78,7 @@ void setup_button()
     xTaskCreatePinnedToCore(
         buttonHandle,     /* Task function. */
         "buttonHandle",   /* name of task. */
-        4096,             /* Stack size of task */
+        10000,             /* Stack size of task */
         (void *)&button,  /* parameter of the task */
         1,                /* priority of the task */
         NULL,             /* Task handle to keep track of created task */

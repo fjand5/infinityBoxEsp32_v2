@@ -12,13 +12,13 @@
 void saveConfigFile();
 void setValue(String key, String value, bool save = true);
 std::map<String, String> ConfigContent;
-typedef void (*configChangeCallback)(String, String);
-std::list<configChangeCallback> onStoreChanges;
+typedef void (*configChangeCallback)(String, String, void *);
+std::list<std::pair<configChangeCallback, void *>> onStoreChanges;
 SemaphoreHandle_t spiffs_sem;
 SemaphoreHandle_t configContent_sem;
-void setOnStoreChange(void (*func)(String key, String value))
+void setOnStoreChange(void (*func)(String key, String value, void *_p), void *p)
 {
-  onStoreChanges.push_front(func);
+  onStoreChanges.push_front(std::make_pair(func,p));
 }
 // Mỗi dòng là một phần tử (một cặp key value) (key):(value)\n
 void loadFileIntoConfig(String content)
@@ -192,13 +192,13 @@ void getValuesByObject(JsonObject objectValues)
 // Gán giá trị cho key
 void setValue(String key, String value, bool save)
 {
-  log_d("setValue: key: %s; value: %s",key.c_str(), value.c_str());
+  log_d("setValue: key: %s; value: %s", key.c_str(), value.c_str());
   bool noChange = ConfigContent[key] == value;
   if (!noChange)
   {
     if (key.startsWith("*") || key.indexOf("=") >= 0 || key.indexOf("\n") >= 0 || value.indexOf("\n") >= 0)
       return;
-    
+
     if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
     {
       ConfigContent[key] = value;
@@ -210,10 +210,7 @@ void setValue(String key, String value, bool save)
        onStoreChange != onStoreChanges.end();
        ++onStoreChange)
   {
-    if ((*onStoreChange) != NULL)
-    {
-      (*onStoreChange)(key, value);
-    }
+      onStoreChange->first(key, value, onStoreChange->second);
   }
 
   // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
