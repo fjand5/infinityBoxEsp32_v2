@@ -8,6 +8,8 @@ private:
     void affterService();
 
     bool _enable = true;
+
+    bool _isConfig = false;
 public:
     VBox(uint16_t num_leds, uint8_t pin, neoPixelType type,
         uint8_t max_num_segments  = MAX_NUM_SEGMENTS,
@@ -17,4 +19,10 @@ public:
     void disable();
     void setColorByIndex(uint8_t index, uint32_t color);
     uint8_t getNumModeName(String name);
+    void setConfigState(bool state){
+        _isConfig = state;
+    };
+    bool getConfigState(){
+        return _isConfig;
+    }
 };

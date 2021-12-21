@@ -1,31 +1,14 @@
 #pragma once
 #include "box_env.h"
+#include "box_command.h"
 #include "driver_show.h"
 #include "v_box.h"
+#include "box_init.h"
 #include "ultis.h"
 
 #define FLAG_BOX_READY (1 << 0)
-
-#define BOX_ENABLE 1
-#define BOX_DISABLE 2
-#define BOX_SET_MODE 3
-#define BOX_GET_MODE 4
-#define BOX_SET_COLOR 5
-#define BOX_SET_BRIGHTNESS 6
-#define SEND_COMMAND_TO_BOX(command) \
-    command.id = millis();           \
-    xQueueSend(boxCommandQueue, (void *)&command, portMAX_DELAY);
-#define BOX_RESPONSE_COMMAND(command) xQueueSend(boxCommandResoponseQueue, (void *)&command, portMAX_DELAY);
-QueueHandle_t boxCommandQueue;
-QueueHandle_t boxCommandResoponseQueue;
-struct BoxCommand
-{
-    uint32_t id;
-    int8_t cmd;
-    int8_t layer;
-    int8_t option;
-    void *p;
-};
+extern QueueHandle_t boxCommandQueue;
+extern QueueHandle_t boxCommandResoponseQueue;
 
 VBox layers[NUM_OF_LAYER] = {VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
@@ -42,7 +25,6 @@ void boxHandle(void *params)
     {
         _layers[i].init();
         _layers[i].setBrightness(255);
-        splitSegment(&_layers[i]);
         _layers[i].start();
     }
 
@@ -51,87 +33,14 @@ void boxHandle(void *params)
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         _layers[i].setCustomShow(boxShow);
-        String tmp;
-        
-        tmp = String("en_layer_") + i;
-        if (getValue(tmp, "true") == "true")
-        {
-            _layers[i].enable();
-        }
-        else
-        {
-            _layers[i].disable();
-        }
-
-        tmp = String("mode_layer_") + i;
-        uint8_t modeInt = _layers[i].getNumModeName(getValue(tmp, "1"));
-        setLayerMode(&_layers[i], modeInt);
-
-        tmp = String("color0_layer_") + i;
-        uint32_t color;
-        color = stringToColor(getValue(tmp, "0xff0000"));
-        setLayerColor(&_layers[i], 0, color);
-
-        tmp = String("color1_layer_") + i;
-        color = stringToColor(getValue(tmp, "0x00ff00"));
-        setLayerColor(&_layers[i], 1, color);
-
-        tmp = String("color2_layer_") + i;
-        color = stringToColor(getValue(tmp, "0x0000ff"));
-        setLayerColor(&_layers[i], 2, color);
-
-        tmp = String("brig_layer_") + i;
-        setLayerBrightness(&_layers[i], getValue(tmp, "50").toInt());
     }
+    init_layers(_layers);
     xEventGroupSetBits(box_status, FLAG_BOX_READY);
     boxCommandQueue = xQueueCreate(8, sizeof(BoxCommand));
     boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
-    BoxCommand rxBoxCmd;
     while (1)
     {
-
-        if (xQueueReceive(boxCommandQueue,
-                          &rxBoxCmd, 0))
-        {
-            if (rxBoxCmd.cmd == BOX_ENABLE)
-            {
-                _layers[rxBoxCmd.layer].enable();
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
-            }
-            else if (rxBoxCmd.cmd == BOX_DISABLE)
-            {
-                _layers[rxBoxCmd.layer].disable();
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
-            }
-            else if (rxBoxCmd.cmd == BOX_GET_MODE)
-            {
-                uint8_t modeInt = _layers[rxBoxCmd.layer].getMode();
-                BoxCommand res;
-                res.id = rxBoxCmd.id;
-                res.p = &modeInt;
-                BOX_RESPONSE_COMMAND(res);
-            }
-            else if (rxBoxCmd.cmd == BOX_SET_MODE)
-            {
-                char *modeStr = (char *)rxBoxCmd.p;
-                uint8_t modeInt = _layers[rxBoxCmd.layer].getNumModeName(String(modeStr));
-                for (int i = 0; i < _layers[rxBoxCmd.layer].getNumSegments(); i++)
-                {
-                    _layers[rxBoxCmd.layer].setMode(i, modeInt);
-                };
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
-            }
-            else if (rxBoxCmd.cmd == BOX_SET_COLOR)
-            {
-                _layers[rxBoxCmd.layer].setColorByIndex(rxBoxCmd.option, *((uint32_t *)rxBoxCmd.p));
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
-            }
-            else if (rxBoxCmd.cmd == BOX_SET_BRIGHTNESS)
-            {
-                _layers[rxBoxCmd.layer].setBrightness(*((uint8_t *)rxBoxCmd.p));
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
-            }
-        }
+        command_handle(_layers);
         for (size_t i = 0; i < NUM_OF_LAYER; i++)
         {
             _layers[i].service();

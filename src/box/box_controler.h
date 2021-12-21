@@ -91,3 +91,54 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
         setValue(String("brig_layer_") + layer, String(brightness));
     }
 }
+void box_config_segment(String key, String value)
+{
+    bool rev;
+    uint16_t num;
+
+    if (key.endsWith("_rev"))
+    {
+        String tmp = key;
+        tmp.replace("_rev", "");
+        rev = value == "true";
+        num = getValue(tmp, "0").toInt();
+    }
+    else
+    {
+
+        rev = getValue(key + "_rev", "false") == "true";
+        num = value.toInt();
+    }
+    BoxCommand txBoxCmd, rxBoxCmd;
+    txBoxCmd.cmd = BOX_CONFIG_SEGMENT;
+    txBoxCmd.option = rev;
+    txBoxCmd.p = (void *)&num;
+    SEND_COMMAND_TO_BOX(txBoxCmd);
+    if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
+        rxBoxCmd.id == txBoxCmd.id)
+    {
+        setValue(key, value);
+    }
+}
+void box_config_show_face(String key, String value)
+{
+    key.replace("show_", "");
+    Face face;
+    face.start1=getValue(key + "_1").toInt();
+    face.inv1=getValue(key + "_1_rev") == "true";
+    face.start2=getValue(key + "_2").toInt();
+    face.inv2=getValue(key + "_2_rev") == "true";
+    face.start3=getValue(key + "_3").toInt();
+    face.inv3=getValue(key + "_3_rev") == "true";
+    face.start4=getValue(key + "_4").toInt();
+    face.inv4=getValue(key + "_4_rev") == "true";
+
+    BoxCommand txBoxCmd, rxBoxCmd;
+    txBoxCmd.cmd = BOX_CONFIG_SHOW_FACE;
+    txBoxCmd.p = (void *)&face;
+    SEND_COMMAND_TO_BOX(txBoxCmd);
+    if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
+        rxBoxCmd.id == txBoxCmd.id)
+    {
+    }
+}
