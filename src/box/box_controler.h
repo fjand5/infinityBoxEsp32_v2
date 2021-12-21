@@ -28,7 +28,7 @@ void box_disable(int8_t layer)
         setValue(String("en_layer_") + layer, "false");
     }
 }
-void box_setMode(int8_t layer, String mode)
+void box_setMode(int8_t layer, String mode, bool save = true)
 {
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_SET_MODE;
@@ -38,7 +38,7 @@ void box_setMode(int8_t layer, String mode)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("mode_layer_") + layer, String(mode));
+        setValue(String("mode_layer_") + layer, String(mode), save);
     }
 }
 uint8_t box_getMode(int8_t layer)
@@ -55,12 +55,12 @@ uint8_t box_getMode(int8_t layer)
     }
     return -1;
 }
-void box_nextMode()
+void box_nextMode(bool save = true)
 {
     uint8_t curMode = box_getMode(0);
     curMode++;
     String nm = box.getModeName(curMode);
-    box_setMode(0, nm);
+    box_setMode(0, nm, save);
 }
 void box_setColor(int8_t layer, int8_t iColor, String color)
 {

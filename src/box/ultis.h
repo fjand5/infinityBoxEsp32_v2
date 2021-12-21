@@ -1,6 +1,14 @@
 #pragma once
 #include "Arduino.h"
 #include "v_box.h"
+#define BOX_THREAD(func,param)  xTaskCreatePinnedToCore(\
+        func,      \
+        "THREAD_LAYERS",    \
+        4096,         \ 
+        (void *)param, \
+        2,              \
+        NULL,           \
+        BOX_CORE_CPU);  
 #define SPLIT_SEGMENT_TYPE_VERTEX 0
 #define SPLIT_SEGMENT_TYPE_FACE 1
 uint32_t stringToColor(String val)

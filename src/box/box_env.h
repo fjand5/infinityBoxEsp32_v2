@@ -3,6 +3,6 @@
 #define LED_NUM_OF_SEG 24
 #define LED_COUNT_ONE_SEG LED_COUNT / LED_NUM_OF_SEG
 #define LED_PIN 23
-
+#define TRANSITION_TIME 1000
 
 #define BOX_CORE_CPU 1

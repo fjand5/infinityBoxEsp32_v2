@@ -198,7 +198,7 @@ void setupWebserver()
         http_request_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(http_request_sem);
         SET_FLAG(FLAG_WEBSERVER_READY);
-        WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY);
+        WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY| FLAG_INITIALIZED_STORE);
 
         while (1)
         {

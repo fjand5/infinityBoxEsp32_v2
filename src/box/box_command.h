@@ -118,11 +118,28 @@ void command_handle(VBox *layers)
             {
                 char *modeStr = (char *)rxBoxCmd.p;
                 uint8_t modeInt = layers[rxBoxCmd.layer].getNumModeName(String(modeStr));
-                for (int i = 0; i < layers[rxBoxCmd.layer].getNumSegments(); i++)
+                struct SetModeBundle
                 {
-                    layers[rxBoxCmd.layer].setMode(i, modeInt);
-                };
-                BOX_RESPONSE_COMMAND(rxBoxCmd);
+                    VBox *layers;
+                    uint8_t index;
+                    uint8_t mode;
+                } setModeBundle;
+                setModeBundle.layers = layers;
+                setModeBundle.index = rxBoxCmd.layer;
+                setModeBundle.mode = modeInt;
+                BOX_THREAD([](void *p)
+                           {
+                               SetModeBundle setModeBundle = *((SetModeBundle *)p);
+                               uint8_t numOfSegment = setModeBundle.layers[setModeBundle.index].getNumSegments();
+                               for (int i = 0; i < numOfSegment; i++)
+                               {
+                                   setModeBundle.layers[setModeBundle.index].setMode(i, setModeBundle.mode);
+                                   delay(TRANSITION_TIME/numOfSegment);
+                               };
+                               BOX_RESPONSE_COMMAND(rxBoxCmd);
+                               vTaskDelete(NULL);
+                           },
+                           &setModeBundle);
             }
             else if (rxBoxCmd.cmd == BOX_SET_COLOR)
             {
