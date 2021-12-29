@@ -34,6 +34,13 @@ void setLayerMode(VBox *layer, uint8_t mode)
         layer->setMode(i, mode);
     }
 }
+void setLayerSpeed(VBox *layer, uint16_t speed)
+{
+    for (int i = 0; i < layer->getNumSegments(); i++)
+    {
+        layer->setSpeed(i, speed);
+    }
+}
 void setLayerBrightness(VBox *layer, uint8_t brig)
 {
     layer->setBrightness(brig);

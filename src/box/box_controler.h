@@ -28,19 +28,6 @@ void box_disable(int8_t layer)
         setValue(String("en_layer_") + layer, "false");
     }
 }
-void box_setMode(int8_t layer, String mode, bool save = true)
-{
-    BoxCommand txBoxCmd, rxBoxCmd;
-    txBoxCmd.cmd = BOX_SET_MODE;
-    txBoxCmd.layer = layer;
-    txBoxCmd.p = (void *)mode.c_str();
-    SEND_COMMAND_TO_BOX(txBoxCmd);
-    if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-        rxBoxCmd.id == txBoxCmd.id)
-    {
-        setValue(String("mode_layer_") + layer, String(mode), save);
-    }
-}
 uint8_t box_getMode(int8_t layer)
 {
     BoxCommand txBoxCmd, rxBoxCmd;
@@ -54,6 +41,25 @@ uint8_t box_getMode(int8_t layer)
         return curMode;
     }
     return -1;
+}
+
+void box_setMode(int8_t layer, String mode, bool save = true)
+{
+    uint16_t speed = getValue(String("speed_layer_") + layer + "_" + mode).toInt();
+
+    BoxCommand txBoxCmd, rxBoxCmd;
+    txBoxCmd.cmd = BOX_SET_MODE;
+    txBoxCmd.layer = layer;
+    txBoxCmd.p = (void *)mode.c_str();
+    txBoxCmd.option = speed;
+    SEND_COMMAND_TO_BOX(txBoxCmd);
+    if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
+        rxBoxCmd.id == txBoxCmd.id)
+    {
+        setValue(String("speed_layer_") + layer, String(speed), false);
+
+        setValue(String("mode_layer_") + layer, String(mode), save);
+    }
 }
 void box_nextMode(bool save = true)
 {
@@ -74,6 +80,7 @@ void box_setColor(int8_t layer, int8_t iColor, String color)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
+
         setValue(String("color") + iColor + "_layer_" + layer, color);
     }
 }
@@ -89,6 +96,22 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
         rxBoxCmd.id == txBoxCmd.id)
     {
         setValue(String("brig_layer_") + layer, String(brightness));
+    }
+}
+void box_setSpeed(int8_t layer, uint16_t speed)
+{
+    speed = constrain(speed, 0, 65535);
+    String mode = getValue(String("mode_layer_") + layer);
+    BoxCommand txBoxCmd, rxBoxCmd;
+    txBoxCmd.cmd = BOX_SET_SPEED;
+    txBoxCmd.layer = layer;
+    txBoxCmd.p = (void *)&speed;
+    SEND_COMMAND_TO_BOX(txBoxCmd);
+    if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
+        rxBoxCmd.id == txBoxCmd.id)
+    {
+        setValue(String("speed_layer_") + layer, String(speed), false);
+        setValue(String("speed_layer_") + layer + "_" + mode, String(speed));
     }
 }
 void box_config_segment(String key, String value)
@@ -124,14 +147,14 @@ void box_config_show_face(String key, String value)
 {
     key.replace("show_", "");
     Face face;
-    face.start1=getValue(key + "_1").toInt();
-    face.inv1=getValue(key + "_1_rev") == "true";
-    face.start2=getValue(key + "_2").toInt();
-    face.inv2=getValue(key + "_2_rev") == "true";
-    face.start3=getValue(key + "_3").toInt();
-    face.inv3=getValue(key + "_3_rev") == "true";
-    face.start4=getValue(key + "_4").toInt();
-    face.inv4=getValue(key + "_4_rev") == "true";
+    face.start1 = getValue(key + "_1").toInt();
+    face.inv1 = getValue(key + "_1_rev") == "true";
+    face.start2 = getValue(key + "_2").toInt();
+    face.inv2 = getValue(key + "_2_rev") == "true";
+    face.start3 = getValue(key + "_3").toInt();
+    face.inv3 = getValue(key + "_3_rev") == "true";
+    face.start4 = getValue(key + "_4").toInt();
+    face.inv4 = getValue(key + "_4_rev") == "true";
 
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_CONFIG_SHOW_FACE;

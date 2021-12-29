@@ -40,6 +40,13 @@ void boxHandle(void *params)
     boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
     while (1)
     {
+        static UBaseType_t lastUxHighWaterMark = 0;
+        UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+        if (lastUxHighWaterMark != uxHighWaterMark)
+        {
+            lastUxHighWaterMark = uxHighWaterMark;
+            log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
+        }
         command_handle(_layers);
         for (size_t i = 0; i < NUM_OF_LAYER; i++)
         {
@@ -55,7 +62,7 @@ void setup_box()
     xReturned = xTaskCreatePinnedToCore(
         boxHandle,      /* Task function. */
         "boxHandle",    /* name of task. */
-        70000,          /* Stack size of task */
+        4096,          /* Stack size of task */
         (void *)layers, /* parameter of the task */
         1,              /* priority of the task */
         NULL,           /* Task handle to keep track of created task */

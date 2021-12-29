@@ -11,6 +11,7 @@
 #define BOX_SET_BRIGHTNESS 6
 #define BOX_CONFIG_SEGMENT 7
 #define BOX_CONFIG_SHOW_FACE 8
+#define BOX_SET_SPEED 9
 #define SEND_COMMAND_TO_BOX(command) \
     command.id = millis();           \
     xQueueSend(boxCommandQueue, (void *)&command, portMAX_DELAY);
@@ -123,10 +124,13 @@ void command_handle(VBox *layers)
                     VBox *layers;
                     uint8_t index;
                     uint8_t mode;
+                    uint16_t speed;
                 } setModeBundle;
                 setModeBundle.layers = layers;
                 setModeBundle.index = rxBoxCmd.layer;
                 setModeBundle.mode = modeInt;
+                setModeBundle.speed = rxBoxCmd.option;
+
                 BOX_THREAD([](void *p)
                            {
                                SetModeBundle setModeBundle = *((SetModeBundle *)p);
@@ -134,7 +138,9 @@ void command_handle(VBox *layers)
                                for (int i = 0; i < numOfSegment; i++)
                                {
                                    setModeBundle.layers[setModeBundle.index].setMode(i, setModeBundle.mode);
-                                   delay(TRANSITION_TIME/numOfSegment);
+                                   setModeBundle.layers[setModeBundle.index].setSpeed(i, setModeBundle.speed);
+
+                                   delay(TRANSITION_TIME / numOfSegment);
                                };
                                BOX_RESPONSE_COMMAND(rxBoxCmd);
                                vTaskDelete(NULL);
@@ -149,6 +155,16 @@ void command_handle(VBox *layers)
             else if (rxBoxCmd.cmd == BOX_SET_BRIGHTNESS)
             {
                 layers[rxBoxCmd.layer].setBrightness(*((uint8_t *)rxBoxCmd.p));
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+
+            else if (rxBoxCmd.cmd == BOX_SET_SPEED)
+            {
+                setLayerSpeed(&layers[rxBoxCmd.layer], *((uint16_t *)rxBoxCmd.p));
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+            }
+            else
+            {
                 BOX_RESPONSE_COMMAND(rxBoxCmd);
             }
         }

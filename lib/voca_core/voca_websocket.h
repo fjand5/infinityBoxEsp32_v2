@@ -128,13 +128,6 @@ void setupWebSocket()
 
             while (1)
             {
-                static UBaseType_t lastUxHighWaterMark = 0;
-                UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-                if (lastUxHighWaterMark != uxHighWaterMark)
-                {
-                    lastUxHighWaterMark = uxHighWaterMark;
-                    log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
-                }
                 _webSocket->loop();
                 delay(10);
             }

@@ -20,7 +20,7 @@ void init_layers(VBox* layers){
         splitSegment(&layers[i]);
         
         tmp = String("mode_layer_") + i;
-        uint8_t modeInt = layers[i].getNumModeName(getValue(tmp, "1"));
+        uint8_t modeInt = layers[i].getNumModeName(getValue(tmp, "Blink"));
         setLayerMode(&layers[i], modeInt);
 
         tmp = String("color0_layer_") + i;

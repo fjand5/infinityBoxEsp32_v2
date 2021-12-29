@@ -4,7 +4,8 @@
 #include <ArduinoJson.h>
 #include <ArduinoJWT.h>
 #include "voca_store.h"
-
+// Bật/Tắt tính năng kiểm tra quá hạn token
+#define CHECK_EXPIRE
 #define EXPIRE_TIME 48 * 24 * 60 * 1000 // miliseconds (2 ngày)
 ArduinoJWT auth_jwt(__TIME__);
 uint32_t simpleHash(String str)
@@ -36,13 +37,15 @@ bool check_auth_jwt(String token)
         if (err) // sai cấu trúc json
             return false;
         JsonObject obj = _doc.as<JsonObject>();
-        int exp = obj["exp"];
 
+#ifdef CHECK_EXPIRE
+        int exp = obj["exp"];
         if (exp < millis() || exp >= (millis() + EXPIRE_TIME)) 
         // hết hạn hoặc  không hợp lệ
         {
             return false;
         }
+#endif
         if (obj["hpw"] != simpleHash(getPassword())) // mật khẩu đã thay đổi
         {
             return false;
