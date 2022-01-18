@@ -130,7 +130,6 @@ void command_handle(VBox *layers)
                 setModeBundle.index = rxBoxCmd.layer;
                 setModeBundle.mode = modeInt;
                 setModeBundle.speed = rxBoxCmd.option;
-
                 BOX_THREAD([](void *p)
                            {
                                SetModeBundle setModeBundle = *((SetModeBundle *)p);
@@ -142,10 +141,11 @@ void command_handle(VBox *layers)
 
                                    delay(TRANSITION_TIME / numOfSegment);
                                };
-                               BOX_RESPONSE_COMMAND(rxBoxCmd);
                                vTaskDelete(NULL);
                            },
                            &setModeBundle);
+                BOX_RESPONSE_COMMAND(rxBoxCmd);
+                
             }
             else if (rxBoxCmd.cmd == BOX_SET_COLOR)
             {

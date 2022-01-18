@@ -69,6 +69,7 @@ void setupWifi(void)
     renderButton(F("System"), F("_format"), F(R"({
     "name":"Xóa dữ liệu",
     "description":"",
+    "newLine":true,
     "confirm":"Bạn có chắc muốn xóa toàn bộ dữ liệu không?",
     "span":{
     }
@@ -76,6 +77,13 @@ void setupWifi(void)
                [](String key, String value)
                {
                  LITTLEFS.format();
+               });
+  renderInput(F("System"), F("_version"), F(R"({
+    "name":"Phiên bản",
+    "description":""
+  })"),
+               [](String key, String value)
+               {
                });
   //   renderColorPicker("Color", "_color", R"({
   //   "name":"Xóa dữ liệu",

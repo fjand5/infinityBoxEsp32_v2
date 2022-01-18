@@ -21,7 +21,7 @@ void resetFactory()
 void onClick()
 {
     log_d(" onClick");
-    box_nextMode(false);
+    box_nextMode(0);
     // if (getValue("on_off_tgl") != "true")
     // {
     //     setValue("on_off_tgl", "true");

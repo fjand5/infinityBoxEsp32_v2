@@ -13,6 +13,8 @@ void setup(void)
   setup_button();
   setup_voca();
   render();
+  const char compile_date[] = __TIME__ " " __DATE__;
+  setValue("_version",compile_date);
   vTaskDelete(NULL);
 }
 

@@ -9,8 +9,7 @@ void setup_render_layer()
         tab_name = String("Layer ") + i;
 
         renderSwitch(tab_name, String("en_layer_") + i, F(R"({
-    "name":"Chạy",
-    "newLine":true
+    "name":"Chạy"
   })"),
                      [](String key, String value)
                      {
@@ -21,6 +20,14 @@ void setup_render_layer()
                              box_enable(li);
                          else
                              box_disable(li);
+                     });
+        renderButton(tab_name, String("save_layer_") + i, F(R"({
+    "name":"Lưu",
+    "newLine":true
+  })"),
+                     [](String key, String value)
+                     {
+                         saveConfigFile();
                      });
         renderSlider(tab_name, String("brig_layer_") + i, F(R"({
     "name":"Độ sáng",
@@ -86,6 +93,29 @@ void setup_render_layer()
 
         String tmp;
         tmp = String("mode_layer_") + i;
+        renderButton(tab_name, String("mode_layer_") + i +"_prev", F(R"({
+    "name":"Prev"
+  })"),
+                     [](String key, String value)
+                     {
+                         int li;
+                         key.replace("mode_layer_", "");
+                         key.replace("_prev", "");
+                         li = key.toInt();
+                         box_prevMode(li);
+                     });
+        renderButton(tab_name, String("mode_layer_") + i +"_next", F(R"({
+    "name":"Next",
+    "newLine":true
+  })"),
+                     [](String key, String value)
+                     {
+                         int li;
+                         key.replace("mode_layer_", "");
+                         key.replace("_next", "");
+                         li = key.toInt();
+                         box_nextMode(li);
+                     });
 
         renderSelect(tab_name, String("mode_layer_") + i, F(R"({
     "name":"Hiệu ứng",
@@ -95,7 +125,8 @@ void setup_render_layer()
         "sm":24,
         "md":12,
         "xl":12
-    }
+    },
+    "newLine":true
   })"),
                      [](String key, String value)
                      {

@@ -13,7 +13,7 @@ void box_enable(int8_t layer)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("en_layer_") + layer, "true");
+        setValue(String("en_layer_") + layer, "true", false);
     }
 }
 void box_disable(int8_t layer)
@@ -25,7 +25,7 @@ void box_disable(int8_t layer)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("en_layer_") + layer, "false");
+        setValue(String("en_layer_") + layer, "false", false);
     }
 }
 uint8_t box_getMode(int8_t layer)
@@ -43,7 +43,7 @@ uint8_t box_getMode(int8_t layer)
     return -1;
 }
 
-void box_setMode(int8_t layer, String mode, bool save = true)
+void box_setMode(int8_t layer, String mode)
 {
     uint16_t speed = getValue(String("speed_layer_") + layer + "_" + mode).toInt();
 
@@ -58,15 +58,26 @@ void box_setMode(int8_t layer, String mode, bool save = true)
     {
         setValue(String("speed_layer_") + layer, String(speed), false);
 
-        setValue(String("mode_layer_") + layer, String(mode), save);
+        setValue(String("mode_layer_") + layer, String(mode), false);
     }
 }
-void box_nextMode(bool save = true)
+void box_nextMode(int8_t layer)
 {
-    uint8_t curMode = box_getMode(0);
+    uint8_t curMode = box_getMode(layer);
     curMode++;
+    if (curMode == box.getModeCount() - 1)
+        curMode = 0;
     String nm = box.getModeName(curMode);
-    box_setMode(0, nm, save);
+    box_setMode(layer, nm);
+}
+void box_prevMode(int8_t layer)
+{
+    uint8_t curMode = box_getMode(layer);
+    curMode--;
+    if (curMode == 0)
+        curMode = box.getModeCount() - 1;
+    String nm = box.getModeName(curMode);
+    box_setMode(layer, nm);
 }
 void box_setColor(int8_t layer, int8_t iColor, String color)
 {
@@ -81,7 +92,7 @@ void box_setColor(int8_t layer, int8_t iColor, String color)
         rxBoxCmd.id == txBoxCmd.id)
     {
 
-        setValue(String("color") + iColor + "_layer_" + layer, color);
+        setValue(String("color") + iColor + "_layer_" + layer, color, false);
     }
 }
 
@@ -95,7 +106,7 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("brig_layer_") + layer, String(brightness));
+        setValue(String("brig_layer_") + layer, String(brightness), false);
     }
 }
 void box_setSpeed(int8_t layer, uint16_t speed)
@@ -111,7 +122,7 @@ void box_setSpeed(int8_t layer, uint16_t speed)
         rxBoxCmd.id == txBoxCmd.id)
     {
         setValue(String("speed_layer_") + layer, String(speed), false);
-        setValue(String("speed_layer_") + layer + "_" + mode, String(speed));
+        setValue(String("speed_layer_") + layer + "_" + mode, String(speed), false);
     }
 }
 void box_config_segment(String key, String value)
@@ -140,7 +151,7 @@ void box_config_segment(String key, String value)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(key, value);
+        setValue(key, value, true);
     }
 }
 void box_config_show_face(String key, String value)
