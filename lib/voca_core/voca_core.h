@@ -8,7 +8,6 @@
 #include "voca_system.h"
 #include "voca_websocket.h"
 #include "voca_render.h"
-#include "voca_update.h"
 
 void setup_voca()
 {
@@ -17,7 +16,6 @@ void setup_voca()
     setupRender();
     setupWifi();
     setupWebserver();
-    setupUpdate();
 
     setupWebSocket();
     setupSystem();

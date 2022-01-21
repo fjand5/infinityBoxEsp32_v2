@@ -1,10 +1,12 @@
 #pragma once
+#define USE_DATA_FROM_FILE
 #include "voca_env.h"
 #include "voca_dist.h"
 #include <WebServer.h>
 #include <ArduinoJson.h>
 #include "voca_store.h"
 #include "voca_auth.h"
+#include "voca_update.h"
 
 WebServer server(80);
 SemaphoreHandle_t http_request_sem;
@@ -44,15 +46,20 @@ void addHttpApi(String url, Response response)
                   server.send(401);
                 }
                 xSemaphoreGive(http_request_sem);
-              }
-            });
+              } });
 }
 
 void handleIndex()
 {
   comHeader();
+#ifdef USE_DATA_FROM_FILE
+  File index_html = LITTLEFS.open("/index.html.gz", "r");
+  server.streamFile(index_html, "text/html");
+  index_html.close();
+#else
   server.sendHeader("Content-Encoding", "gzip");
   server.send_P(200, "text/html", index_html, index_html_length);
+#endif
 }
 void setupWebserver()
 {
@@ -166,8 +173,15 @@ void setupWebserver()
                     if (xSemaphoreTake(http_request_sem, portMAX_DELAY) == pdTRUE)
                     {
                       comHeader();
-                      server.sendHeader("Content-Encoding", "gzip");
-                      server.send_P(200, "application/javascript", app_js, app_js_length);
+
+#ifdef USE_DATA_FROM_FILE
+                      File app_js = LITTLEFS.open("/app.js.gz", "r");
+                      server.streamFile(app_js, "application/javascript");
+                      app_js.close();
+#else
+                server.sendHeader("Content-Encoding", "gzip");
+                server.send_P(200, "application/javascript", app_js, app_js_length);
+#endif
                       xSemaphoreGive(http_request_sem);
                     }
                   });
@@ -177,8 +191,15 @@ void setupWebserver()
                     if (xSemaphoreTake(http_request_sem, portMAX_DELAY) == pdTRUE)
                     {
                       comHeader();
-                      server.sendHeader("Content-Encoding", "gzip");
-                      server.send_P(200, "application/javascript", font_woff, font_woff_length);
+
+#ifdef USE_DATA_FROM_FILE
+                      File font_woff = LITTLEFS.open("/element-icons.woff.gz", "r");
+                      server.streamFile(font_woff, "application/javascript");
+                      font_woff.close();
+#else
+                server.sendHeader("Content-Encoding", "gzip");
+                server.send_P(200, "application/javascript", font_woff, font_woff_length);
+#endif
                       xSemaphoreGive(http_request_sem);
                     }
                   });
@@ -188,17 +209,25 @@ void setupWebserver()
                     if (xSemaphoreTake(http_request_sem, portMAX_DELAY) == pdTRUE)
                     {
                       comHeader();
-                      server.sendHeader("Content-Encoding", "gzip");
-                      server.send_P(200, "application/javascript", favicon_ico, favicon_ico_length);
+#ifdef USE_DATA_FROM_FILE
+                      File favicon_ico = LITTLEFS.open("/favicon.ico.gz", "r");
+                      server.streamFile(favicon_ico, "application/javascript");
+                      favicon_ico.close();
+#else
+                server.sendHeader("Content-Encoding", "gzip");
+                server.send_P(200, "application/javascript", favicon_ico, favicon_ico_length);
+#endif
                       xSemaphoreGive(http_request_sem);
                     }
                   });
+    setupUpdate();
+
         server.begin();
         log_w("loopWebserver is running on core: %d", xPortGetCoreID());
         http_request_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(http_request_sem);
         SET_FLAG(FLAG_WEBSERVER_READY);
-        WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY| FLAG_INITIALIZED_STORE);
+        WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY | FLAG_INITIALIZED_STORE);
 
         while (1)
         {

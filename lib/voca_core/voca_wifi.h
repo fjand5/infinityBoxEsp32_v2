@@ -121,9 +121,9 @@ void setupWifi(void)
     WiFi.softAP(apid.c_str(), APPW);
   }
 
-  if (checkKey("_ssid") && checkKey("_sspw"))
-  {
-    WiFi.begin(getValueByCStr("_ssid"), getValueByCStr("_sspw"));
+  // if (checkKey("_ssid") && checkKey("_sspw"))
+  // {
+    WiFi.begin(getValueByCStr("_ssid","Vong Cat-Hide"), getValueByCStr("_sspw","78787878"));
     // WiFi.begin("Vong Cat-Hide", "78787878");
 
     while (WiFi.status() != WL_CONNECTED && millis() < 30000)
@@ -131,7 +131,7 @@ void setupWifi(void)
       delay(500);
       log_d(".");
     }
-  }
+  // }
   // WiFi.begin("Vong Cat-Hide", "78787878");
 
   // Wait for connection
