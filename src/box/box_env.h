@@ -8,4 +8,4 @@
 #define LED_PIN 23
 #define TRANSITION_TIME 1000
 
-#define BOX_CORE_CPU 1
+#define BOX_CORE_CPU 0

@@ -7,8 +7,9 @@
 #define FLAG_WEBSOCKET_READY (4 << 0)
 #define FLAG_SETUP_WIFI_DONE (5 << 0)
 
-#define WAIT_FLAG_SET(flag) xEventGroupWaitBits( system_status, flag, pdFALSE, pdFALSE, portMAX_DELAY)
-#define SET_FLAG(flag) xEventGroupSetBits(system_status, flag)
+
+#define WAIT_FLAG_SET(flag) if (system_status == NULL ) system_status = xEventGroupCreate(); xEventGroupWaitBits( system_status, flag, pdFALSE, pdFALSE, portMAX_DELAY)
+#define SET_FLAG(flag) if (system_status == NULL ) system_status = xEventGroupCreate(); xEventGroupSetBits(system_status, flag)
 #define WAIT_VOCA_READY WAIT_FLAG_SET(FLAG_CONNECTED_STA|FLAG_INITIALIZED_STORE|FLAG_WEBSERVER_READY|FLAG_WEBSOCKET_READY|FLAG_SETUP_WIFI_DONE)
 EventGroupHandle_t system_status;
 void settupStatus()

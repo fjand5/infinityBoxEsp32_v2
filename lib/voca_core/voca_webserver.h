@@ -1,5 +1,5 @@
 #pragma once
-#define USE_DATA_FROM_FILE
+// #define USE_DATA_FROM_FILE
 #include "voca_env.h"
 #include "voca_dist.h"
 #include <WebServer.h>

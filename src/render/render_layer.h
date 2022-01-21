@@ -2,7 +2,13 @@
 #include "voca_render.h"
 void setup_render_layer()
 {
+    if (box_status == NULL)
+    {
+        return;
+    }
+
     xEventGroupWaitBits(box_status, FLAG_BOX_READY, pdFALSE, pdFALSE, portMAX_DELAY);
+
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         String tab_name;
@@ -93,7 +99,7 @@ void setup_render_layer()
 
         String tmp;
         tmp = String("mode_layer_") + i;
-        renderButton(tab_name, String("mode_layer_") + i +"_prev", F(R"({
+        renderButton(tab_name, String("mode_layer_") + i + "_prev", F(R"({
     "name":"Prev"
   })"),
                      [](String key, String value)
@@ -104,7 +110,7 @@ void setup_render_layer()
                          li = key.toInt();
                          box_prevMode(li);
                      });
-        renderButton(tab_name, String("mode_layer_") + i +"_next", F(R"({
+        renderButton(tab_name, String("mode_layer_") + i + "_next", F(R"({
     "name":"Next",
     "newLine":true
   })"),
@@ -147,12 +153,12 @@ void setup_render_layer()
     "name":"Tốc độ",
     "newLine":true
   })"),
-                     [](String key, String value)
-                     {
-                         int li;
-                         key.replace("speed_layer_", "");
-                         li = key.toInt();
-                         box_setSpeed(li, value.toInt());
-                     });
+                    [](String key, String value)
+                    {
+                        int li;
+                        key.replace("speed_layer_", "");
+                        li = key.toInt();
+                        box_setSpeed(li, value.toInt());
+                    });
     };
 };
