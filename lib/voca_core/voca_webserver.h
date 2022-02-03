@@ -1,5 +1,5 @@
 #pragma once
-#define USE_DATA_FROM_FILE
+// #define USE_DATA_FROM_FILE
 #include "voca_env.h"
 #include "voca_dist.h"
 #include <WebServer.h>
@@ -7,6 +7,7 @@
 #include "voca_store.h"
 #include "voca_auth.h"
 #include "voca_update.h"
+#include "voca_status/voca_status.h"
 
 WebServer server(80);
 SemaphoreHandle_t http_request_sem;
@@ -53,7 +54,7 @@ void handleIndex()
 {
   comHeader();
 #ifdef USE_DATA_FROM_FILE
-  File index_html = LITTLEFS.open("/index.html.gz", "r");
+  File index_html = SPIFFS.open("/index.html.gz", "r");
   server.streamFile(index_html, "text/html");
   index_html.close();
 #else
@@ -63,7 +64,7 @@ void handleIndex()
 }
 void setupWebserver()
 {
-  WAIT_FLAG_SET(FLAG_SETUP_WIFI_DONE);
+  vocaStatus.waitStatus(Status_SetupWifi_Done);
   xTaskCreatePinnedToCore(
       [](void *param)
       {
@@ -175,7 +176,7 @@ void setupWebserver()
                       comHeader();
 
 #ifdef USE_DATA_FROM_FILE
-                      File app_js = LITTLEFS.open("/app.js.gz", "r");
+                      File app_js = SPIFFS.open("/app.js.gz", "r");
                       server.streamFile(app_js, "application/javascript");
                       app_js.close();
 #else
@@ -193,7 +194,7 @@ void setupWebserver()
                       comHeader();
 
 #ifdef USE_DATA_FROM_FILE
-                      File font_woff = LITTLEFS.open("/element-icons.woff.gz", "r");
+                      File font_woff = SPIFFS.open("/element-icons.woff.gz", "r");
                       server.streamFile(font_woff, "application/javascript");
                       font_woff.close();
 #else
@@ -210,7 +211,7 @@ void setupWebserver()
                     {
                       comHeader();
 #ifdef USE_DATA_FROM_FILE
-                      File favicon_ico = LITTLEFS.open("/favicon.ico.gz", "r");
+                      File favicon_ico = SPIFFS.open("/favicon.ico.gz", "r");
                       server.streamFile(favicon_ico, "application/javascript");
                       favicon_ico.close();
 #else
@@ -226,8 +227,8 @@ void setupWebserver()
         log_w("loopWebserver is running on core: %d", xPortGetCoreID());
         http_request_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(http_request_sem);
-        SET_FLAG(FLAG_WEBSERVER_READY);
-        WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY | FLAG_INITIALIZED_STORE);
+        vocaStatus.setStatus(Status_WebServer_Ready);
+        vocaStatus.waitStatus(Status_WebSocket_Ready);
 
         while (1)
         {

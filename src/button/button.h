@@ -43,7 +43,8 @@ void doubleClick()
 }
 void buttonHandle(void *params)
 {
-    WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
+    vocaStatus.waitStatus(Status_Store_Initialized);
+    
     EasyButton *button = (EasyButton *)params;
     int brightness = 0;  // how bright the LED is
     int fadeAmount = 10; // how many points to fade the LED by
@@ -80,7 +81,7 @@ void setup_button()
         "buttonHandle",   /* name of task. */
         10000,             /* Stack size of task */
         (void *)&button,  /* parameter of the task */
-        1,                /* priority of the task */
+        0,                /* priority of the task */
         NULL,             /* Task handle to keep track of created task */
         BUTTON_CORE_CPU); /* pin task to core 0 */
 }

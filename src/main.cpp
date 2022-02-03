@@ -7,8 +7,6 @@
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
-
-  delay(555);
   setup_box();
   setup_button();
   setup_voca();

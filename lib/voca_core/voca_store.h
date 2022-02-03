@@ -4,10 +4,11 @@
 #define DEFAULT_PASSWORD "12345678"
 #define CONFIG_FILE "/config.txt"
 #include "FS.h"
-#include <LITTLEFS.h>
+#include "SPIFFS.h"
 #include <map>
 #include <list>
 #include <WS2812FX.h>
+#include "voca_status/voca_status.h"
 
 void saveConfigFile();
 void setValue(String key, String value, bool save = true);
@@ -226,14 +227,14 @@ void saveConfigFile()
   if (xSemaphoreTake(spiffs_sem, portMAX_DELAY) == pdTRUE)
   {
   REOPEN:
-    File cfg_file = LITTLEFS.open(CONFIG_FILE, "w");
+    File cfg_file = SPIFFS.open(CONFIG_FILE, "w");
     if (!cfg_file)
     {
       cfg_file.close();
       delay(100);
       log_e("can't open file, reopening...");
-      LITTLEFS.end();
-      LITTLEFS.begin();
+      SPIFFS.end();
+      SPIFFS.begin();
       goto REOPEN;
     }
     if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
@@ -252,14 +253,46 @@ void saveConfigFile()
   }
 }
 // Khởi tạo
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+    log_w("Listing directory: %s\r\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        log_w("- failed to open directory\n");
+        return;
+    }
+    if(!root.isDirectory()){
+        log_w(" - not a directory\n");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            log_w("  DIR : ");
+            log_w("%s",file.name());
+            if(levels){
+                listDir(fs, file.name(), levels -1);
+            }
+        } else {
+            log_w("  FILE: ");
+            log_w("%s",file.name());
+            log_w("\tSIZE: ");
+            log_w("%d\n",file.size());
+        }
+        file = root.openNextFile();
+    }
+}
 void setupStore()
 {
   spiffs_sem = xSemaphoreCreateBinary();
-  if (!LITTLEFS.begin())
+  log_w("Initialize SPIFFS");
+  delay(100);
+  if (!SPIFFS.begin())
   {
-    log_d("Can't mount LITTLEFS, Try format");
-    LITTLEFS.format();
-    if (!LITTLEFS.begin())
+    log_d("Can't mount SPIFFS, Try format");
+    SPIFFS.format();
+    if (!SPIFFS.begin())
     {
       log_d("Can't mount SPIFFS");
       return;
@@ -273,11 +306,12 @@ void setupStore()
   else
   {
     log_d("SPIFFS mounted ");
+    listDir(SPIFFS, "/", 9);
     xSemaphoreGive(spiffs_sem);
   }
   if (xSemaphoreTake(spiffs_sem, portMAX_DELAY) == pdTRUE)
   {
-    File cfg_file = LITTLEFS.open(CONFIG_FILE, "r");
+    File cfg_file = SPIFFS.open(CONFIG_FILE, "r");
     if (cfg_file)
     {
       String tmp = cfg_file.readString();
@@ -285,12 +319,12 @@ void setupStore()
     }
     else
     {
-      LITTLEFS.open(CONFIG_FILE, "a");
+      SPIFFS.open(CONFIG_FILE, "a");
     }
     cfg_file.close();
     xSemaphoreGive(spiffs_sem);
   }
-  SET_FLAG(FLAG_INITIALIZED_STORE);
+  vocaStatus.setStatus(Status_Store_Initialized);
 }
 
 void loopConfig()

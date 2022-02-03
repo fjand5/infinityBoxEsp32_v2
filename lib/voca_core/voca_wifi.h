@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 #include "voca_store.h"
 #include "voca_webserver.h"
-#include "voca_status.h"
+#include "voca_status/voca_status.h"
 #include "voca_render.h"
 
 #define APID "vocaui"
@@ -14,7 +14,6 @@ void setWifi();
 void getWifi();
 void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-  SET_FLAG(FLAG_CONNECTED_STA);
   if (checkKey("_ssid") && checkKey("_sspw"))
   {
     WiFi.begin(getValueByCStr("_ssid"), getValueByCStr("_sspw"));
@@ -27,13 +26,13 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
     }
     if (WiFi.status() == WL_CONNECTED)
     {
-      SET_FLAG(FLAG_CONNECTED_STA);
+      vocaStatus.setStatus(Status_WifiStation_Connected);
     }
   }
 }
 void setupWifi(void)
 {
-  WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
+  vocaStatus.waitStatus(Status_Store_Initialized);
   renderInput(F("System"), F("_apid"), F(R"({
     "name":"Tên wifi",
     "description":"",
@@ -42,20 +41,20 @@ void setupWifi(void)
       
     }
   })"),
-               [](String key, String value)
-               {
-                 setValue(key,value);
-               });
+              [](String key, String value)
+              {
+                setValue(key, value);
+              });
   renderInput(F("System"), F("_appw"), F(R"({
     "name":"Mật khẩu wifi",
     "description":"",
     "newLine":true,
     "password":true
   })"),
-               [](String key, String value)
-               {
-                 setValue(key,value);
-               });
+              [](String key, String value)
+              {
+                setValue(key, value);
+              });
   renderButton(F("System"), F("_reset"), F(R"({
     "name":"Khởi động lại",
     "description":"",
@@ -66,7 +65,7 @@ void setupWifi(void)
                {
                  ESP.restart();
                });
-    renderButton(F("System"), F("_format"), F(R"({
+  renderButton(F("System"), F("_format"), F(R"({
     "name":"Xóa dữ liệu",
     "description":"",
     "newLine":true,
@@ -76,15 +75,14 @@ void setupWifi(void)
   })"),
                [](String key, String value)
                {
-                 LITTLEFS.format();
+                 SPIFFS.format();
                });
   renderInput(F("System"), F("_version"), F(R"({
     "name":"Phiên bản",
     "description":""
   })"),
-               [](String key, String value)
-               {
-               });
+              [](String key, String value) {
+              });
   //   renderColorPicker("Color", "_color", R"({
   //   "name":"Xóa dữ liệu",
   //   "description":"",
@@ -123,14 +121,14 @@ void setupWifi(void)
 
   // if (checkKey("_ssid") && checkKey("_sspw"))
   // {
-    WiFi.begin(getValueByCStr("_ssid","Vong Cat-Hide"), getValueByCStr("_sspw","78787878"));
-    // WiFi.begin("Vong Cat-Hide", "78787878");
+  WiFi.begin(getValueByCStr("_ssid", "Vong Cat-Hide"), getValueByCStr("_sspw", "78787878"));
+  // WiFi.begin("Vong Cat-Hide", "78787878");
 
-    while (WiFi.status() != WL_CONNECTED && millis() < 30000)
-    {
-      delay(500);
-      log_d(".");
-    }
+  while (WiFi.status() != WL_CONNECTED && millis() < 30000)
+  {
+    delay(500);
+    log_d(".");
+  }
   // }
   // WiFi.begin("Vong Cat-Hide", "78787878");
 
@@ -144,16 +142,15 @@ void setupWifi(void)
   {
     log_d("");
     log_d("Connected to ");
-    log_d("%s",getValue("_ssid").c_str());
+    log_d("%s", getValue("_ssid").c_str());
     WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
-    SET_FLAG(FLAG_CONNECTED_STA);
+    vocaStatus.setStatus(Status_WifiStation_Connected);
   }
 
   addHttpApi("scanWifi", scanWifi);
   addHttpApi("setWifi", setWifi);
   addHttpApi("getWifi", getWifi);
-  SET_FLAG(FLAG_SETUP_WIFI_DONE);
-
+  vocaStatus.setStatus(Status_SetupWifi_Done);
 }
 
 void loopWifi(void)
