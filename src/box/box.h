@@ -19,7 +19,7 @@ EventGroupHandle_t box_status;
 void boxHandle(void *params)
 {
     VBox *_layers = (VBox *)params;
-    WAIT_FLAG_SET(FLAG_INITIALIZED_STORE);
+    vocaStatus.waitStatus(Status_Store_Initialized);
     log_w("boxHandle is running on core: %d", xPortGetCoreID());
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {

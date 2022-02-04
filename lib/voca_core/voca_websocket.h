@@ -100,7 +100,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 void setupWebSocket()
 {
 
-    WAIT_FLAG_SET(FLAG_SETUP_WIFI_DONE);
+    vocaStatus.setStatus(Status_SetupWifi_Done);
+
     xTaskCreatePinnedToCore(
         [](void *param)
         {
@@ -110,9 +111,9 @@ void setupWebSocket()
             _webSocket->onEvent(webSocketEvent);
             websocket_sem = xSemaphoreCreateBinary();
             xSemaphoreGive(websocket_sem);
-            SET_FLAG(FLAG_WEBSOCKET_READY);
-            WAIT_FLAG_SET(FLAG_WEBSERVER_READY | FLAG_WEBSOCKET_READY | FLAG_INITIALIZED_STORE);
 
+            vocaStatus.setStatus(Status_WebSocket_Ready);
+            vocaStatus.waitStatus(Status_WebServer_Ready);
             setOnStoreChange([](String key, String value, void *p)
                              {
                                  WebSocketsServer *_ws= (WebSocketsServer *)p;
@@ -121,8 +122,7 @@ void setupWebSocket()
                                  getValueByObject(key, obj);
                                  String ret;
                                  serializeJson(_doc, ret);
-                                 _ws->broadcastTXT(ret);
-                             },
+                                 _ws->broadcastTXT(ret); },
                              (void *)_webSocket);
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
 
