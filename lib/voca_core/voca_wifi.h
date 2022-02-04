@@ -2,13 +2,10 @@
 #include "voca_env.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>
-#include "voca_store.h"
+#include "voca_store/voca_store.h"
 #include "voca_webserver.h"
 #include "voca_status/voca_status.h"
 #include "voca_render.h"
-
-#define APID "vocaui"
-#define APPW "12345678"
 void scanWifi();
 void setWifi();
 void getWifi();

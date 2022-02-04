@@ -1,10 +1,9 @@
 #pragma once
-// #define USE_DATA_FROM_FILE
 #include "voca_env.h"
 #include "voca_dist.h"
 #include <WebServer.h>
 #include <ArduinoJson.h>
-#include "voca_store.h"
+#include "voca_store/voca_store.h"
 #include "voca_auth.h"
 #include "voca_update.h"
 #include "voca_status/voca_status.h"
@@ -47,7 +46,8 @@ void addHttpApi(String url, Response response)
                   server.send(401);
                 }
                 xSemaphoreGive(http_request_sem);
-              } });
+              }
+            });
 }
 
 void handleIndex()
@@ -221,7 +221,7 @@ void setupWebserver()
                       xSemaphoreGive(http_request_sem);
                     }
                   });
-    setupUpdate();
+        setupUpdate();
 
         server.begin();
         log_w("loopWebserver is running on core: %d", xPortGetCoreID());
