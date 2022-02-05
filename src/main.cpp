@@ -1,14 +1,14 @@
 #include <Arduino.h>
 #include "voca_core.h"
 #include "render/render.h"
-#include "button/button.h"
+#include "control_button/control_button.h"
 #include "box/box.h"
 
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
   setup_box();
-  setup_button();
+  controlButton.begin();
   setup_voca();
 
   render();

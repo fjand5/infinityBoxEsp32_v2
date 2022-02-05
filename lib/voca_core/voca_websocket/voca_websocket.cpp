@@ -19,7 +19,7 @@ void VocaWebsocket::cbConnectEvent(uint8_t num, uint8_t *payload, size_t length)
     }
     token.replace("/", "");
 #ifdef AUTH_FEATURE
-    if (!checkAuthJwt(token))
+    if (!vocaAuth.checkAuthJwt(token))
     {
         log_d("Token: %s num: %d", token.c_str(), num);
         xSemaphoreGive(semWebsocket);

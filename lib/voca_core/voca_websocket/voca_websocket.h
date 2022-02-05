@@ -1,7 +1,7 @@
 #pragma once
 #include "voca_env.h"
 #ifdef AUTH_FEATURE
-#include "../voca_auth.h"
+#include "../voca_auth/voca_auth.h"
 #endif
 #include "voca_store/voca_store.h"
 #include "voca_status/voca_status.h"

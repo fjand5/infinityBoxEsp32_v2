@@ -35,9 +35,9 @@ void VocaWebserver::begin(/* args */)
                String token = header("Authorization");
                token.replace("Bearer ", "");
 #ifdef AUTH_FEATURE
-               if (check_auth_jwt(token))
+               if (vocaAuth.checkAuthJwt(token))
                {
-                   String bearerHeader = String("Bearer ") + create_auth_jwt();
+                   String bearerHeader = String("Bearer ") + vocaAuth.createAuthJwt();
                    sendHeader("Authorization", bearerHeader);
                    send(200);
                }
@@ -65,9 +65,9 @@ void VocaWebserver::begin(/* args */)
                    return;
                }
 #ifdef AUTH_FEATURE
-               if (authenticate(getUsername().c_str(), getPassword().c_str()))
+               if (authenticate(vocaAuth.getUsername().c_str(), vocaAuth.getPassword().c_str()))
                {
-                   String bearerHeader = String("Bearer ") + create_auth_jwt();
+                   String bearerHeader = String("Bearer ") + vocaAuth.createAuthJwt();
                    sendHeader("Authorization", bearerHeader);
 
                    send(200);
@@ -102,20 +102,19 @@ void VocaWebserver::begin(/* args */)
 
                String token = header("Authorization");
                token.replace("Bearer ", "");
-               if (check_auth_jwt(token))
+               if (vocaAuth.checkAuthJwt(token))
                {
-                   String bearerHeader = String("Bearer ") + create_auth_jwt();
+                   String bearerHeader = String("Bearer ") + vocaAuth.createAuthJwt();
                    sendHeader("Authorization", bearerHeader);
-                   String arg = arg(0);
-
+                   String _arg = arg(0);
                    DynamicJsonDocument _doc(258);
-                   deserializeJson(_doc, arg);
+                   deserializeJson(_doc, _arg);
                    JsonObject obj = _doc.as<JsonObject>();
                    String password = obj["password"];
                    String newPassword = obj["newPassword"];
-                   if (getPassword() == password)
+                   if (vocaAuth.getPassword() == password)
                    {
-                       setPassword(newPassword);
+                       vocaAuth.setPassword(newPassword);
                        send(200);
                    }
                    else
@@ -234,12 +233,12 @@ void VocaWebserver::addHttpApi(const String url, Response response)
                   xSemaphoreGive(semHttpRequest);
                   return;
                 }
-#if AUTH_FEATURE
+#ifdef AUTH_FEATURE
                 String token = header("Authorization");
                 token.replace("Bearer ", "");
-                if (check_auth_jwt(token))
+                if (vocaAuth.checkAuthJwt(token))
                 {
-                  String bearerHeader = String("Bearer ") + create_auth_jwt();
+                  String bearerHeader = String("Bearer ") + vocaAuth.createAuthJwt();
                   sendHeader("Authorization", bearerHeader);
                   response();
                 }

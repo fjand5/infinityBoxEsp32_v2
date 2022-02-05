@@ -1,5 +1,6 @@
 #include "box/box_controler.h"
-#include "voca_core.h"
+#include "voca_render/voca_render.h"
+
 void setup_render_layer()
 {
     if (box_status == NULL)
@@ -14,7 +15,7 @@ void setup_render_layer()
         String tab_name;
         tab_name = String("Layer ") + i;
 
-        renderSwitch(tab_name, String("en_layer_") + i, F(R"({
+        vocaRender.renderSwitch(tab_name, String("en_layer_") + i, F(R"({
     "name":"Chạy"
   })"),
                      [](String key, String value)
@@ -27,7 +28,7 @@ void setup_render_layer()
                          else
                              box_disable(li);
                      });
-        renderButton(tab_name, String("save_layer_") + i, F(R"({
+        vocaRender.renderButton(tab_name, String("save_layer_") + i, F(R"({
     "name":"Lưu",
     "newLine":true
   })"),
@@ -35,7 +36,7 @@ void setup_render_layer()
                      {
                          vocaStore.updateStore();
                      });
-        renderSlider(tab_name, String("brig_layer_") + i, F(R"({
+        vocaRender.renderSlider(tab_name, String("brig_layer_") + i, F(R"({
     "name":"Độ sáng",
     "min":0,
     "max":255,
@@ -56,7 +57,7 @@ void setup_render_layer()
 
         String tmp;
         tmp = String("color0_layer_") + i;
-        renderColorPicker(tab_name, String("color0_layer_") + i, F(R"({
+        vocaRender.renderColorPicker(tab_name, String("color0_layer_") + i, F(R"({
     "name":"Màu 0"
   })"),
                           [](String key, String value)
@@ -68,7 +69,7 @@ void setup_render_layer()
                           });
 
         tmp = String("color1_layer_") + i;
-        renderColorPicker(tab_name, String("color1_layer_") + i, F(R"({
+        vocaRender.renderColorPicker(tab_name, String("color1_layer_") + i, F(R"({
     "name":"Màu 1"
   })"),
                           [](String key, String value)
@@ -80,7 +81,7 @@ void setup_render_layer()
                           });
 
         tmp = String("color2_layer_") + i;
-        renderColorPicker(tab_name, String("color2_layer_") + i, F(R"({
+        vocaRender.renderColorPicker(tab_name, String("color2_layer_") + i, F(R"({
     "name":"Màu 2",
     "newLine":true
   })"),
@@ -99,7 +100,7 @@ void setup_render_layer()
 
         String tmp;
         tmp = String("mode_layer_") + i;
-        renderButton(tab_name, String("mode_layer_") + i + "_prev", F(R"({
+        vocaRender.renderButton(tab_name, String("mode_layer_") + i + "_prev", F(R"({
     "name":"Prev"
   })"),
                      [](String key, String value)
@@ -110,7 +111,7 @@ void setup_render_layer()
                          li = key.toInt();
                          box_prevMode(li);
                      });
-        renderButton(tab_name, String("mode_layer_") + i + "_next", F(R"({
+        vocaRender.renderButton(tab_name, String("mode_layer_") + i + "_next", F(R"({
     "name":"Next",
     "newLine":true
   })"),
@@ -123,7 +124,7 @@ void setup_render_layer()
                          box_nextMode(li);
                      });
 
-        renderSelect(tab_name, String("mode_layer_") + i, F(R"({
+        vocaRender.renderSelect(tab_name, String("mode_layer_") + i, F(R"({
     "name":"Hiệu ứng",
     "options":["Static","Blink","Breath","Color Wipe","Color Wipe Inverse","Color Wipe Reverse","Color Wipe Reverse Inverse","Color Wipe Random","Random Color","Single Dynamic","Multi Dynamic","Rainbow","Rainbow Cycle","Scan","Dual Scan","Fade","Theater Chase","Theater Chase Rainbow","Running Lights","Twinkle","Twinkle Random","Twinkle Fade","Twinkle Fade Random","Sparkle","Flash Sparkle","Hyper Sparkle","Strobe","Strobe Rainbow","Multi Strobe","Blink Rainbow","Chase White","Chase Color","Chase Random","Chase Rainbow","Chase Flash","Chase Flash Random","Chase Rainbow White","Chase Blackout","Chase Blackout Rainbow","Color Sweep Random","Running Color","Running Red Blue","Running Random","Larson Scanner","Comet","Fireworks","Fireworks Random","Merry Christmas","Fire Flicker","Fire Flicker soft","Fire Flicker intense","Circus Combustus","Halloween","Bicolor Chase","Tricolor Chase","TwinkleFOX","Rain","Custom 0","Custom 1","Custom 2","Custom 3","Custom 4","Custom 5","Custom 6","Custom 7"],
     "span":{
@@ -149,7 +150,7 @@ void setup_render_layer()
 
         String tmp;
         tmp = String("speed_layer_") + i;
-        renderInput(tab_name, String("speed_layer_") + i, F(R"({
+        vocaRender.renderInput(tab_name, String("speed_layer_") + i, F(R"({
     "name":"Tốc độ",
     "newLine":true
   })"),

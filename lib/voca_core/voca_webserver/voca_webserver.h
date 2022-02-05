@@ -5,7 +5,7 @@
 #include <ArduinoJson.h>
 #include <HTTPUpdateServer.h>
 #ifdef AUTH_FEATURE
-#include "../voca_auth.h"
+#include "../voca_auth/voca_auth.h"
 #endif
 #include "../voca_status/voca_status.h"
 class VocaWebserver : public WebServer
