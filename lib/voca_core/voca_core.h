@@ -69,6 +69,9 @@ void setup_voca()
     vocaWebserver.begin();
     vocaWebsocket.begin();
     setupSystem();
+
     renderUI();
+
     vocaStatus.waitAllStatus();
+
 }

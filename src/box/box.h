@@ -20,7 +20,7 @@ void boxHandle(void *params)
 {
     VBox *_layers = (VBox *)params;
     vocaStatus.waitStatus(Status_Store_Initialized);
-    log_w("boxHandle is running on core: %d", xPortGetCoreID());
+    log_w("Box is running on core: %d", xPortGetCoreID());
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         _layers[i].init();
@@ -38,6 +38,8 @@ void boxHandle(void *params)
     xEventGroupSetBits(box_status, FLAG_BOX_READY);
     boxCommandQueue = xQueueCreate(8, sizeof(BoxCommand));
     boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
+    log_w("Box has initialze !!!");
+
     while (1)
     {
         static UBaseType_t lastUxHighWaterMark = 0;
@@ -64,7 +66,7 @@ void setup_box()
         "boxHandle",    /* name of task. */
         4096,          /* Stack size of task */
         (void *)layers, /* parameter of the task */
-        1,              /* priority of the task */
+        0,              /* priority of the task */
         NULL,           /* Task handle to keep track of created task */
         BOX_CORE_CPU);  /* pin task to core 0 */
     if (xReturned == pdPASS)

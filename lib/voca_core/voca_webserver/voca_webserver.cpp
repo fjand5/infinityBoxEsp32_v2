@@ -34,16 +34,20 @@ void VocaWebserver::begin(/* args */)
                }
                String token = header("Authorization");
                token.replace("Bearer ", "");
-               //   if (check_auth_jwt(token))
-               //   {
-               //       String bearerHeader = String("Bearer ") + create_auth_jwt();
-               //       sendHeader("Authorization", bearerHeader);
-               //       send(200);
-               //   }
-               //   else
-               //   {
-               //       send(401);
-               //   }
+#ifdef AUTH_FEATURE
+               if (check_auth_jwt(token))
+               {
+                   String bearerHeader = String("Bearer ") + create_auth_jwt();
+                   sendHeader("Authorization", bearerHeader);
+                   send(200);
+               }
+               else
+               {
+                   send(401);
+               }
+#else
+                send(200);
+#endif
                xSemaphoreGive(semHttpRequest);
            }
        });
@@ -191,7 +195,7 @@ void VocaWebserver::begin(/* args */)
         {
             VocaWebserver *_vocaWebserver = (VocaWebserver *)param;
             log_w("loopWebserver is running on core: %d", xPortGetCoreID());
-            // vocaStatus.setStatus(Status_WebServer_Ready);
+            vocaStatus.setStatus(Status_WebServer_Ready);
             vocaStatus.waitStatus(Status_WebSocket_Ready);
 
             while (1)

@@ -11,6 +11,7 @@ VocaStatus::~VocaStatus()
 void VocaStatus::waitStatus(ModuleFlagReady_e status)
 {
     xEventGroupWaitBits(systemStatus, 1<<status, pdFALSE, pdFALSE, portMAX_DELAY);
+
 };
 void VocaStatus::waitAllStatus()
 {
