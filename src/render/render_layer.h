@@ -1,5 +1,5 @@
 #include "box/box_controler.h"
-#include "voca_render.h"
+#include "voca_core.h"
 void setup_render_layer()
 {
     if (box_status == NULL)
@@ -33,7 +33,7 @@ void setup_render_layer()
   })"),
                      [](String key, String value)
                      {
-                         saveConfigFile();
+                         vocaStore.updateStore();
                      });
         renderSlider(tab_name, String("brig_layer_") + i, F(R"({
     "name":"Độ sáng",

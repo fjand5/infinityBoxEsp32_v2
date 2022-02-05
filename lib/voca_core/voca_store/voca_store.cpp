@@ -3,7 +3,7 @@ VocaStore vocaStore;
 bool VocaStore::mountSpiffs()
 {
     log_d("==== Initializing SPIFFS ====\n");
-    delay(100);
+    delay(111);
     if (!SPIFFS.begin())
     {
         log_w("Can't mount SPIFFS, Try format\n");
@@ -34,7 +34,7 @@ bool VocaStore::loadFileToContent()
     {
         String content = cfg_file.readString();
         // Mỗi dòng là một phần tử (một cặp key value) (key)=(value)
-        log_d("=======\n%s=======\n", content.c_str());
+        log_d("\n=======\n%s=======\n", content.c_str());
         while (content.indexOf("\n") >= 0)
         {
             String curLine = content.substring(0, content.indexOf("\n"));
@@ -56,6 +56,10 @@ bool VocaStore::loadFileToContent()
 }
 VocaStore::VocaStore()
 {
+}
+void VocaStore::begin()
+{
+
     if (!mountSpiffs())
     {
         return;
@@ -63,6 +67,7 @@ VocaStore::VocaStore()
 
     semSpiffs = xSemaphoreCreateBinary();
     xSemaphoreGive(semSpiffs);
+    loadFileToContent();
     vocaStatus.setStatus(Status_Store_Initialized);
 }
 bool VocaStore::checkValidKey(const String key)
@@ -82,7 +87,7 @@ bool VocaStore::checkValidValue(const String value)
         return false;
     return true;
 }
-void VocaStore::setValue(const String key, const String value, const bool save = false)
+void VocaStore::setValue(const String key, const String value, const bool save)
 {
     log_d("Setting Value: key: %s; value: %s\n", key.c_str(), value.c_str());
     bool isNoChange = storeContent[key] == value;
@@ -164,9 +169,9 @@ bool VocaStore::checkKey(const String key)
     }
     return false;
 }
-const String VocaStore::getValue(const String key, const String def = "", bool createIfNotExist = true)
+const String VocaStore::getValue(const String key, const String def, bool createIfNotExist)
 {
-    if (checkValidKey(key))
+    if (!checkValidKey(key))
         return "";
     if (checkKey(key))
     {
@@ -186,18 +191,20 @@ const String VocaStore::getValue(const String key, const String def = "", bool c
         return def;
     }
 }
-void VocaStore::readValueToObject(const String key, JsonObject objectValue, const String def = "", bool createIfNotExist = true)
+void VocaStore::readValueToObject(const String key, JsonObject objectValue, const String def, bool createIfNotExist)
 {
-    if (checkValidKey(key))
+    if (!checkValidKey(key))
         return;
     String value = getValue(key, def, createIfNotExist);
     objectValue[key] = value;
 }
-char *VocaStore::getValueByCStr(const String key, const String def = "", bool createIfNotExist = true)
+char *VocaStore::getValueByCStr(const String key, const String def, bool createIfNotExist)
 {
     char *ret;
-    if (checkValidKey(key))
+    if (!checkValidKey(key))
+    {
         return ret;
+    }
     if (checkKey(key))
     {
         String tmp;
@@ -224,33 +231,33 @@ char *VocaStore::getValueByCStr(const String key, const String def = "", bool cr
 }
 String VocaStore::getStore()
 {
-  String ret = "";
-  if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
-  {
-    for (std::pair<String, String> e : storeContent)
+    String ret = "";
+    if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
     {
-      String k = e.first;
-      if (k.startsWith("*"))
-        continue;
-      String v = e.second;
-      ret += k + "=" + v + "\n";
+        for (std::pair<String, String> e : storeContent)
+        {
+            String k = e.first;
+            if (k.startsWith("*"))
+                continue;
+            String v = e.second;
+            ret += k + "=" + v + "\n";
+        }
+        xSemaphoreGive(semStoreContent);
     }
-    xSemaphoreGive(semStoreContent);
-  }
-  return ret;
+    return ret;
 }
 void VocaStore::readStore(JsonObject objectValues)
 {
-  if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
-  {
-    for (std::pair<String, String> e : storeContent)
+    if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
     {
-      String k = e.first;
-      if (k.startsWith("*"))
-        continue;
-      String v = e.second;
-      objectValues[k] = v;
+        for (std::pair<String, String> e : storeContent)
+        {
+            String k = e.first;
+            if (k.startsWith("*"))
+                continue;
+            String v = e.second;
+            objectValues[k] = v;
+        }
+        xSemaphoreGive(semStoreContent);
     }
-    xSemaphoreGive(semStoreContent);
-  }
 }

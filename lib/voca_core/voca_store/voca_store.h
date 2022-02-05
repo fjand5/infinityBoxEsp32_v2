@@ -23,6 +23,7 @@ private:
 
 public:
   VocaStore();
+  void begin();
   void setValue(const String key, const String value, bool save = false);
   bool updateStore();
   void addStoreChangeEvent(StoreChangeEvent cb, void *prams);
@@ -30,6 +31,7 @@ public:
   const String getValue(const String key, const String def = "", bool createValueByDefault = true);
   void readValueToObject(const String key, JsonObject objectValue, const String def = "", bool createIfNotExist = true);
   char *getValueByCStr(const String key, const String def = "", bool createIfNotExist = true);
+
   String getStore();
   void readStore(JsonObject objectValues);
 };

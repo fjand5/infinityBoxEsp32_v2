@@ -2,31 +2,32 @@
 #include "voca_env.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <functional>
 #include "voca_websocket.h"
-#include "voca_webserver.h"
+#include "voca_webserver/voca_webserver.h"
+
 #include <map>
 #include <list>
 String renderData;
 SemaphoreHandle_t renderData_sem;
-typedef void (*OnEvent)(String key, String value);
-std::list<OnEvent> OnEvents;
-std::map<String, OnEvent> EventWithKeys;
-void setOnEvents(String key, OnEvent cb)
+typedef std::function <void (String key, String value)>ComponentEvent;
+std::map<String, ComponentEvent> componentEvents;
+void setOnEvents(String key, ComponentEvent cb)
 {
-  EventWithKeys[key] = cb;
+  componentEvents[key] = cb;
 }
 void setupRender()
 {
   renderData_sem = xSemaphoreCreateBinary();
   xSemaphoreGive(renderData_sem);
-  addHttpApi("/render", []()
-             { server.send_P(200, "application/json", renderData.c_str()); });
+  vocaWebserver.addHttpApi("/render", []()
+             { vocaWebserver.send_P(200, "application/json", renderData.c_str()); });
   setOnWSTextIncome([](JsonObject obj)
                     {
-                      for (std::pair<String, OnEvent> e : EventWithKeys)
+                      for (std::pair<String, ComponentEvent> e : componentEvents)
                       {
                         String k = e.first;
-                        OnEvent cb = e.second;
+                        ComponentEvent cb = e.second;
                         if (obj["espKey"] == k)
                         {
                           cb(k, obj["espValue"]);
@@ -74,32 +75,32 @@ option.offset : số cột component dịch sang phải (những components phí
 option.pull : di chuyển component sang phải (những components khác KHÔNG bị dịch theo)
 option.push : di chuyển component sang trái
 */
-void renderInput(String tab, String espKey, String option, OnEvent event)
+void renderInput(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspInput", tab, espKey, option);
 }
-void renderSlider(String tab, String espKey, String option, OnEvent event)
+void renderSlider(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspSlider", tab, espKey, option);
 }
-void renderSwitch(String tab, String espKey, String option, OnEvent event)
+void renderSwitch(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspSwitch", tab, espKey, option);
 }
-void renderButton(String tab, String espKey, String option, OnEvent event)
+void renderButton(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspButton", tab, espKey, option);
 }
-void renderColorPicker(String tab, String espKey, String option, OnEvent event)
+void renderColorPicker(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspColorPicker", tab, espKey, option);
 }
-void renderSelect(String tab, String espKey, String option, OnEvent event)
+void renderSelect(String tab, String espKey, String option, ComponentEvent event)
 {
   setOnEvents(espKey, event);
   renderComponent("EspSelect", tab, espKey, option);

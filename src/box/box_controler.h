@@ -13,7 +13,7 @@ void box_enable(int8_t layer)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("en_layer_") + layer, "true", false);
+        vocaStore.setValue(String("en_layer_") + layer, "true", false);
     }
 }
 void box_disable(int8_t layer)
@@ -25,7 +25,7 @@ void box_disable(int8_t layer)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("en_layer_") + layer, "false", false);
+        vocaStore.setValue(String("en_layer_") + layer, "false", false);
     }
 }
 uint8_t box_getMode(int8_t layer)
@@ -45,7 +45,7 @@ uint8_t box_getMode(int8_t layer)
 
 void box_setMode(int8_t layer, String mode)
 {
-    uint16_t speed = getValue(String("speed_layer_") + layer + "_" + mode).toInt();
+    uint16_t speed = vocaStore.getValue(String("speed_layer_") + layer + "_" + mode).toInt();
 
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_SET_MODE;
@@ -56,9 +56,9 @@ void box_setMode(int8_t layer, String mode)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("speed_layer_") + layer, String(speed), false);
+        vocaStore.setValue(String("speed_layer_") + layer, String(speed), false);
 
-        setValue(String("mode_layer_") + layer, String(mode), false);
+        vocaStore.setValue(String("mode_layer_") + layer, String(mode), false);
     }
 }
 void box_nextMode(int8_t layer)
@@ -92,7 +92,7 @@ void box_setColor(int8_t layer, int8_t iColor, String color)
         rxBoxCmd.id == txBoxCmd.id)
     {
 
-        setValue(String("color") + iColor + "_layer_" + layer, color, false);
+        vocaStore.setValue(String("color") + iColor + "_layer_" + layer, color, false);
     }
 }
 
@@ -106,13 +106,13 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("brig_layer_") + layer, String(brightness), false);
+        vocaStore.setValue(String("brig_layer_") + layer, String(brightness), false);
     }
 }
 void box_setSpeed(int8_t layer, uint16_t speed)
 {
     speed = constrain(speed, 0, 65535);
-    String mode = getValue(String("mode_layer_") + layer);
+    String mode = vocaStore.getValue(String("mode_layer_") + layer);
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_SET_SPEED;
     txBoxCmd.layer = layer;
@@ -121,8 +121,8 @@ void box_setSpeed(int8_t layer, uint16_t speed)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(String("speed_layer_") + layer, String(speed), false);
-        setValue(String("speed_layer_") + layer + "_" + mode, String(speed), false);
+        vocaStore.setValue(String("speed_layer_") + layer, String(speed), false);
+        vocaStore.setValue(String("speed_layer_") + layer + "_" + mode, String(speed), false);
     }
 }
 void box_config_segment(String key, String value)
@@ -135,12 +135,12 @@ void box_config_segment(String key, String value)
         String tmp = key;
         tmp.replace("_rev", "");
         rev = value == "true";
-        num = getValue(tmp, "0").toInt();
+        num = vocaStore.getValue(tmp, "0").toInt();
     }
     else
     {
 
-        rev = getValue(key + "_rev", "false") == "true";
+        rev = vocaStore.getValue(key + "_rev", "false") == "true";
         num = value.toInt();
     }
     BoxCommand txBoxCmd, rxBoxCmd;
@@ -151,21 +151,21 @@ void box_config_segment(String key, String value)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        setValue(key, value, true);
+        vocaStore.setValue(key, value, true);
     }
 }
 void box_config_show_face(String key, String value)
 {
     key.replace("show_", "");
     Face face;
-    face.start1 = getValue(key + "_1").toInt();
-    face.inv1 = getValue(key + "_1_rev") == "true";
-    face.start2 = getValue(key + "_2").toInt();
-    face.inv2 = getValue(key + "_2_rev") == "true";
-    face.start3 = getValue(key + "_3").toInt();
-    face.inv3 = getValue(key + "_3_rev") == "true";
-    face.start4 = getValue(key + "_4").toInt();
-    face.inv4 = getValue(key + "_4_rev") == "true";
+    face.start1 = vocaStore.getValue(key + "_1").toInt();
+    face.inv1 = vocaStore.getValue(key + "_1_rev") == "true";
+    face.start2 = vocaStore.getValue(key + "_2").toInt();
+    face.inv2 = vocaStore.getValue(key + "_2_rev") == "true";
+    face.start3 = vocaStore.getValue(key + "_3").toInt();
+    face.inv3 = vocaStore.getValue(key + "_3_rev") == "true";
+    face.start4 = vocaStore.getValue(key + "_4").toInt();
+    face.inv4 = vocaStore.getValue(key + "_4_rev") == "true";
 
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_CONFIG_SHOW_FACE;

@@ -1,6 +1,7 @@
 #pragma once
 #include "voca_env.h"
-#include "voca_store.h"
+#include "voca_auth.h"
+#include "voca_store/voca_store.h"
 
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
@@ -66,12 +67,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
                 }
                 String _key = obj["espKey"];
                 obj = _doc.to<JsonObject>();
-                getValueByObject(_key, obj);
+                vocaStore.readValueToObject(_key, obj);
             }
             else if (obj["cmd"] == "gal")
             {
                 obj = _doc.to<JsonObject>();
-                getValuesByObject(obj);
+                vocaStore.readStore(obj);
             }
             else if (obj["cmd"] == "ping")
             {
@@ -114,12 +115,12 @@ void setupWebSocket()
 
             vocaStatus.setStatus(Status_WebSocket_Ready);
             vocaStatus.waitStatus(Status_WebServer_Ready);
-            setOnStoreChange([](String key, String value, void *p)
+            vocaStore.addStoreChangeEvent([](String key, String value, void *p)
                              {
                                  WebSocketsServer *_ws= (WebSocketsServer *)p;
                                  DynamicJsonDocument _doc(2048);
                                  JsonObject obj = _doc.to<JsonObject>();
-                                 getValueByObject(key, obj);
+                                 vocaStore.readValueToObject(key, obj);
                                  String ret;
                                  serializeJson(_doc, ret);
                                  _ws->broadcastTXT(ret); },
