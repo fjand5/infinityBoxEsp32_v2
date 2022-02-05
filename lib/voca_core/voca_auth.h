@@ -1,22 +1,22 @@
 #pragma once
 #include "voca_env.h"
-// #include <Arduino.h>
-// #include <ArduinoJson.h>
+#include <Arduino.h>
+#include <ArduinoJson.h>
 #ifdef AUTH_FEATURE
 #include <ArduinoJWT.h>
 #include "voca_store/voca_store.h"
 ArduinoJWT auth_jwt(__TIME__);
 #endif
-uint32_t simpleHash(String str)
-{
-    uint32_t ret = 0;
-    for (size_t i = 0; i < str.length(); i++)
-    {
-        ret += int8_t(str[i]);
-    }
-    return ret;
-}
-String create_auth_jwt()
+// uint32_t createHash(String str)
+// {
+//     uint32_t ret = 0;
+//     for (size_t i = 0; i < str.length(); i++)
+//     {
+//         ret += int8_t(str[i]);
+//     }
+//     return ret;
+// }
+String createAuthJwt()
 {
 #ifdef AUTH_FEATURE
     DynamicJsonDocument _doc(128);
@@ -31,7 +31,7 @@ String create_auth_jwt()
 
 #endif
 }
-bool check_auth_jwt(String token)
+bool checkAuthJwt(String token)
 {
 #ifdef AUTH_FEATURE
     DynamicJsonDocument _doc(128);

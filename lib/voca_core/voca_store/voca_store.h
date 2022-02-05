@@ -7,7 +7,7 @@
 #include <list>
 #include <ArduinoJson.h>
 
-typedef std::function<void((String, String, void *))> StoreChangeEvent;
+typedef std::function<void(String, String, void *)> StoreChangeEvent;
 class VocaStore
 {
 private:

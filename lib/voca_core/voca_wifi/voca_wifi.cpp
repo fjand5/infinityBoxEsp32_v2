@@ -12,7 +12,6 @@ static void scanWifi()
   uint8_t encryptionType;
   uint8_t *bssid;
   int32_t channel;
-  bool hidden;
   int scanResult;
 
   log_d("Starting WiFi scan...");

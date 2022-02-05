@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <functional>
-#include "voca_websocket.h"
+#include "voca_websocket/voca_websocket.h"
 #include "voca_webserver/voca_webserver.h"
 
 #include <map>
@@ -22,7 +22,7 @@ void setupRender()
   xSemaphoreGive(renderData_sem);
   vocaWebserver.addHttpApi("/render", []()
              { vocaWebserver.send_P(200, "application/json", renderData.c_str()); });
-  setOnWSTextIncome([](JsonObject obj)
+  vocaWebsocket.setWebsocketReceiveEvent([](JsonObject obj)
                     {
                       for (std::pair<String, ComponentEvent> e : componentEvents)
                       {

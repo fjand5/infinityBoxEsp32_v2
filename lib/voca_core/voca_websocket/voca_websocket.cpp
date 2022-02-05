@@ -1,22 +1,16 @@
-#pragma once
-#include "voca_env.h"
-#include "voca_auth.h"
-#include "voca_store/voca_store.h"
+#include "voca_websocket.h"
+VocaWebsocket vocaWebsocket(81);
 
-#include <WebSocketsServer.h>
-#include <ArduinoJson.h>
-
-#include <list>
-
-WebSocketsServer webSocket = WebSocketsServer(81);
-SemaphoreHandle_t websocket_sem;
-typedef void (*OnWSTextIncome)(JsonObject);
-std::list<OnWSTextIncome> OnWSTextIncomes;
-void setOnWSTextIncome(OnWSTextIncome cb)
+VocaWebsocket::VocaWebsocket(int port) : WebSocketsServer(port)
 {
-    OnWSTextIncomes.push_front(cb);
 }
-void onConnect(uint8_t num, uint8_t *payload, size_t length)
+
+void VocaWebsocket::setWebsocketReceiveEvent(WebsocketReceiveEvent cb)
+{
+    WebsocketReceiveEvents.push_front(cb);
+}
+
+void VocaWebsocket::cbConnectEvent(uint8_t num, uint8_t *payload, size_t length)
 {
     String token = "";
     for (int i = 0; i < length; i++)
@@ -24,21 +18,22 @@ void onConnect(uint8_t num, uint8_t *payload, size_t length)
         token += (char)payload[i];
     }
     token.replace("/", "");
-
-    if (!check_auth_jwt(token))
+#ifdef AUTH_FEATURE
+    if (!checkAuthJwt(token))
     {
-        log_d("token: %s num: %d", token.c_str(), num);
-        xSemaphoreGive(websocket_sem);
-        webSocket.disconnect(num);
+        log_d("Token: %s num: %d", token.c_str(), num);
+        xSemaphoreGive(semWebsocket);
+        disconnect(num);
     }
     else
     {
-        log_d("token: %s num: %d", token.c_str(), num);
+        log_d("Token: %s num: %d", token.c_str(), num);
     }
+#endif
 }
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+void VocaWebsocket::cbWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
-    if (xSemaphoreTake(websocket_sem, portMAX_DELAY) == pdTRUE)
+    if (xSemaphoreTake(semWebsocket, portMAX_DELAY) == pdTRUE)
     {
         switch (type)
         {
@@ -48,7 +43,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         case WStype_CONNECTED:
         {
-            onConnect(num, payload, length);
+            cbConnectEvent(num, payload, length);
             break;
         }
         case WStype_TEXT:
@@ -60,7 +55,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             String ret;
             if (obj["cmd"] == "exe")
             {
-                for (auto const &item : OnWSTextIncomes)
+                for (auto const &item : WebsocketReceiveEvents)
                 {
                     if (item != NULL)
                         item(obj);
@@ -82,7 +77,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             }
             // dùng luôn _doc để lấy giá trị
             serializeJson(_doc, ret);
-            webSocket.broadcastTXT(ret);
+            broadcastTXT(ret);
             break;
         }
         case WStype_BIN:
@@ -94,53 +89,50 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         case WStype_FRAGMENT_FIN:
             break;
         }
-        xSemaphoreGive(websocket_sem);
+        xSemaphoreGive(semWebsocket);
     }
 }
-
-void setupWebSocket()
+void VocaWebsocket::begin()
 {
-
     vocaStatus.setStatus(Status_SetupWifi_Done);
-
+    WebSocketsServer::begin();
+    onEvent([this](uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+            { cbWebSocketEvent(num, type, payload, length); });
+    semWebsocket = xSemaphoreCreateBinary();
+    xSemaphoreGive(semWebsocket);
     xTaskCreatePinnedToCore(
         [](void *param)
         {
-            WebSocketsServer *_webSocket = (WebSocketsServer *)param;
+            VocaWebsocket *vocaWebsocket = (VocaWebsocket *)param;
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
-            _webSocket->begin();
-            _webSocket->onEvent(webSocketEvent);
-            websocket_sem = xSemaphoreCreateBinary();
-            xSemaphoreGive(websocket_sem);
 
             vocaStatus.setStatus(Status_WebSocket_Ready);
             vocaStatus.waitStatus(Status_WebServer_Ready);
             vocaStore.addStoreChangeEvent([](String key, String value, void *p)
-                             {
-                                 WebSocketsServer *_ws= (WebSocketsServer *)p;
+                                          {
+                                 VocaWebsocket *_ws= (VocaWebsocket *)p;
                                  DynamicJsonDocument _doc(2048);
                                  JsonObject obj = _doc.to<JsonObject>();
                                  vocaStore.readValueToObject(key, obj);
                                  String ret;
                                  serializeJson(_doc, ret);
                                  _ws->broadcastTXT(ret); },
-                             (void *)_webSocket);
+                                          (void *)vocaWebsocket);
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
 
             while (1)
             {
-                _webSocket->loop();
+                vocaWebsocket->loop();
                 delay(10);
             }
         },
         "loopSocket",
         5000,
-        (void *)&webSocket,
+        (void *)this,
         2,
         NULL,
         VOCA_CORE_CPU);
 }
-
-void loopWebSocket()
+VocaWebsocket::~VocaWebsocket()
 {
 }

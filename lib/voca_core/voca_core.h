@@ -7,7 +7,7 @@
 #include "voca_webserver/voca_webserver.h"
 #include "voca_store/voca_store.h"
 #include "voca_system.h"
-#include "voca_websocket.h"
+#include "voca_websocket/voca_websocket.h"
 void renderUI()
 {
     renderInput(F("System"), F("_apid"), F(R"({
@@ -67,8 +67,7 @@ void setup_voca()
     setupRender();
     vocaWifi.begin();
     vocaWebserver.begin();
-
-    setupWebSocket();
+    vocaWebsocket.begin();
     setupSystem();
     renderUI();
     vocaStatus.waitAllStatus();

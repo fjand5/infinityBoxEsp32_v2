@@ -200,7 +200,7 @@ void VocaStore::readValueToObject(const String key, JsonObject objectValue, cons
 }
 char *VocaStore::getValueByCStr(const String key, const String def, bool createIfNotExist)
 {
-    char *ret;
+    char *ret = nullptr;
     if (!checkValidKey(key))
     {
         return ret;
