@@ -3,25 +3,28 @@ VocaAuth vocaAuth;
 
 VocaAuth::VocaAuth() : ArduinoJWT(__TIME__)
 {
+}
+
+void VocaAuth::begin()
+{
     authPreferences.begin("VocaAuth");
 }
 
 String VocaAuth::getPassword()
 {
-    return authPreferences.getString("pwd");
+    return authPreferences.getString("pwd", DEFAULT_PASSWORD);
 };
 
 String VocaAuth::getUsername()
 {
-    return authPreferences.getString("usr");
+    return authPreferences.getString("usr", DEFAULT_USERNAME);
+};
+void VocaAuth::setPassword(String pwd){
 
 };
-    void VocaAuth::setPassword(String pwd){
+void VocaAuth::setUsername(String usr){
 
-    };
-    void VocaAuth::setUsername(String usr){
-        
-    };
+};
 uint32_t VocaAuth::createHash(String str)
 {
     uint32_t ret = 0;

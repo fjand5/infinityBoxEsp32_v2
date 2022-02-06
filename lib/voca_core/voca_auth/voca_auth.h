@@ -12,6 +12,7 @@ private:
     uint32_t createHash(String str);
 public:
     VocaAuth();
+    void begin();
     String createAuthJwt();
     bool checkAuthJwt(String token);
     String getPassword();
