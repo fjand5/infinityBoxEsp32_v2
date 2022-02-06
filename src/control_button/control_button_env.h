@@ -7,3 +7,7 @@
 #define LEDC_CHANNEL_0 0
 #define LEDC_TIMER_8_BIT 8
 #define LEDC_BASE_FREQ 5000
+
+#define BLINK_CYCLE 500   // ms
+#define FADE_FAST_FACTOR 5   // ms
+#define FADE_SLOW_FACTOR 10   // ms

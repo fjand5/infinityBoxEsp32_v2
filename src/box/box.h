@@ -1,20 +1,23 @@
 #pragma once
 #include "box_env.h"
 #include "box_command.h"
+#include "box_controler.h"
 #include "driver_show.h"
 #include "v_box.h"
 #include "box_init.h"
 #include "ultis.h"
+#include "../control_button/control_button.h"
 
 #define FLAG_BOX_READY (1 << 0)
 extern QueueHandle_t boxCommandQueue;
 extern QueueHandle_t boxCommandResoponseQueue;
-
+extern void box_nextMode(int8_t layer);
 VBox layers[NUM_OF_LAYER] = {VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800),
                              VBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800)};
 WS2812FX box = WS2812FX(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 EventGroupHandle_t box_status;
+TimerHandle_t nextModeTimer;
 
 void boxHandle(void *params)
 {
@@ -39,7 +42,6 @@ void boxHandle(void *params)
     boxCommandQueue = xQueueCreate(8, sizeof(BoxCommand));
     boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
     log_w("Box has initialze !!!");
-
     while (1)
     {
         static UBaseType_t lastUxHighWaterMark = 0;
@@ -56,15 +58,49 @@ void boxHandle(void *params)
         }
     }
 }
+void startNextModeTimer()
+{
+    xTimerStart(nextModeTimer, portMAX_DELAY);
+    controlButton.setLedMode(LedMode_FadeFast);
+}
+void stopNextModeTimer()
+{
+    xTimerStop(nextModeTimer, portMAX_DELAY);
+    controlButton.setLedMode(LedMode_Blink);
+}
 void setup_box()
 {
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
     box_status = xEventGroupCreate();
+
+    controlButton.setClickEvent([]()
+                                { box_nextMode(0); });
+    controlButton.setDoubleClickEvent(
+        []()
+        {
+            if (xTimerIsTimerActive(nextModeTimer) == pdTRUE)
+            {
+                stopNextModeTimer();
+            }
+            else
+            {
+                startNextModeTimer();
+            }
+        });
+
+    nextModeTimer = xTimerCreate(
+        "nextModeTimer",
+        5000 / portTICK_PERIOD_MS,
+        pdTRUE, (void *)1,
+        [](TimerHandle_t xTimer)
+        {
+            box_nextMode(0);
+        });
     xReturned = xTaskCreatePinnedToCore(
         boxHandle,      /* Task function. */
         "boxHandle",    /* name of task. */
-        4096,          /* Stack size of task */
+        4096,           /* Stack size of task */
         (void *)layers, /* parameter of the task */
         0,              /* priority of the task */
         NULL,           /* Task handle to keep track of created task */
@@ -73,6 +109,7 @@ void setup_box()
     {
         /* The task was created.  Use the task's handle to delete the task. */
         log_w("setup_box created: %d", xPortGetCoreID());
+        startNextModeTimer();
     }
     else
     {

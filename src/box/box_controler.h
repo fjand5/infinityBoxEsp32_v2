@@ -6,7 +6,6 @@ extern WS2812FX box;
 void box_enable(int8_t layer)
 {
     BoxCommand txBoxCmd, rxBoxCmd;
-
     txBoxCmd.cmd = BOX_ENABLE;
     txBoxCmd.layer = layer;
     SEND_COMMAND_TO_BOX(txBoxCmd);
@@ -106,7 +105,7 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
-        vocaStore.setValue(String("brig_layer_") + layer, String(brightness), false);
+        vocaStore.setValue(String("brig_layer_") + layer, String(brightness), true);
     }
 }
 void box_setSpeed(int8_t layer, uint16_t speed)
