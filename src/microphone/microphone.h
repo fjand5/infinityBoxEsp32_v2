@@ -12,7 +12,7 @@ class Microphone
 private:
   double vReal[SAMPLES];
   double vImag[SAMPLES];
-  double micGain = 1.0;
+  double micGain = 50.0;
   double takeBeat = 50.0;
 
 public:

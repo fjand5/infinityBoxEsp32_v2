@@ -7,6 +7,7 @@
 #include "box_init.h"
 #include "ultis.h"
 #include "../control_button/control_button.h"
+#include "../microphone/microphone.h"
 
 #define FLAG_BOX_READY (1 << 0)
 extern QueueHandle_t boxCommandQueue;
@@ -51,6 +52,16 @@ void boxHandle(void *params)
             lastUxHighWaterMark = uxHighWaterMark;
             log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
         }
+        microphone.handleMicrophone([](double val, double freq){
+            String tmp;
+            for (size_t i = 0; i < val; i++)
+            {
+                tmp+="=";
+            }
+            
+            log_w("handleMicrophone: %s", tmp.c_str());
+            
+        });
         command_handle(_layers);
         for (size_t i = 0; i < NUM_OF_LAYER; i++)
         {

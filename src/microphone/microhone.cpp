@@ -45,8 +45,8 @@ void Microphone::begin()
             ;
     }
     log_d("I2S driver installed.");
-    setMicGain(10);
-    setTakeBeat(10);
+    setMicGain(20);
+    setTakeBeat(50);
     // setMicGain(getValue("micGain_sld", "10").toDouble());
     // setTakeBeat(getValue("takeBeat_sld", "50").toDouble());
 };
