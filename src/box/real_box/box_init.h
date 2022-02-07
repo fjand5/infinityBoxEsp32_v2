@@ -1,9 +1,8 @@
 #pragma once
-#include "v_box.h"
-#include "ultis.h"
+// #include "../virtual_box/virtual_box.h"
+#include "../ultis.h"
 #include "voca_store/voca_store.h"
-#include "driver_show.h"
-void init_layers(VBox* layers){
+void init_layers(VirtualBox* layers){
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         String tmp;

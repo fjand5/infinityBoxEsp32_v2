@@ -1,14 +1,17 @@
+#pragma once
 #include "box/box_controler.h"
+#include "box/box_env.h"
+
 #include "voca_render/voca_render.h"
 
 void setup_render_layer()
 {
-    if (box_status == NULL)
-    {
-        return;
-    }
+    // if (box_status == NULL)
+    // {
+    //     return;
+    // }
 
-    xEventGroupWaitBits(box_status, FLAG_BOX_READY, pdFALSE, pdFALSE, portMAX_DELAY);
+    // xEventGroupWaitBits(box_status, FLAG_BOX_READY, pdFALSE, pdFALSE, portMAX_DELAY);
 
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {

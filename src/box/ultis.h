@@ -1,6 +1,8 @@
 #pragma once
 #include "Arduino.h"
-#include "v_box.h"
+#include "voca_store/voca_store.h"
+#include "virtual_box/virtual_box.h"
+
 #define BOX_THREAD(func, param) xTaskCreatePinnedToCore( \
     func,                                                \
     "THREAD_LAYERS",                                     \
@@ -27,32 +29,32 @@ uint32_t stringToColor(String val)
     color = ((uint32_t)redInt << 16) | ((uint32_t)greenInt << 8) | blueInt;
     return color;
 }
-void setLayerMode(VBox *layer, uint8_t mode)
+void setLayerMode(VirtualBox *layer, uint8_t mode)
 {
     for (int i = 0; i < layer->getNumSegments(); i++)
     {
         layer->setMode(i, mode);
     }
 }
-void setLayerSpeed(VBox *layer, uint16_t speed)
+void setLayerSpeed(VirtualBox *layer, uint16_t speed)
 {
     for (int i = 0; i < layer->getNumSegments(); i++)
     {
         layer->setSpeed(i, speed);
     }
 }
-void setLayerBrightness(VBox *layer, uint8_t brig)
+void setLayerBrightness(VirtualBox *layer, uint8_t brig)
 {
     layer->setBrightness(brig);
 }
-void setLayerColor(VBox *layer, uint8_t index, uint32_t color)
+void setLayerColor(VirtualBox *layer, uint8_t index, uint32_t color)
 {
     for (int i = 0; i < layer->getNumSegments(); i++)
     {
         layer->setColorByIndex(index, color);
     }
 }
-void splitSegment(VBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX)
+void splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX)
 {
     int mode, color, speed;
     mode = layer->getMode();

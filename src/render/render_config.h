@@ -1,3 +1,4 @@
+#pragma once
 #include "box/box_controler.h"
 #include "voca_render/voca_render.h"
 void setup_render_config()

@@ -1,14 +1,14 @@
 #pragma once
-#include "box.h"
-#include "ultis.h"
+#include "real_box/real_box.h"
+// #include "ultis.h"
 #include "voca_core.h"
-extern WS2812FX box;
+extern RealBox realBox;
 void box_enable(int8_t layer)
 {
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_ENABLE;
     txBoxCmd.layer = layer;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -20,7 +20,7 @@ void box_disable(int8_t layer)
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_DISABLE;
     txBoxCmd.layer = layer;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -32,7 +32,7 @@ uint8_t box_getMode(int8_t layer)
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_GET_MODE;
     txBoxCmd.layer = layer;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -51,7 +51,7 @@ void box_setMode(int8_t layer, String mode)
     txBoxCmd.layer = layer;
     txBoxCmd.p = (void *)mode.c_str();
     txBoxCmd.option = speed;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -86,7 +86,7 @@ void box_setColor(int8_t layer, int8_t iColor, String color)
     txBoxCmd.option = iColor;
     uint32_t colorInt = stringToColor(color);
     txBoxCmd.p = (void *)&colorInt;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -101,7 +101,7 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     txBoxCmd.cmd = BOX_SET_BRIGHTNESS;
     txBoxCmd.layer = layer;
     txBoxCmd.p = (void *)&brightness;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -116,7 +116,7 @@ void box_setSpeed(int8_t layer, uint16_t speed)
     txBoxCmd.cmd = BOX_SET_SPEED;
     txBoxCmd.layer = layer;
     txBoxCmd.p = (void *)&speed;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -146,7 +146,7 @@ void box_config_segment(String key, String value)
     txBoxCmd.cmd = BOX_CONFIG_SEGMENT;
     txBoxCmd.option = rev;
     txBoxCmd.p = (void *)&num;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {
@@ -169,7 +169,7 @@ void box_config_show_face(String key, String value)
     BoxCommand txBoxCmd, rxBoxCmd;
     txBoxCmd.cmd = BOX_CONFIG_SHOW_FACE;
     txBoxCmd.p = (void *)&face;
-    SEND_COMMAND_TO_BOX(txBoxCmd);
+    realBox.feedCommand(&txBoxCmd);
     if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
         rxBoxCmd.id == txBoxCmd.id)
     {

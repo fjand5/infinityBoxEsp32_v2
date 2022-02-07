@@ -155,7 +155,6 @@ bool VocaStore::updateStore()
 }
 void VocaStore::addStoreChangeEvent(StoreChangeEvent cb, void *prams)
 {
-
     storeChangeEvents.push_front(std::make_pair(cb, prams));
 }
 

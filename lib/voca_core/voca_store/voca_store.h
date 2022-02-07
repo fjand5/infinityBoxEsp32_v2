@@ -13,7 +13,6 @@ class VocaStore
 private:
   std::map<String, String> storeContent;
   std::list<std::pair<StoreChangeEvent, void *>> storeChangeEvents;
-
   SemaphoreHandle_t semSpiffs;
   SemaphoreHandle_t semStoreContent;
   bool mountSpiffs();

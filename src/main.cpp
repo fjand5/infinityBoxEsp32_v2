@@ -2,13 +2,13 @@
 #include "voca_core.h"
 #include "render/render.h"
 #include "control_button/control_button.h"
-#include "box/box.h"
+#include "box/real_box/real_box.h"
 #include "microphone/microphone.h"
 
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
-  setup_box();
+  realBox.begin();
   microphone.begin();
   controlButton.begin();
 
