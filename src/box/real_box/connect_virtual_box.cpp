@@ -3,23 +3,6 @@
 
 static VirtualBox *virtualBoxes[NUM_OF_LAYER];
 
-uint32_t stringToColor(String val)
-{
-    // #ffaabb
-    val.toLowerCase();
-    if (!val.startsWith("#") || val.length() != 7)
-        val = "#ff0000";
-    uint32_t color;
-    String redStr = val.substring(1, 3);
-    String greenStr = val.substring(3, 5);
-    String blueStr = val.substring(5);
-    int redInt = strtol(redStr.c_str(), NULL, 16);
-    int greenInt = strtol(greenStr.c_str(), NULL, 16);
-    int blueInt = strtol(blueStr.c_str(), NULL, 16);
-    color = ((uint32_t)redInt << 16) | ((uint32_t)greenInt << 8) | blueInt;
-    return color;
-}
-
 void ConnectVirtualBox::mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes)
 {
     for (uint16_t i = 0; i < numBytes; i++)
@@ -267,7 +250,7 @@ uint8_t ConnectVirtualBox::getVirtualBoxMode(uint8_t index)
     return virtualBoxes[index]->getMode();
 };
 
-void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode)
+void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode, uint16_t *newSpeed)
 {
     uint8_t modeInt = virtualBoxes[0]->getNumModeName(String(mode));
     struct SetModeBundle
@@ -275,33 +258,64 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode)
         VirtualBox *layer;
         uint8_t index;
         uint8_t mode;
-    } setModeBundle;
-    setModeBundle.layer = virtualBoxes[index];
-    setModeBundle.index = index;
-    setModeBundle.mode = modeInt;
-
+    };
+    SetModeBundle *setModeBundle = new SetModeBundle;
+    setModeBundle->layer = virtualBoxes[index];
+    setModeBundle->index = index;
+    setModeBundle->mode = modeInt;
+    if (newSpeed != NULL)
+    {
+        *newSpeed = virtualBoxes[index]->getSpeedByMode(setModeBundle->mode);
+    }
     xTaskCreatePinnedToCore(
         [](void *p)
         {
-            SetModeBundle setModeBundle = *((SetModeBundle *)p);
-            uint8_t numOfSegment = setModeBundle.layer->getNumSegments();
+            SetModeBundle *setModeBundle = (SetModeBundle *)p;
+            uint8_t numOfSegment = setModeBundle->layer->getNumSegments();
             for (int i = 0; i < numOfSegment; i++)
             {
 
-                uint16_t newSpeed = setModeBundle.layer->getSpeedByMode(setModeBundle.mode);
-                setModeBundle.layer->setMode(i, setModeBundle.mode);
-                setModeBundle.layer->setSpeed(i, newSpeed);
+                uint16_t _newSpeed = setModeBundle->layer->getSpeedByMode(setModeBundle->mode);
+                setModeBundle->layer->setMode(i, setModeBundle->mode);
+                setModeBundle->layer->setSpeed(i, _newSpeed);
 
                 delay(TRANSITION_TIME / numOfSegment);
             };
+            delete setModeBundle;
             vTaskDelete(NULL);
         },
         "setVirtualBoxMode",
         4096,
-        (void *)&setModeBundle,
+        (void *)setModeBundle,
         2,
         NULL,
         BOX_CORE_CPU);
+};
+
+char *ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
+{
+    uint8_t currentMode = getVirtualBoxMode(index);
+    currentMode++;
+    if (currentMode >= virtualBoxes[0]->getModeCount())
+        currentMode = 0;
+    String tmp = virtualBoxes[0]->getModeName(currentMode);
+    char *newMode = new char[tmp.length() + 1];
+    strcpy(newMode, tmp.c_str());
+    setVirtualBoxMode(index, tmp, newSpeed);
+    return newMode;
+};
+
+char *ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
+{
+    int8_t currentMode = getVirtualBoxMode(index);
+    currentMode--;
+    if (currentMode <= 0)
+        currentMode = virtualBoxes[0]->getModeCount() - 1;
+    String tmp = virtualBoxes[0]->getModeName(currentMode);
+    char *newMode = new char[tmp.length() + 1];
+    strcpy(newMode, tmp.c_str());
+    setVirtualBoxMode(index, tmp, newSpeed);
+    return newMode;
 };
 
 void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
@@ -309,7 +323,8 @@ void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColo
     VirtualBox *layer = virtualBoxes[indexLayer];
     layer->setColorByIndex(indexColor, color);
 };
-void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness){
+void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness)
+{
 
     VirtualBox *layer = virtualBoxes[index];
     layer->setBrightness(brightness);
@@ -361,20 +376,20 @@ void ConnectVirtualBox::initVirtualBoxes()
         splitSegment(virtualBoxes[i]);
 
         tmp = String("mode_layer_") + i;
-        setVirtualBoxMode(i,vocaStore.getValue(tmp, "Blink"));
+        setVirtualBoxMode(i, vocaStore.getValue(tmp, "Blink"), NULL);
 
         tmp = String("color0_layer_") + i;
         uint32_t color;
         color = stringToColor(vocaStore.getValue(tmp, "0xff0000"));
-        setVirtualBoxColor(i,0,color);
+        setVirtualBoxColor(i, 0, color);
 
         tmp = String("color1_layer_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "0x00ff00"));
-        setVirtualBoxColor(i,1,color);
+        setVirtualBoxColor(i, 1, color);
 
         tmp = String("color2_layer_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "0x0000ff"));
-        setVirtualBoxColor(i,1,color);
+        setVirtualBoxColor(i, 1, color);
 
         tmp = String("brig_layer_") + i;
         setVirtualBoxBrightness(i, vocaStore.getValue(tmp, "50").toInt());

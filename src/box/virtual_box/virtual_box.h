@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VIRTUAL_BOX
+#define VIRTUAL_BOX
 #include <WS2812FX.h>
 #include <map>
 class VirtualBox : public WS2812FX
@@ -22,3 +23,4 @@ public:
     uint16_t getSpeedByMode(uint8_t mode);
 
 };
+#endif

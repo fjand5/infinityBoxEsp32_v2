@@ -1,134 +1,121 @@
-#pragma once
+#ifndef BOX_CONTROLER
+#define BOX_CONTROLER
 #include "real_box/real_box.h"
-// #include "ultis.h"
 #include "voca_core.h"
+// #include "box_utils.h"
+
 extern RealBox realBox;
 void box_enable(int8_t layer)
 {
-    log_w("box_enable %d", layer);
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
-    request->cmd = BOX_ENABLE;
+    request->cmd = BoxCommand_Enable;
     request->layer = layer;
     realBox.feedCommand(request,
-                        [](RealBoxCommandBundle result)
+                        [request](RealBoxCommandBundle result)
                         {
                             vocaStore.setValue(String("en_layer_") + result.layer, "true", false);
-                            log_w("box_enable complete %d", result.layer);
+                            delete request;
                         });
-    delete request;
 }
 void box_disable(int8_t layer)
 {
-    log_w("box_disable %d", layer);
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
-    request->cmd = BOX_DISABLE;
+    request->cmd = BoxCommand_Disable;
     request->layer = layer;
     realBox.feedCommand(request,
-                        [](RealBoxCommandBundle result)
+                        [request](RealBoxCommandBundle result)
                         {
                             vocaStore.setValue(String("en_layer_") + result.layer, "false", false);
-                            log_w("box_disable complete %d", result.layer);
-
+                            delete request;
                         });
-    delete request;
-}
-int8_t box_getMode(int8_t layer)
-{
-    
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_GET_MODE;
-    // txBoxCmd.layer = layer;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    //     uint8_t curMode = *((uint8_t *)rxBoxCmd.p);
-    //     return curMode;
-    // }
-    // return -1;
 }
 
 void box_setMode(int8_t layer, String mode)
 {
-    // uint16_t speed = vocaStore.getValue(String("speed_layer_") + layer + "_" + mode).toInt();
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_SetMode;
+    request->layer = layer;
 
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_SET_MODE;
-    // txBoxCmd.layer = layer;
-    // txBoxCmd.p = (void *)mode.c_str();
-    // txBoxCmd.option = speed;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    //     vocaStore.setValue(String("speed_layer_") + layer, String(speed), false);
+    char *modeStr = new char[mode.length() + 1];
+    strcpy(modeStr, mode.c_str());
 
-    //     vocaStore.setValue(String("mode_layer_") + layer, String(mode), false);
-    // }
+    request->p = (void *)modeStr;
+    realBox.feedCommand(request,
+                        [modeStr, request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
+                            delete modeStr;
+                            delete request;
+                        });
 }
 void box_nextMode(int8_t layer)
 {
-    // uint8_t curMode = box_getMode(layer);
-    // curMode++;
-    // if (curMode == box.getModeCount() - 1)
-    //     curMode = 0;
-    // String nm = box.getModeName(curMode);
-    // box_setMode(layer, nm);
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_NextMode;
+    request->layer = layer;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
+                            delete request;
+                        });
 }
 void box_prevMode(int8_t layer)
 {
-    // uint8_t curMode = box_getMode(layer);
-    // curMode--;
-    // if (curMode == 0)
-    //     curMode = box.getModeCount() - 1;
-    // String nm = box.getModeName(curMode);
-    // box_setMode(layer, nm);
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_PreviousMode;
+    request->layer = layer;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
+                            delete request;
+                        });
 }
-void box_setColor(int8_t layer, int8_t iColor, String color)
+void box_setColor(int8_t layer, int8_t colorIndex, String color)
 {
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_SET_COLOR;
-    // txBoxCmd.layer = layer;
-    // txBoxCmd.option = iColor;
-    // uint32_t colorInt = stringToColor(color);
-    // txBoxCmd.p = (void *)&colorInt;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-
-    //     vocaStore.setValue(String("color") + iColor + "_layer_" + layer, color, false);
-    // }
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_SetColor;
+    request->layer = layer;
+    request->option = colorIndex;
+    request->color = realBox.stringToColor(color);
+    realBox.feedCommand(request,
+                        [colorIndex, request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("color") + colorIndex + "_layer_" + result.layer, String(result.color), false);
+                            delete request;
+                        });
 }
 
 void box_setBrightness(int8_t layer, uint8_t brightness)
 {
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_SET_BRIGHTNESS;
-    // txBoxCmd.layer = layer;
-    // txBoxCmd.p = (void *)&brightness;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    //     vocaStore.setValue(String("brig_layer_") + layer, String(brightness), true);
-    // }
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_SetBrightness;
+    request->layer = layer;
+    request->brightness = brightness;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("brig_layer_") + result.layer, String(result.brightness), false);
+                            delete request;
+                        });
 }
 void box_setSpeed(int8_t layer, uint16_t speed)
 {
-    // speed = constrain(speed, 0, 65535);
-    // String mode = vocaStore.getValue(String("mode_layer_") + layer);
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_SET_SPEED;
-    // txBoxCmd.layer = layer;
-    // txBoxCmd.p = (void *)&speed;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    //     vocaStore.setValue(String("speed_layer_") + layer, String(speed), false);
-    //     vocaStore.setValue(String("speed_layer_") + layer + "_" + mode, String(speed), false);
-    // }
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_SetSpeed;
+    request->layer = layer;
+    request->speed = speed;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("speed_layer_") + result.layer + "_" + vocaStore.getValue(String("mode_layer_") + result.layer), String((char *)result.p), false);
+                            delete request;
+                        });
 }
 void box_config_segment(String key, String value)
 {
@@ -181,3 +168,4 @@ void box_config_show_face(String key, String value)
     // {
     // }
 }
+#endif

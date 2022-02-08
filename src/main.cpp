@@ -3,7 +3,7 @@
 #include "render/render.h"
 #include "control_button/control_button.h"
 #include "box/real_box/real_box.h"
-#include "microphone/microphone.h"
+// #include "microphone/microphone.h"
 
 void setup(void)
 {

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef DRIVER_BOX
+#define DRIVER_BOX
 #include "driver/rmt.h"
 #include "../box_env.h"
 #define RMT_CHANNEL RMT_CHANNEL_0
@@ -72,3 +72,4 @@ static void rmt_tx_int(rmt_channel_t channel, uint8_t gpio) {
     rmt_driver_install(config.channel, 0, 0);
     rmt_translator_init(config.channel, u8_to_rmt);
 }
+#endif

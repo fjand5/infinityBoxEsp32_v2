@@ -1,5 +1,6 @@
 #include "real_box.h"
 RealBox realBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
 RealBox::RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type) : WS2812FX(num_leds, pin, type)
 {
 }
@@ -12,11 +13,11 @@ void IRAM_ATTR RealBox::boxShow()
 void RealBox::boxHandle()
 {
     log_w("Box is running on core: %d", xPortGetCoreID());
+    queueCommand = xQueueCreate(NUM_OF_COMMAND_WAITING, sizeof(RealBoxCommandBundle));
     init();
     rmt_tx_int(RMT_CHANNEL, getPin());
     setVirtualBoxesDisplay(boxShow);
     initVirtualBoxes();
-    queueCommand = xQueueCreate(NUM_OF_COMMAND_WAITING, sizeof(RealBoxCommandBundle));
     log_w("Box has initialze !!!");
     while (1)
     {
@@ -77,7 +78,7 @@ void RealBox::responseResult(RealBoxCommandBundle realBoxCommandBundle)
     responseCommandIndex.erase(id);
 };
 
-bool RealBox::checkCommand(RealBoxCommandBundle *realBoxCommandBundle)
+BaseType_t RealBox::checkCommand(RealBoxCommandBundle *realBoxCommandBundle)
 {
 
     return xQueueReceive(queueCommand,
@@ -85,16 +86,16 @@ bool RealBox::checkCommand(RealBoxCommandBundle *realBoxCommandBundle)
 };
 void RealBox::commandHandle()
 {
-    if (checkCommand(&commandInfo))
+    if (checkCommand(&commandInfo) == pdTRUE)
     {
-        if (commandInfo.cmd == BOX_CONFIG_SEGMENT)
+        if (commandInfo.cmd == BoxCommand_ConfigSegment)
         {
             uint16_t num = *((uint16_t *)commandInfo.p);
             bool rev = commandInfo.option;
             configSegment(num, rev);
             responseResult(commandInfo);
         }
-        else if (commandInfo.cmd == BOX_CONFIG_SHOW_FACE)
+        else if (commandInfo.cmd == BoxCommand_ConfigShowFace)
         {
             Face face = *((Face *)commandInfo.p);
             configShowFace(face);
@@ -108,17 +109,17 @@ void RealBox::commandHandle()
                 initVirtualBoxes();
             }
 
-            if (commandInfo.cmd == BOX_ENABLE)
+            if (commandInfo.cmd == BoxCommand_Enable)
             {
                 enableVirtualBox(commandInfo.layer);
                 responseResult(commandInfo);
             }
-            else if (commandInfo.cmd == BOX_DISABLE)
+            else if (commandInfo.cmd == BoxCommand_Disable)
             {
                 disableVirtualBox(commandInfo.layer);
                 responseResult(commandInfo);
             }
-            else if (commandInfo.cmd == BOX_GET_MODE)
+            else if (commandInfo.cmd == BoxCommand_GetMode)
             {
                 uint8_t modeInt = getVirtualBoxMode(commandInfo.layer);
                 RealBoxCommandBundle res;
@@ -126,26 +127,47 @@ void RealBox::commandHandle()
                 res.p = &modeInt;
                 responseResult(res);
             }
-            else if (commandInfo.cmd == BOX_SET_MODE)
+            else if (commandInfo.cmd == BoxCommand_SetMode)
             {
                 char *modeStr = (char *)commandInfo.p;
-                setVirtualBoxMode(commandInfo.layer, modeStr);
+                uint16_t newSpeed;
+                setVirtualBoxMode(commandInfo.layer, modeStr, &newSpeed);
+                commandInfo.speed = newSpeed;
                 responseResult(commandInfo);
             }
-            else if (commandInfo.cmd == BOX_SET_COLOR)
+            else if (commandInfo.cmd == BoxCommand_NextMode)
             {
-                setVirtualBoxColor(commandInfo.layer, commandInfo.option, *((uint32_t *)commandInfo.p));
+                uint16_t newSpeed;
+                char *newMode = nextVirtualBoxMode(commandInfo.layer, &newSpeed);
+                commandInfo.speed = newSpeed;
+                commandInfo.p = (void *)newMode;
                 responseResult(commandInfo);
             }
-            else if (commandInfo.cmd == BOX_SET_BRIGHTNESS)
+            else if (commandInfo.cmd == BoxCommand_PreviousMode)
             {
-                setVirtualBoxBrightness(commandInfo.layer, *((uint8_t *)commandInfo.p));
+                uint16_t newSpeed;
+                char *newMode = previousVirtualBoxMode(commandInfo.layer, &newSpeed);
+                commandInfo.speed = newSpeed;
+                commandInfo.p = (void *)newMode;
+                responseResult(commandInfo);
+            }
+            else if (commandInfo.cmd == BoxCommand_SetColor)
+            {
+                setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.color);
+                responseResult(commandInfo);
+            }
+            else if (commandInfo.cmd == BoxCommand_SetBrightness)
+            {
+                setVirtualBoxBrightness(commandInfo.layer, commandInfo.brightness);
                 responseResult(commandInfo);
             }
 
-            else if (commandInfo.cmd == BOX_SET_SPEED)
+            else if (commandInfo.cmd == BoxCommand_SetSpeed)
             {
-                setVirtualBoxSpeed(commandInfo.layer, *((uint16_t *)commandInfo.p));
+                setVirtualBoxSpeed(commandInfo.layer, commandInfo.speed);
+                String tmp;
+                tmp = getModeName(getMode());
+                commandInfo.p = (void*)tmp.c_str();
                 responseResult(commandInfo);
             }
             else
