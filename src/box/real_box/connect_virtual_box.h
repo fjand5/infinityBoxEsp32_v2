@@ -4,6 +4,8 @@
 #include "../box_env.h"
 #include <WS2812FX.h>
 #include "../virtual_box/virtual_box.h"
+#include "voca_store/voca_store.h"
+
 class ConnectVirtualBox
 {
 private:

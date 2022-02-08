@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VOCA_STORE
+#define VOCA_STORE
 #include "../voca_env.h"
 #include "../voca_status/voca_status.h"
 #include "FS.h"
@@ -87,5 +88,7 @@ bool Authentication(String username, String password)
   return false;
 }
 #endif
+#endif
+
 // Lấy giá trị của Key
 // Lấy toàn bộ file content

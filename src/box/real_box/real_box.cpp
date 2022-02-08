@@ -38,7 +38,7 @@ void RealBox::boxHandle()
 
         // });
         commandHandle();
-        ConnectVirtualBox::serviceVirtualBoxes();
+        serviceVirtualBoxes();
     }
 }
 void RealBox::startNextModeTimer()

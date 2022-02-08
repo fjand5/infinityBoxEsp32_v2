@@ -1,31 +1,36 @@
 #pragma once
-// #include "real_box/real_box.h"
+#include "real_box/real_box.h"
 // #include "ultis.h"
 #include "voca_core.h"
-// extern RealBox realBox;
+extern RealBox realBox;
 void box_enable(int8_t layer)
 {
-    // RealBoxCommandBundle *request = new RealBoxCommandBundle;
-    // request->cmd = BOX_ENABLE;
-    // request->layer = layer;
-    // realBox.feedCommand(request,
-    //                     [](RealBoxCommandBundle result)
-    //                     {
-    //                         vocaStore.setValue(String("en_layer_") + result.layer, "true", false);
-    //                     });
-    // delete request;
+    log_w("box_enable %d", layer);
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BOX_ENABLE;
+    request->layer = layer;
+    realBox.feedCommand(request,
+                        [](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("en_layer_") + result.layer, "true", false);
+                            log_w("box_enable complete %d", result.layer);
+                        });
+    delete request;
 }
 void box_disable(int8_t layer)
 {
-    // RealBoxCommandBundle *request = new RealBoxCommandBundle;
-    // request->cmd = BOX_DISABLE;
-    // request->layer = layer;
-    // realBox.feedCommand(request,
-    //                     [](RealBoxCommandBundle result)
-    //                     {
-    //                         vocaStore.setValue(String("en_layer_") + result.layer, "false", false);
-    //                     });
-    // delete request;
+    log_w("box_disable %d", layer);
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BOX_DISABLE;
+    request->layer = layer;
+    realBox.feedCommand(request,
+                        [](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("en_layer_") + result.layer, "false", false);
+                            log_w("box_disable complete %d", result.layer);
+
+                        });
+    delete request;
 }
 int8_t box_getMode(int8_t layer)
 {

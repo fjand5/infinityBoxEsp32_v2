@@ -55,7 +55,6 @@ private:
     void responseResult(RealBoxCommandBundle realBoxCommandBundle);
     bool checkCommand(RealBoxCommandBundle *realBoxCommandBundle);
     void commandHandle();
-    void initVirtualBoxes();
 
 public:
     RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type);

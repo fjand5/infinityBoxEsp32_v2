@@ -8,11 +8,12 @@
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
-  realBox.begin();
-  microphone.begin();
-  controlButton.begin();
-
   setup_voca();
+  delay(2222);
+  realBox.begin();
+  // microphone.begin();
+  // controlButton.begin();
+
 
   render();
 
