@@ -1,6 +1,4 @@
 #include "real_box.h"
-
-static VirtualBox *virtualBoxes[NUM_OF_LAYER];
 RealBox realBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 RealBox::RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type) : WS2812FX(num_leds, pin, type)
 {
@@ -8,43 +6,17 @@ RealBox::RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type) : WS2812FX(n
 
 void IRAM_ATTR RealBox::boxShow()
 {
-    for (uint16_t i = 0; i < realBox.getNumBytes(); i++)
-    {
-        uint32_t sumPixelsValue = 0;
-        uint32_t count = 0;
-        for (size_t li = 0; li < NUM_OF_LAYER; li++)
-        {
-            if (virtualBoxes[li]->isRunning())
-            {
-                count++;
-                sumPixelsValue += virtualBoxes[li]->getPixels()[i];
-            }
-        }
-        if (count != 0)
-            realBox.getPixels()[i] = sumPixelsValue / count;
-        else
-            realBox.getPixels()[i] = 0;
-    }
+    mixVirtualBox(realBox.getPixels(), realBox.getNumBytes());
     rmt_write_sample(RMT_CHANNEL, realBox.getPixels(), realBox.getNumBytes(), false); // channel 0
 }
 void RealBox::boxHandle()
 {
     log_w("Box is running on core: %d", xPortGetCoreID());
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        virtualBoxes[i]->init();
-        virtualBoxes[i]->setBrightness(255);
-        virtualBoxes[i]->start();
-    }
-
     init();
     rmt_tx_int(RMT_CHANNEL, getPin());
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        virtualBoxes[i]->setCustomShow(boxShow);
-    }
+    setDisplay(boxShow);
     // init_virtualBoxes(virtualBoxes);
-    xEventGroupSetBits(box_status, FLAG_BOX_READY);
+    // xEventGroupSetBits(box_status, FLAG_BOX_READY);
     queueCommand = xQueueCreate(NUM_OF_COMMAND_WAITING, sizeof(RealBoxCommandBundle));
     // boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
     log_w("Box has initialze !!!");
@@ -67,11 +39,8 @@ void RealBox::boxHandle()
         //     log_w("handleMicrophone: %s", tmp.c_str());
 
         // });
-        // command_handle(virtualBoxes);
-        for (size_t i = 0; i < NUM_OF_LAYER; i++)
-        {
-            virtualBoxes[i]->service();
-        }
+        // command_handle(virtualBoxes)
+        ConnectVirtualBox::service();
     }
 }
 void RealBox::startNextModeTimer()
@@ -126,50 +95,20 @@ void RealBox::commandHandle()
         {
             uint16_t num = *((uint16_t *)rxBoxCmd.p);
             bool rev = rxBoxCmd.option;
-            for (uint8_t i = 0; i < NUM_OF_LAYER; i++)
-            {
-                virtualBoxes[i]->resetSegments();
-                virtualBoxes[i]->clear();
-                virtualBoxes[i]->setSegment(0,
-                                     LED_COUNT_ONE_SEG * num,
-                                     LED_COUNT_ONE_SEG * (num + 1) - 1,
-                                     FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, rev);
-                virtualBoxes[i]->setConfigState(true);
-            }
+            configSegment(num, rev);
             responseResult(rxBoxCmd);
         }
         else if (rxBoxCmd.cmd == BOX_CONFIG_SHOW_FACE)
         {
             Face face = *((Face *)rxBoxCmd.p);
-            for (uint8_t i = 0; i < NUM_OF_LAYER; i++)
-            {
-                virtualBoxes[i]->resetSegments();
-                virtualBoxes[i]->clear();
-                virtualBoxes[i]->setSegment(0,
-                                     LED_COUNT_ONE_SEG * face.start1,
-                                     LED_COUNT_ONE_SEG * (face.start1 + 1) - 1,
-                                     FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv1);
-                virtualBoxes[i]->setSegment(1,
-                                     LED_COUNT_ONE_SEG * face.start2,
-                                     LED_COUNT_ONE_SEG * (face.start2 + 1) - 1,
-                                     FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv2);
-                virtualBoxes[i]->setSegment(2,
-                                     LED_COUNT_ONE_SEG * face.start3,
-                                     LED_COUNT_ONE_SEG * (face.start3 + 1) - 1,
-                                     FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv3);
-                virtualBoxes[i]->setSegment(3,
-                                     LED_COUNT_ONE_SEG * face.start4,
-                                     LED_COUNT_ONE_SEG * (face.start4 + 1) - 1,
-                                     FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv4);
-                virtualBoxes[i]->setConfigState(true);
-            }
+            configShowFace(face);
             responseResult(rxBoxCmd);
         }
         else
         {
-            if (virtualBoxes[rxBoxCmd.layer]->getConfigState() == true)
+            if (getConfigState() == true)
             {
-                virtualBoxes[rxBoxCmd.layer]->setConfigState(false);
+                setConfigState(false);
                 // init_layers(*virtualBoxes);
             }
 
@@ -249,13 +188,8 @@ void RealBox::begin()
 {
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
-
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        virtualBoxes[i] = new VirtualBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-    }
     // vocaStatus.waitStatus(Status_Store_Initialized);
-
+    ConnectVirtualBox::begin();
     box_status = xEventGroupCreate();
 
     // controlButton.setClickEvent([]()
