@@ -1,5 +1,6 @@
 #pragma once
 #include <WS2812FX.h>
+#include <map>
 class VirtualBox : public WS2812FX
 {
 private:
@@ -18,4 +19,6 @@ public:
     void disable();
     void setColorByIndex(uint8_t index, uint32_t color);
     uint8_t getNumModeName(String name);
+    uint16_t getSpeedByMode(uint8_t mode);
+
 };

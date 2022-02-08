@@ -31,7 +31,7 @@ typedef struct
 {
     uint32_t id;
     int8_t cmd;
-    int8_t layer;
+    uint8_t layer;
     int8_t option;
     void *p;
 } RealBoxCommandBundle;
@@ -41,6 +41,8 @@ typedef std::function<void(RealBoxCommandBundle)> ResponseCommand;
 class RealBox : public WS2812FX, public ConnectVirtualBox
 {
 private:
+    RealBoxCommandBundle commandInfo;
+
     EventGroupHandle_t box_status;
     TimerHandle_t nextModeTimer;
 
@@ -53,7 +55,7 @@ private:
     void responseResult(RealBoxCommandBundle realBoxCommandBundle);
     bool checkCommand(RealBoxCommandBundle *realBoxCommandBundle);
     void commandHandle();
-    void initVirtualBoxes(VirtualBox *layers);
+    void initVirtualBoxes();
 
 public:
     RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type);
@@ -62,7 +64,7 @@ public:
     void boxHandle();
     void startNextModeTimer();
     void stopNextModeTimer();
-    void feedCommand(RealBoxCommandBundle realBoxCommandBundle, ResponseCommand cbResponseCommand);
+    void feedCommand(RealBoxCommandBundle* realBoxCommandBundle, ResponseCommand cbResponseCommand);
     void begin();
 };
 extern RealBox realBox;

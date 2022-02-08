@@ -65,7 +65,7 @@ void ConnectVirtualBox::configShowFace(Face face)
         setConfigState(true);
     }
 };
-void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX)
+void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type)
 {
     int mode, color, speed;
     mode = layer->getMode();
@@ -233,22 +233,78 @@ void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT
     }
 }
 
-void ConnectVirtualBox::setLayerMode(VirtualBox *layer, uint8_t mode)
+void ConnectVirtualBox::enableVirtualBox(uint8_t index)
 {
-    for (int i = 0; i < layer->getNumSegments(); i++)
-    {
-        layer->setMode(i, mode);
-    }
-}
 
-void ConnectVirtualBox::setLayerSpeed(VirtualBox *layer, uint16_t speed)
+    virtualBoxes[index]->enable();
+};
+
+void ConnectVirtualBox::disableVirtualBox(uint8_t index)
 {
+    virtualBoxes[index]->disable();
+};
+
+uint8_t ConnectVirtualBox::getVirtualBoxMode(uint8_t index)
+{
+    return virtualBoxes[index]->getMode();
+};
+
+void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode)
+{
+    uint8_t modeInt = virtualBoxes[0]->getNumModeName(String(mode));
+    struct SetModeBundle
+    {
+        VirtualBox *layer;
+        uint8_t index;
+        uint8_t mode;
+    } setModeBundle;
+    setModeBundle.layer = virtualBoxes[index];
+    setModeBundle.index = index;
+    setModeBundle.mode = modeInt;
+
+    xTaskCreatePinnedToCore(
+        [](void *p)
+        {
+            SetModeBundle setModeBundle = *((SetModeBundle *)p);
+            uint8_t numOfSegment = setModeBundle.layer->getNumSegments();
+            for (int i = 0; i < numOfSegment; i++)
+            {
+
+                uint16_t newSpeed = setModeBundle.layer->getSpeedByMode(setModeBundle.mode);
+                setModeBundle.layer->setMode(i, setModeBundle.mode);
+                setModeBundle.layer->setSpeed(i, newSpeed);
+
+                delay(TRANSITION_TIME / numOfSegment);
+            };
+            vTaskDelete(NULL);
+        },
+        "setVirtualBoxMode",
+        4096,
+        (void *)&setModeBundle,
+        2,
+        NULL,
+        BOX_CORE_CPU);
+};
+
+void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
+{
+    VirtualBox *layer = virtualBoxes[indexLayer];
+    layer->setColorByIndex(indexColor, color);
+};
+void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness){
+
+    VirtualBox *layer = virtualBoxes[index];
+    layer->setBrightness(brightness);
+};
+void ConnectVirtualBox::setVirtualBoxSpeed(uint8_t index, uint16_t speed)
+{
+    VirtualBox *layer = virtualBoxes[index];
     for (int i = 0; i < layer->getNumSegments(); i++)
     {
         layer->setSpeed(i, speed);
     }
 }
-void ConnectVirtualBox::setDisplay(void (*p)())
+void ConnectVirtualBox::setVirtualBoxesDisplay(void (*p)())
 {
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
@@ -256,21 +312,15 @@ void ConnectVirtualBox::setDisplay(void (*p)())
     }
 }
 
-void ConnectVirtualBox::service()
+void ConnectVirtualBox::serviceVirtualBoxes()
 {
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         virtualBoxes[i]->service();
     }
 }
-void ConnectVirtualBox::begin()
+void ConnectVirtualBox::initVirtualBoxes()
 {
-
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        virtualBoxes[i] = new VirtualBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-    }
-
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         virtualBoxes[i]->init();
@@ -293,8 +343,8 @@ void ConnectVirtualBox::begin()
         splitSegment(virtualBoxes[i]);
 
         tmp = String("mode_layer_") + i;
-        uint8_t modeInt = 2; //  virtualBoxes[i]->getNumModeName(vocaStore.getValue(tmp, "Blink"));
-        setLayerMode(virtualBoxes[i], modeInt);
+        // uint8_t modeInt = 2; //  virtualBoxes[i]->getNumModeName(vocaStore.getValue(tmp, "Blink"));
+        setVirtualBoxMode(i, "Blink");
 
         tmp = String("color0_layer_") + i;
         uint32_t color;
@@ -312,6 +362,15 @@ void ConnectVirtualBox::begin()
         tmp = String("brig_layer_") + i;
         // setLayerBrightness(&virtualBoxes[i]-> vocaStore.getValue(tmp, "50").toInt());
     }
+};
+void ConnectVirtualBox::beginVirtualBoxes()
+{
+
+    for (size_t i = 0; i < NUM_OF_LAYER; i++)
+    {
+        virtualBoxes[i] = new VirtualBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+    }
+    initVirtualBoxes();
 };
 
 ConnectVirtualBox::~ConnectVirtualBox()

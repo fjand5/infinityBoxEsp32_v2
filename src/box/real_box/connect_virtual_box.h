@@ -22,12 +22,7 @@ protected:
         uint16_t start4;
         bool inv4;
     };
-
-    static void mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes);
-    void setLayerMode(VirtualBox *layer, uint8_t mode);
-    void setLayerSpeed(VirtualBox *layer, uint16_t speed);
-
-
+    // config
     void configSegment( uint16_t num, bool rev);
     void configShowFace( Face face);
 
@@ -37,13 +32,32 @@ protected:
     bool getConfigState(){
         return _isConfig;
     }
-    
-    void setDisplay(void (*p)());
-    void service();
 
+
+    // display
+    static void mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes);
+    void setVirtualBoxesDisplay(void (*p)());
+    void serviceVirtualBoxes();
+
+    // control
+    void enableVirtualBox(uint8_t index);
+    void disableVirtualBox(uint8_t index);
+
+    void setVirtualBoxSpeed(uint8_t index, uint16_t speed);
+
+    uint8_t getVirtualBoxMode(uint8_t index);
+    void setVirtualBoxMode(uint8_t index, String mode);
+
+    void setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color);
+
+    void setVirtualBoxBrightness(uint8_t index, uint8_t brightness);
+
+    
+    // initialze
+    void initVirtualBoxes();
+    void beginVirtualBoxes();
 
 public:
     ConnectVirtualBox(/* args */);
-    void begin();
     ~ConnectVirtualBox();
 };

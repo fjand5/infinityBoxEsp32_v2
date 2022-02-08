@@ -14,11 +14,9 @@ void RealBox::boxHandle()
     log_w("Box is running on core: %d", xPortGetCoreID());
     init();
     rmt_tx_int(RMT_CHANNEL, getPin());
-    setDisplay(boxShow);
-    // init_virtualBoxes(virtualBoxes);
-    // xEventGroupSetBits(box_status, FLAG_BOX_READY);
+    setVirtualBoxesDisplay(boxShow);
+    initVirtualBoxes();
     queueCommand = xQueueCreate(NUM_OF_COMMAND_WAITING, sizeof(RealBoxCommandBundle));
-    // boxCommandResoponseQueue = xQueueCreate(1, sizeof(BoxCommand));
     log_w("Box has initialze !!!");
     while (1)
     {
@@ -39,8 +37,8 @@ void RealBox::boxHandle()
         //     log_w("handleMicrophone: %s", tmp.c_str());
 
         // });
-        // command_handle(virtualBoxes)
-        ConnectVirtualBox::service();
+        commandHandle();
+        ConnectVirtualBox::serviceVirtualBoxes();
     }
 }
 void RealBox::startNextModeTimer()
@@ -54,12 +52,12 @@ void RealBox::stopNextModeTimer()
     // controlButton.setLedMode(LedMode_Blink);
 }
 
-void RealBox::feedCommand(RealBoxCommandBundle realBoxCommandBundle, ResponseCommand cbResponseCommand)
+void RealBox::feedCommand(RealBoxCommandBundle *realBoxCommandBundle, ResponseCommand cbResponseCommand)
 {
     uint32_t id = millis();
-    realBoxCommandBundle.id = id;
-    responseCommandIndex.insert(std::pair<uint32_t, ResponseCommand>(id, cbResponseCommand));
-    xQueueSend(queueCommand, (void *)&realBoxCommandBundle, portMAX_DELAY);
+    realBoxCommandBundle->id = id;
+    responseCommandIndex[id] = cbResponseCommand;
+    xQueueSend(queueCommand, (void *)realBoxCommandBundle, portMAX_DELAY);
 };
 
 void RealBox::responseResult(RealBoxCommandBundle realBoxCommandBundle)
@@ -87,99 +85,72 @@ bool RealBox::checkCommand(RealBoxCommandBundle *realBoxCommandBundle)
 };
 void RealBox::commandHandle()
 {
-    RealBoxCommandBundle rxBoxCmd;
-
-    if (checkCommand(&rxBoxCmd))
+    if (checkCommand(&commandInfo))
     {
-        if (rxBoxCmd.cmd == BOX_CONFIG_SEGMENT)
+        if (commandInfo.cmd == BOX_CONFIG_SEGMENT)
         {
-            uint16_t num = *((uint16_t *)rxBoxCmd.p);
-            bool rev = rxBoxCmd.option;
+            uint16_t num = *((uint16_t *)commandInfo.p);
+            bool rev = commandInfo.option;
             configSegment(num, rev);
-            responseResult(rxBoxCmd);
+            responseResult(commandInfo);
         }
-        else if (rxBoxCmd.cmd == BOX_CONFIG_SHOW_FACE)
+        else if (commandInfo.cmd == BOX_CONFIG_SHOW_FACE)
         {
-            Face face = *((Face *)rxBoxCmd.p);
+            Face face = *((Face *)commandInfo.p);
             configShowFace(face);
-            responseResult(rxBoxCmd);
+            responseResult(commandInfo);
         }
         else
         {
             if (getConfigState() == true)
             {
                 setConfigState(false);
-                // init_layers(*virtualBoxes);
+                initVirtualBoxes();
             }
 
-            if (rxBoxCmd.cmd == BOX_ENABLE)
+            if (commandInfo.cmd == BOX_ENABLE)
             {
-
-                virtualBoxes[rxBoxCmd.layer]->enable();
-                responseResult(rxBoxCmd);
+                enableVirtualBox(commandInfo.layer);
+                responseResult(commandInfo);
             }
-            else if (rxBoxCmd.cmd == BOX_DISABLE)
+            else if (commandInfo.cmd == BOX_DISABLE)
             {
-                virtualBoxes[rxBoxCmd.layer]->disable();
-                responseResult(rxBoxCmd);
+                disableVirtualBox(commandInfo.layer);
+                responseResult(commandInfo);
             }
-            else if (rxBoxCmd.cmd == BOX_GET_MODE)
+            else if (commandInfo.cmd == BOX_GET_MODE)
             {
-                uint8_t modeInt = virtualBoxes[rxBoxCmd.layer]->getMode();
+                uint8_t modeInt = getVirtualBoxMode(commandInfo.layer);
                 RealBoxCommandBundle res;
-                res.id = rxBoxCmd.id;
+                res.id = commandInfo.id;
                 res.p = &modeInt;
                 responseResult(res);
             }
-            else if (rxBoxCmd.cmd == BOX_SET_MODE)
+            else if (commandInfo.cmd == BOX_SET_MODE)
             {
-                char *modeStr = (char *)rxBoxCmd.p;
-                uint8_t modeInt = virtualBoxes[rxBoxCmd.layer]->getNumModeName(String(modeStr));
-                struct SetModeBundle
-                {
-                    VirtualBox *layers;
-                    uint8_t index;
-                    uint8_t mode;
-                    uint16_t speed;
-                } setModeBundle;
-                setModeBundle.layers = *virtualBoxes;
-                setModeBundle.index = rxBoxCmd.layer;
-                setModeBundle.mode = modeInt;
-                setModeBundle.speed = rxBoxCmd.option;
-                // BOX_THREAD([](void *p)
-                //            {
-                //                SetModeBundle setModeBundle = *((SetModeBundle *)p);
-                //                uint8_t numOfSegment = setModeBundle.layers[setModeBundle.index].getNumSegments();
-                //                for (int i = 0; i < numOfSegment; i++)
-                //                {
-                //                    setModeBundle.layers[setModeBundle.index].setMode(i, setModeBundle.mode);
-                //                    setModeBundle.layers[setModeBundle.index].setSpeed(i, setModeBundle.speed);
-
-                //                    delay(TRANSITION_TIME / numOfSegment);
-                //                };
-                //                vTaskDelete(NULL); },
-                //            &setModeBundle);
-                responseResult(rxBoxCmd);
+                char *modeStr = (char *)commandInfo.p;
+                setVirtualBoxMode(commandInfo.layer, modeStr);
+                responseResult(commandInfo);
             }
-            else if (rxBoxCmd.cmd == BOX_SET_COLOR)
+            else if (commandInfo.cmd == BOX_SET_COLOR)
             {
-                virtualBoxes[rxBoxCmd.layer]->setColorByIndex(rxBoxCmd.option, *((uint32_t *)rxBoxCmd.p));
-                responseResult(rxBoxCmd);
+                setVirtualBoxColor(commandInfo.layer, commandInfo.option, *((uint32_t *)commandInfo.p));
+                responseResult(commandInfo);
             }
-            else if (rxBoxCmd.cmd == BOX_SET_BRIGHTNESS)
+            else if (commandInfo.cmd == BOX_SET_BRIGHTNESS)
             {
-                virtualBoxes[rxBoxCmd.layer]->setBrightness(*((uint8_t *)rxBoxCmd.p));
-                responseResult(rxBoxCmd);
+                setVirtualBoxBrightness(commandInfo.layer, *((uint8_t *)commandInfo.p));
+                responseResult(commandInfo);
             }
 
-            else if (rxBoxCmd.cmd == BOX_SET_SPEED)
+            else if (commandInfo.cmd == BOX_SET_SPEED)
             {
-                // setLayerSpeed(virtualBoxes[rxBoxCmd.layer],*((uint16_t *)rxBoxCmd.p));
-                responseResult(rxBoxCmd);
+                setVirtualBoxSpeed(commandInfo.layer, *((uint16_t *)commandInfo.p));
+                responseResult(commandInfo);
             }
             else
             {
-                responseResult(rxBoxCmd);
+                responseResult(commandInfo);
             }
         }
     }
@@ -189,7 +160,7 @@ void RealBox::begin()
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
     // vocaStatus.waitStatus(Status_Store_Initialized);
-    ConnectVirtualBox::begin();
+    beginVirtualBoxes();
     box_status = xEventGroupCreate();
 
     // controlButton.setClickEvent([]()
