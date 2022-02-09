@@ -41,22 +41,26 @@ void VocaRender::begin()
 {
   semVocaRender = xSemaphoreCreateBinary();
   xSemaphoreGive(semVocaRender);
-  vocaWebserver.addHttpApi("/render", [this]()
-                           { vocaWebserver.send_P(200, "application/json", renderData.c_str()); });
-  vocaWebsocket.setWebsocketReceiveEvent([this](JsonObject obj)
-                                         {
-                      for (std::pair<String, ComponentEvent> e : componentEvents)
-                      {
-                        String k = e.first;
-                        ComponentEvent cb = e.second;
-                        if (obj["espKey"] == k)
-                        {
-                          cb(k, obj["espValue"]);
-                        }
-                      } });
+  vocaWebserver.addHttpApi(
+      "/render",
+      [this]()
+      {
+        vocaWebserver.send_P(200, "application/json", renderData.c_str());
+      });
+  vocaWebsocket.setWebsocketReceiveEvent(
+      [this](JsonObject obj)
+      {
+        for (std::pair<String, ComponentEvent> e : componentEvents)
+        {
+          String k = e.first;
+          ComponentEvent cb = e.second;
+          if (obj["espKey"] == k)
+          {
+            cb(k, obj["espValue"]);
+          }
+        }
+      });
 }
-
-
 
 void VocaRender::renderInput(String tab, String espKey, String option, ComponentEvent event)
 {
