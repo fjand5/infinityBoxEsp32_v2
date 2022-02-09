@@ -5,6 +5,7 @@
 // #include "box_utils.h"
 
 extern RealBox realBox;
+
 void box_enable(int8_t layer)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
@@ -13,7 +14,7 @@ void box_enable(int8_t layer)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("en_layer_") + result.layer, "true", false);
+                            vocaStore.setValue(String("enLyr_") + result.layer, "true", false);
                             delete request;
                         });
 }
@@ -25,7 +26,7 @@ void box_disable(int8_t layer)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("en_layer_") + result.layer, "false", false);
+                            vocaStore.setValue(String("enLyr_") + result.layer, "false", false);
                             delete request;
                         });
 }
@@ -35,17 +36,12 @@ void box_setMode(int8_t layer, String mode)
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
     request->cmd = BoxCommand_SetMode;
     request->layer = layer;
-
-    char *modeStr = new char[mode.length() + 1];
-    strcpy(modeStr, mode.c_str());
-
-    request->p = (void *)modeStr;
+    request->mode = realBox.getModeNum(mode);
     realBox.feedCommand(request,
-                        [modeStr, request](RealBoxCommandBundle result)
+                        [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
-                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
-                            delete modeStr;
+                            vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mdLyr_") + result.layer, String(request->mode), false);
                             delete request;
                         });
 }
@@ -57,8 +53,8 @@ void box_nextMode(int8_t layer)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
-                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
+                            vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mdLyr_") + result.layer, String(result.mode), false);
                             delete request;
                         });
 }
@@ -70,8 +66,8 @@ void box_prevMode(int8_t layer)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
-                            vocaStore.setValue(String("mode_layer_") + result.layer, String((char *)result.p), false);
+                            vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mdLyr_") + result.layer, String(result.mode), false);
                             delete request;
                         });
 }
@@ -83,9 +79,9 @@ void box_setColor(int8_t layer, int8_t colorIndex, String color)
     request->option = colorIndex;
     request->color = realBox.stringToColor(color);
     realBox.feedCommand(request,
-                        [colorIndex, request](RealBoxCommandBundle result)
+                        [colorIndex, request, color](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("color") + colorIndex + "_layer_" + result.layer, String(result.color), false);
+                            vocaStore.setValue(String("cl") + colorIndex + "Lyr_" + result.layer, String(color), false);
                             delete request;
                         });
 }
@@ -99,7 +95,7 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("brig_layer_") + result.layer, String(result.brightness), false);
+                            vocaStore.setValue(String("brgLyr_") + result.layer, String(result.brightness), false);
                             delete request;
                         });
 }
@@ -112,8 +108,8 @@ void box_setSpeed(int8_t layer, uint16_t speed)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("speed_layer_") + result.layer, String(result.speed), false);
-                            vocaStore.setValue(String("speed_layer_") + result.layer + "_" + vocaStore.getValue(String("mode_layer_") + result.layer), String((char *)result.p), false);
+                            vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("spdLyr_") + result.layer + "_" + vocaStore.getValue(String("mdLyr_") + result.layer), String((char *)result.p), false);
                             delete request;
                         });
 }

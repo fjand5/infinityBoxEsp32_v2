@@ -1,19 +1,21 @@
 #ifndef VOCA_STORE
 #define VOCA_STORE
+#define VOCA_STORE_NAME "voca_store"
+
 #include "../voca_env.h"
 #include "../voca_status/voca_status.h"
+#include "../voca_eventbus/voca_eventbus.h"
 #include "FS.h"
 #include "SPIFFS.h"
 #include <map>
 #include <list>
 #include <ArduinoJson.h>
-
-typedef std::function<void(String, String, void *)> StoreChangeEvent;
+extern VocaEventBus vocaEventBus;
 class VocaStore
 {
 private:
   std::map<String, String> storeContent;
-  std::list<std::pair<StoreChangeEvent, void *>> storeChangeEvents;
+  std::map<int32_t, String> keyIndex;
   SemaphoreHandle_t semSpiffs;
   SemaphoreHandle_t semStoreContent;
   bool mountSpiffs();
@@ -26,7 +28,7 @@ public:
   void begin();
   void setValue(const String key, const String value, bool save = false);
   bool updateStore();
-  void addStoreChangeEvent(StoreChangeEvent cb, void *prams);
+  void addStoreChangeEvent(EventBusFunction cb, void *prams);
   bool checkKey(const String key);
   const String getValue(const String key, const String def = "", bool createValueByDefault = true);
   void readValueToObject(const String key, JsonObject objectValue, const String def = "", bool createIfNotExist = true);

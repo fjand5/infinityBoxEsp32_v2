@@ -61,6 +61,16 @@ void RealBox::feedCommand(RealBoxCommandBundle *realBoxCommandBundle, ResponseCo
     xQueueSend(queueCommand, (void *)realBoxCommandBundle, portMAX_DELAY);
 };
 
+uint8_t RealBox::getModeNum(String mode){
+    for (size_t i = 0; i <getModeCount(); i++)
+    {
+        if (mode == getModeName(i)){
+            return i;
+        }
+    }
+    return 0;
+    
+};
 void RealBox::responseResult(RealBoxCommandBundle realBoxCommandBundle)
 {
     uint32_t id;
@@ -129,26 +139,25 @@ void RealBox::commandHandle()
             }
             else if (commandInfo.cmd == BoxCommand_SetMode)
             {
-                char *modeStr = (char *)commandInfo.p;
                 uint16_t newSpeed;
-                setVirtualBoxMode(commandInfo.layer, modeStr, &newSpeed);
+                setVirtualBoxMode(commandInfo.layer, commandInfo.mode, &newSpeed);
                 commandInfo.speed = newSpeed;
                 responseResult(commandInfo);
             }
             else if (commandInfo.cmd == BoxCommand_NextMode)
             {
                 uint16_t newSpeed;
-                char *newMode = nextVirtualBoxMode(commandInfo.layer, &newSpeed);
+                uint8_t newMode = nextVirtualBoxMode(commandInfo.layer, &newSpeed);
                 commandInfo.speed = newSpeed;
-                commandInfo.p = (void *)newMode;
+                commandInfo.mode = newMode;
                 responseResult(commandInfo);
             }
             else if (commandInfo.cmd == BoxCommand_PreviousMode)
             {
                 uint16_t newSpeed;
-                char *newMode = previousVirtualBoxMode(commandInfo.layer, &newSpeed);
+                uint8_t newMode = previousVirtualBoxMode(commandInfo.layer, &newSpeed);
                 commandInfo.speed = newSpeed;
-                commandInfo.p = (void *)newMode;
+                commandInfo.mode = newMode;
                 responseResult(commandInfo);
             }
             else if (commandInfo.cmd == BoxCommand_SetColor)
@@ -167,7 +176,7 @@ void RealBox::commandHandle()
                 setVirtualBoxSpeed(commandInfo.layer, commandInfo.speed);
                 String tmp;
                 tmp = getModeName(getMode());
-                commandInfo.p = (void*)tmp.c_str();
+                commandInfo.p = (void *)tmp.c_str();
                 responseResult(commandInfo);
             }
             else
@@ -181,7 +190,6 @@ void RealBox::begin()
 {
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
-    // vocaStatus.waitStatus(Status_Store_Initialized);
     beginVirtualBoxes();
     box_status = xEventGroupCreate();
 
@@ -192,7 +200,7 @@ void RealBox::begin()
     //     {
     //         if (xTimerIsTimerActive(nextModeTimer) == pdTRUE)
     //         {
-    //             stopNextModeTimer();
+    // stopNextModeTimer();
     //         }
     //         else
     //         {

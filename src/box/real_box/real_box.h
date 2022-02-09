@@ -24,6 +24,7 @@ typedef struct
     int8_t cmd;
     uint8_t layer;
     uint8_t brightness;
+    uint8_t mode;
 
     int8_t option;
     uint16_t speed;
@@ -72,6 +73,7 @@ public:
     void startNextModeTimer();
     void stopNextModeTimer();
     void feedCommand(RealBoxCommandBundle *realBoxCommandBundle, ResponseCommand cbResponseCommand);
+    uint8_t getModeNum(String mode);
     void begin();
 };
 extern RealBox realBox;

@@ -64,7 +64,6 @@ void VocaStore::begin()
     {
         return;
     }
-
     semSpiffs = xSemaphoreCreateBinary();
     xSemaphoreGive(semSpiffs);
     loadFileToContent();
@@ -109,13 +108,10 @@ void VocaStore::setValue(const String key, const String value, const bool save)
         log_d("Nothing change!!!\n");
     }
 
-    for (auto storeChangeEvent = storeChangeEvents.begin();
-         storeChangeEvent != storeChangeEvents.end();
-         ++storeChangeEvent)
-    {
-        storeChangeEvent->first(key, value, storeChangeEvent->second);
-    }
-
+    EventBusData *eventBusData = new EventBusData;
+    eventBusData->key = key;
+    eventBusData->val = value;
+    vocaEventBus.executeEventBus(VOCA_STORE_NAME, 0, (void *)eventBusData, sizeof(EventBusData));
     // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
     if (!save || isNoChange)
     {
@@ -153,9 +149,10 @@ bool VocaStore::updateStore()
         xSemaphoreGive(semSpiffs);
     }
 }
-void VocaStore::addStoreChangeEvent(StoreChangeEvent cb, void *prams)
+void VocaStore::addStoreChangeEvent(EventBusFunction cb, void *prams)
 {
-    storeChangeEvents.push_front(std::make_pair(cb, prams));
+    vocaEventBus.addEventBus(VOCA_STORE_NAME, cb,
+                             prams, true);
 }
 
 bool VocaStore::checkKey(const String key)

@@ -2,14 +2,18 @@
 #include "voca_env.h"
 #define VOCA_EVENTBUS_NAME "eventBusArgs"
 #include <functional>
-typedef struct{
+
+typedef std::function<void(String, String, void *)> EventBusFunction;
+
+typedef struct
+{
     String key;
     String val;
-}EventBusData;
+} EventBusData;
 class VocaEventBus
 {
 private:
-    int32_t idAutoIncrease = 0;
+    int32_t idAutoIncrease = 1;
     esp_event_loop_args_t eventBusArgs = {
         .queue_size = 32,
         .task_name = VOCA_EVENTBUS_NAME,
@@ -21,8 +25,11 @@ private:
 public:
     VocaEventBus(/* args */);
     int32_t addEventBus(
-        esp_event_handler_t cbEventBus);
-    void executeEventBus(int32_t id,
+        const char* name,
+        EventBusFunction cbEventBus, void *prams, bool anyId = false);
+    void executeEventBus(
+        const char* name,
+        int32_t id,
         void *data,
         size_t data_size);
     ~VocaEventBus();

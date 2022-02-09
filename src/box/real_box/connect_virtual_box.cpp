@@ -250,9 +250,8 @@ uint8_t ConnectVirtualBox::getVirtualBoxMode(uint8_t index)
     return virtualBoxes[index]->getMode();
 };
 
-void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode, uint16_t *newSpeed)
+void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed)
 {
-    uint8_t modeInt = virtualBoxes[0]->getNumModeName(String(mode));
     struct SetModeBundle
     {
         VirtualBox *layer;
@@ -262,7 +261,7 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode, uint16_t *
     SetModeBundle *setModeBundle = new SetModeBundle;
     setModeBundle->layer = virtualBoxes[index];
     setModeBundle->index = index;
-    setModeBundle->mode = modeInt;
+    setModeBundle->mode = mode;
     if (newSpeed != NULL)
     {
         *newSpeed = virtualBoxes[index]->getSpeedByMode(setModeBundle->mode);
@@ -292,30 +291,24 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, String mode, uint16_t *
         BOX_CORE_CPU);
 };
 
-char *ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
+uint8_t ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
 {
     uint8_t currentMode = getVirtualBoxMode(index);
     currentMode++;
     if (currentMode >= virtualBoxes[0]->getModeCount())
-        currentMode = 0;
-    String tmp = virtualBoxes[0]->getModeName(currentMode);
-    char *newMode = new char[tmp.length() + 1];
-    strcpy(newMode, tmp.c_str());
-    setVirtualBoxMode(index, tmp, newSpeed);
-    return newMode;
+        currentMode = 0;;
+    setVirtualBoxMode(index, currentMode, newSpeed);
+    return currentMode;
 };
 
-char *ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
+uint8_t ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
 {
     int8_t currentMode = getVirtualBoxMode(index);
     currentMode--;
     if (currentMode <= 0)
         currentMode = virtualBoxes[0]->getModeCount() - 1;
-    String tmp = virtualBoxes[0]->getModeName(currentMode);
-    char *newMode = new char[tmp.length() + 1];
-    strcpy(newMode, tmp.c_str());
-    setVirtualBoxMode(index, tmp, newSpeed);
-    return newMode;
+    setVirtualBoxMode(index, currentMode, newSpeed);
+    return currentMode;
 };
 
 void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
@@ -354,6 +347,7 @@ void ConnectVirtualBox::serviceVirtualBoxes()
 }
 void ConnectVirtualBox::initVirtualBoxes()
 {
+    vocaStatus.waitStatus(Status_Store_Initialized);
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         virtualBoxes[i]->init();
@@ -363,7 +357,7 @@ void ConnectVirtualBox::initVirtualBoxes()
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         String tmp;
-        tmp = String("en_layer_") + i;
+        tmp = String("enLyr_") + i;
         if (vocaStore.getValue(tmp, "true") == "true")
         {
             virtualBoxes[i]->enable();
@@ -375,23 +369,23 @@ void ConnectVirtualBox::initVirtualBoxes()
 
         splitSegment(virtualBoxes[i]);
 
-        tmp = String("mode_layer_") + i;
-        setVirtualBoxMode(i, vocaStore.getValue(tmp, "Blink"), NULL);
+        tmp = String("mdLyr_") + i;
+        setVirtualBoxMode(i, vocaStore.getValue(tmp, "0").toInt(), NULL);
 
-        tmp = String("color0_layer_") + i;
+        tmp = String("cl0Lyr_") + i;
         uint32_t color;
         color = stringToColor(vocaStore.getValue(tmp, "0xff0000"));
         setVirtualBoxColor(i, 0, color);
 
-        tmp = String("color1_layer_") + i;
+        tmp = String("cl1Lyr_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "0x00ff00"));
         setVirtualBoxColor(i, 1, color);
 
-        tmp = String("color2_layer_") + i;
+        tmp = String("cl2Lyr_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "0x0000ff"));
         setVirtualBoxColor(i, 1, color);
 
-        tmp = String("brig_layer_") + i;
+        tmp = String("brgLyr_") + i;
         setVirtualBoxBrightness(i, vocaStore.getValue(tmp, "50").toInt());
     }
 };
@@ -402,7 +396,6 @@ void ConnectVirtualBox::beginVirtualBoxes()
     {
         virtualBoxes[i] = new VirtualBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
     }
-    initVirtualBoxes();
 };
 
 ConnectVirtualBox::~ConnectVirtualBox()

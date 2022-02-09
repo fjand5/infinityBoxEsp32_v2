@@ -108,16 +108,20 @@ void VocaWebsocket::begin()
 
             vocaStatus.setStatus(Status_WebSocket_Ready);
             vocaStatus.waitStatus(Status_WebServer_Ready);
-            vocaStore.addStoreChangeEvent([](String key, String value, void *p)
-                                          {
-                                 VocaWebsocket *_ws= (VocaWebsocket *)p;
-                                 DynamicJsonDocument _doc(2048);
-                                 JsonObject obj = _doc.to<JsonObject>();
-                                 vocaStore.readValueToObject(key, obj);
-                                 String ret;
-                                 serializeJson(_doc, ret);
-                                 _ws->broadcastTXT(ret); },
-                                          (void *)vocaWebsocket);
+            vocaStatus.waitStatus(Status_Store_Initialized);
+
+            vocaStore.addStoreChangeEvent(
+                [](String key, String value, void *p)
+                {
+                    VocaWebsocket *_ws = (VocaWebsocket *)p;
+                    DynamicJsonDocument _doc(2048);
+                    JsonObject obj = _doc.to<JsonObject>();
+                    vocaStore.readValueToObject(key, obj);
+                    String ret;
+                    serializeJson(_doc, ret);
+                    _ws->broadcastTXT(ret);
+                },
+                (void *)vocaWebsocket);
             log_w("loopSocket is running on core: %d", xPortGetCoreID());
 
             while (1)

@@ -8,9 +8,8 @@
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
-  setup_voca();
-  delay(2222);
   realBox.begin();
+  setup_voca();
   // microphone.begin();
   // controlButton.begin();
 
@@ -18,7 +17,7 @@ void setup(void)
   render();
 
   const char compile_date[] = __TIME__ " " __DATE__;
-  vocaStore.setValue("_version", compile_date);
+  // vocaStore.setValue("_version", compile_date);
   vTaskDelete(NULL);
 }
 

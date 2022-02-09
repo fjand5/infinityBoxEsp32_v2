@@ -54,10 +54,10 @@ protected:
     void setVirtualBoxSpeed(uint8_t index, uint16_t speed);
 
     uint8_t getVirtualBoxMode(uint8_t index);
-    void setVirtualBoxMode(uint8_t index, String mode, uint16_t *newSpeed);
+    void setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed);
 
-    char *nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
-    char *previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
+    uint8_t nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
+    uint8_t previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
 
     void setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color);
 
