@@ -1,16 +1,15 @@
 #include "virtual_box.h"
-
-static std::map<uint8_t, uint16_t> speedOfMode;
 VirtualBox::VirtualBox(uint16_t num_leds, uint8_t pin, neoPixelType type,
                        uint8_t max_num_segments,
                        uint8_t max_num_active_segments) : WS2812FX(num_leds, pin, type,
                                                                    max_num_segments,
                                                                    max_num_active_segments)
 {
-    for (size_t i = 0; i < MODE_COUNT; i++)
-    {
-        speedOfMode[i] = (500 + i);
-    }
+    // for (size_t i = 0; i < MODE_COUNT; i++)
+    // {
+    //     speedOfMode[i] = (500 + i);
+    // }
+    speedOfMode = new uint16_t[getModeCount()];
 }
 void VirtualBox::beforeService()
 {
@@ -44,16 +43,20 @@ void VirtualBox::handler()
     service();
     affterService();
 }
-uint8_t VirtualBox::getNumModeName(String name)
-{
-    for (uint8_t i = 0; i < getModeCount(); i++)
-    {
-        if (String(_names[i]) == name)
-            return i;
-    }
-    return 0;
-};
+// uint8_t VirtualBox::getNumModeName(String name)
+// {
+//     for (uint8_t i = 0; i < getModeCount(); i++)
+//     {
+//         if (String(_names[i]) == name)
+//             return i;
+//     }
+//     return 0;
+// };
 uint16_t VirtualBox::getSpeedByMode(uint8_t mode)
 {
     return speedOfMode[mode];
+};
+void VirtualBox::setSpeedForMode(uint8_t mode, uint16_t speed)
+{
+    speedOfMode[mode] = speed;
 };

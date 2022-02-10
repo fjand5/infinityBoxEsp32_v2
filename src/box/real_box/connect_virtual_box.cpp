@@ -77,157 +77,157 @@ void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type)
         int tmp;
         uint8_t opt, index = 0;
         uint16_t offset = 0;
-        tmp = vocaStore.getValue("seg_font_1", "15").toInt();
-        opt = vocaStore.getValue("seg_font_1_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_ft_1", "15").toInt();
+        opt = vocaStore.getValue("sg_ft_1_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_top_4", "16").toInt();
-        opt = vocaStore.getValue("seg_top_4_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-
-        tmp = vocaStore.getValue("seg_font_2", "14").toInt();
-        opt = vocaStore.getValue("seg_font_2_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-        tmp = vocaStore.getValue("seg_left_2", "1").toInt();
-        opt = vocaStore.getValue("seg_left_2_rev", "false") == "true";
+        tmp = vocaStore.getValue("sg_tp_4", "16").toInt();
+        opt = vocaStore.getValue("sg_tp_4_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_font_3", "13").toInt();
-        opt = vocaStore.getValue("seg_font_3_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_ft_2", "14").toInt();
+        opt = vocaStore.getValue("sg_ft_2_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_bottom_3", "9").toInt();
-        opt = vocaStore.getValue("seg_bottom_3_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-
-        tmp = vocaStore.getValue("seg_font_4", "12").toInt();
-        opt = vocaStore.getValue("seg_font_4_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-        tmp = vocaStore.getValue("seg_right_1", "23").toInt();
-        opt = vocaStore.getValue("seg_right_1_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_lf_2", "1").toInt();
+        opt = vocaStore.getValue("sg_lf_2_rv", "false") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_back_1", "4").toInt();
-        opt = vocaStore.getValue("seg_back_1_rev", "false") == "true";
+        tmp = vocaStore.getValue("sg_ft_3", "13").toInt();
+        opt = vocaStore.getValue("sg_ft_3_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_left_4", "3").toInt();
-        opt = vocaStore.getValue("seg_left_4_rev", "false") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-
-        tmp = vocaStore.getValue("seg_back_2", "5").toInt();
-        opt = vocaStore.getValue("seg_back_2_rev", "false") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-        tmp = vocaStore.getValue("seg_top_2", "18").toInt();
-        opt = vocaStore.getValue("seg_top_2_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_bt_3", "9").toInt();
+        opt = vocaStore.getValue("sg_bt_3_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_back_3", "6").toInt();
-        opt = vocaStore.getValue("seg_back_3_rev", "false") == "true";
+        tmp = vocaStore.getValue("sg_ft_4", "12").toInt();
+        opt = vocaStore.getValue("sg_ft_4_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_right_3", "21").toInt();
-        opt = vocaStore.getValue("seg_right_3_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-
-        tmp = vocaStore.getValue("seg_back_4", "7").toInt();
-        opt = vocaStore.getValue("seg_back_4_rev", "false") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-        tmp = vocaStore.getValue("seg_bottom_1", "11").toInt();
-        opt = vocaStore.getValue("seg_bottom_1_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_rg_1", "23").toInt();
+        opt = vocaStore.getValue("sg_rg_1_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_top_3", "17").toInt();
-        opt = vocaStore.getValue("seg_top_3_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_bk_1", "4").toInt();
+        opt = vocaStore.getValue("sg_bk_1_rv", "false") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_left_3", "2").toInt();
-        opt = vocaStore.getValue("seg_left_3_rev", "false") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-
-        tmp = vocaStore.getValue("seg_top_1", "19").toInt();
-        opt = vocaStore.getValue("seg_top_1_rev", "true") == "true";
-        opt = opt << 7;
-        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
-                          opt);
-        index++;
-        tmp = vocaStore.getValue("seg_right_4", "20").toInt();
-        opt = vocaStore.getValue("seg_right_4_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_lf_4", "3").toInt();
+        opt = vocaStore.getValue("sg_lf_4_rv", "false") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_bottom_4", "8").toInt();
-        opt = vocaStore.getValue("seg_bottom_4_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_bk_2", "5").toInt();
+        opt = vocaStore.getValue("sg_bk_2_rv", "false") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_left_1", "0").toInt();
-        opt = vocaStore.getValue("seg_left_1_rev", "false") == "true";
+        tmp = vocaStore.getValue("sg_tp_2", "18").toInt();
+        opt = vocaStore.getValue("sg_tp_2_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
 
-        tmp = vocaStore.getValue("seg_bottom_2", "10").toInt();
-        opt = vocaStore.getValue("seg_bottom_2_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_bk_3", "6").toInt();
+        opt = vocaStore.getValue("sg_bk_3_rv", "false") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
         index++;
-        tmp = vocaStore.getValue("seg_right_2", "22").toInt();
-        opt = vocaStore.getValue("seg_right_2_rev", "true") == "true";
+        tmp = vocaStore.getValue("sg_rg_3", "21").toInt();
+        opt = vocaStore.getValue("sg_rg_3_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+
+        tmp = vocaStore.getValue("sg_bk_4", "7").toInt();
+        opt = vocaStore.getValue("sg_bk_4_rv", "false") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+        tmp = vocaStore.getValue("sg_bt_1", "11").toInt();
+        opt = vocaStore.getValue("sg_bt_1_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+
+        tmp = vocaStore.getValue("sg_tp_3", "17").toInt();
+        opt = vocaStore.getValue("sg_tp_3_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+        tmp = vocaStore.getValue("sg_lf_3", "2").toInt();
+        opt = vocaStore.getValue("sg_lf_3_rv", "false") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+
+        tmp = vocaStore.getValue("sg_tp_1", "19").toInt();
+        opt = vocaStore.getValue("sg_tp_1_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+        tmp = vocaStore.getValue("sg_rg_4", "20").toInt();
+        opt = vocaStore.getValue("sg_rg_4_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+
+        tmp = vocaStore.getValue("sg_bt_4", "8").toInt();
+        opt = vocaStore.getValue("sg_bt_4_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+        tmp = vocaStore.getValue("sg_lf_1", "0").toInt();
+        opt = vocaStore.getValue("sg_lf_1_rv", "false") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+
+        tmp = vocaStore.getValue("sg_bt_2", "10").toInt();
+        opt = vocaStore.getValue("sg_bt_2_rv", "true") == "true";
+        opt = opt << 7;
+        layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
+                          opt);
+        index++;
+        tmp = vocaStore.getValue("sg_rg_2", "22").toInt();
+        opt = vocaStore.getValue("sg_rg_2_rv", "true") == "true";
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
@@ -296,7 +296,8 @@ uint8_t ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
     uint8_t currentMode = getVirtualBoxMode(index);
     currentMode++;
     if (currentMode >= virtualBoxes[0]->getModeCount())
-        currentMode = 0;;
+        currentMode = 0;
+    ;
     setVirtualBoxMode(index, currentMode, newSpeed);
     return currentMode;
 };
@@ -369,8 +370,20 @@ void ConnectVirtualBox::initVirtualBoxes()
 
         splitSegment(virtualBoxes[i]);
 
+        for (size_t mi = 0; mi < virtualBoxes[i]->getModeCount(); mi++)
+        {
+            String spdKey = "spdLyr_";
+            spdKey += String(i)+"_";
+            spdKey += String(mi);
+            virtualBoxes[i]->setSpeedForMode(mi, vocaStore.getValue(spdKey).toInt());
+        }
+        
+
         tmp = String("mdLyr_") + i;
-        setVirtualBoxMode(i, vocaStore.getValue(tmp, "0").toInt(), NULL);
+        uint8_t currentMode = vocaStore.getValue(tmp, "0").toInt();
+        uint16_t newSpeed;
+        setVirtualBoxMode(i, currentMode, &newSpeed);
+        setVirtualBoxSpeed(i, newSpeed);
 
         tmp = String("cl0Lyr_") + i;
         uint32_t color;

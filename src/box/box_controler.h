@@ -31,12 +31,12 @@ void box_disable(int8_t layer)
                         });
 }
 
-void box_setMode(int8_t layer, String mode)
+void box_setMode(int8_t layer, uint8_t mode)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
     request->cmd = BoxCommand_SetMode;
     request->layer = layer;
-    request->mode = realBox.getModeNum(mode);
+    request->mode = mode;
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
@@ -109,38 +109,43 @@ void box_setSpeed(int8_t layer, uint16_t speed)
                         [request](RealBoxCommandBundle result)
                         {
                             vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
-                            vocaStore.setValue(String("spdLyr_") + result.layer + "_" + vocaStore.getValue(String("mdLyr_") + result.layer), String((char *)result.p), false);
+                            vocaStore.setValue(String("spdLyr_") + result.layer + "_" + vocaStore.getValue(String("mdLyr_") + result.layer), String(result.speed), false);
                             delete request;
                         });
 }
 void box_config_segment(String key, String value)
 {
-    // bool rev;
-    // uint16_t num;
+    bool rev;
+    uint8_t num;
 
-    // if (key.endsWith("_rev"))
-    // {
-    //     String tmp = key;
-    //     tmp.replace("_rev", "");
-    //     rev = value == "true";
-    //     num = vocaStore.getValue(tmp, "0").toInt();
-    // }
-    // else
-    // {
+    if (key.endsWith("_rv"))
+    {
+        String tmp = key;
+        tmp.replace("_rv", "");
+        rev = value == "true";
+        num = vocaStore.getValue(tmp, "0").toInt();
+    }
+    else
+    {
 
-    //     rev = vocaStore.getValue(key + "_rev", "false") == "true";
-    //     num = value.toInt();
-    // }
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_CONFIG_SEGMENT;
-    // txBoxCmd.option = rev;
-    // txBoxCmd.p = (void *)&num;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    //     vocaStore.setValue(key, value, true);
-    // }
+        rev = vocaStore.getValue(key + "_rv", "false") == "true";
+        num = value.toInt();
+    }
+
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_ConfigSegment;
+    request->rev = rev;
+    request->numSeg = num;
+
+    
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            sg_tp_4
+                            sg_tp_4_rv
+                            // vocaStore.setValue(key, value, true);
+                            delete request;
+                        });
 }
 void box_config_show_face(String key, String value)
 {

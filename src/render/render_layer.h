@@ -137,7 +137,7 @@ void setup_render_layer()
                          int li;
                          key.replace("mdLyr_", "");
                          li = key.toInt();
-                         box_setMode(li, value);
+                         box_setMode(li, value.toInt());
                      });
     };
     for (size_t i = 0; i < NUM_OF_LAYER; i++)

@@ -85,6 +85,7 @@ public:
         color = ((uint32_t)redInt << 16) | ((uint32_t)greenInt << 8) | blueInt;
         return color;
     }
+    uint8_t getModeNum(String mode);
     ~ConnectVirtualBox();
 };
 #endif

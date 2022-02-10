@@ -25,7 +25,8 @@ typedef struct
     uint8_t layer;
     uint8_t brightness;
     uint8_t mode;
-
+    uint8_t numSeg;
+    bool rev;
     int8_t option;
     uint16_t speed;
     void *p;

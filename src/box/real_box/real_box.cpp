@@ -100,9 +100,7 @@ void RealBox::commandHandle()
     {
         if (commandInfo.cmd == BoxCommand_ConfigSegment)
         {
-            uint16_t num = *((uint16_t *)commandInfo.p);
-            bool rev = commandInfo.option;
-            configSegment(num, rev);
+            configSegment(commandInfo.numSeg, commandInfo.rev);
             responseResult(commandInfo);
         }
         else if (commandInfo.cmd == BoxCommand_ConfigShowFace)

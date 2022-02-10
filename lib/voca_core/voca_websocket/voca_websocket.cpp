@@ -49,7 +49,7 @@ void VocaWebsocket::cbWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
         case WStype_TEXT:
         {
 
-            DynamicJsonDocument _doc(2048);
+            DynamicJsonDocument _doc(10000);
             deserializeJson(_doc, payload, length);
             JsonObject obj = _doc.as<JsonObject>();
             String ret;
