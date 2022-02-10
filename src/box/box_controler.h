@@ -118,55 +118,60 @@ void box_config_segment(String key, String value)
     bool rev;
     uint8_t num;
 
+    char *segName;
     if (key.endsWith("_rv"))
     {
         String tmp = key;
         tmp.replace("_rv", "");
         rev = value == "true";
         num = vocaStore.getValue(tmp, "0").toInt();
+        segName = new char[tmp.length() + 1]();
+        strcpy(segName, tmp.c_str());
     }
     else
     {
 
         rev = vocaStore.getValue(key + "_rv", "false") == "true";
         num = value.toInt();
+        segName = new char[key.length() + 1]();
+        strcpy(segName, key.c_str());
     }
 
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
     request->cmd = BoxCommand_ConfigSegment;
     request->rev = rev;
     request->numSeg = num;
-
-    
     realBox.feedCommand(request,
-                        [request](RealBoxCommandBundle result)
+                        [request, segName](RealBoxCommandBundle result)
                         {
-                            sg_tp_4
-                            sg_tp_4_rv
-                            // vocaStore.setValue(key, value, true);
+                            String tmp = String(segName);
+                            vocaStore.setValue(tmp, String(result.numSeg), true);
+                            tmp += "_rv";
+                            vocaStore.setValue(tmp, String(result.rev?"true":"false"), true);
                             delete request;
+                            delete segName;
                         });
 }
 void box_config_show_face(String key, String value)
 {
-    // key.replace("show_", "");
-    // Face face;
-    // face.start1 = vocaStore.getValue(key + "_1").toInt();
-    // face.inv1 = vocaStore.getValue(key + "_1_rev") == "true";
-    // face.start2 = vocaStore.getValue(key + "_2").toInt();
-    // face.inv2 = vocaStore.getValue(key + "_2_rev") == "true";
-    // face.start3 = vocaStore.getValue(key + "_3").toInt();
-    // face.inv3 = vocaStore.getValue(key + "_3_rev") == "true";
-    // face.start4 = vocaStore.getValue(key + "_4").toInt();
-    // face.inv4 = vocaStore.getValue(key + "_4_rev") == "true";
-
-    // RealBoxCommandBundle txBoxCmd, rxBoxCmd;
-    // txBoxCmd.cmd = BOX_CONFIG_SHOW_FACE;
-    // txBoxCmd.p = (void *)&face;
-    // realBox.feedCommand(&txBoxCmd);
-    // if (xQueueReceive(boxCommandResoponseQueue, &rxBoxCmd, portMAX_DELAY) &&
-    //     rxBoxCmd.id == txBoxCmd.id)
-    // {
-    // }
+    key.replace("shw_", "");
+    Face* face = new Face;
+    face->start1 = vocaStore.getValue(key + "_1").toInt();
+    face->inv1 = vocaStore.getValue(key + "_1_rv") == "true";
+    face->start2 = vocaStore.getValue(key + "_2").toInt();
+    face->inv2 = vocaStore.getValue(key + "_2_rv") == "true";
+    face->start3 = vocaStore.getValue(key + "_3").toInt();
+    face->inv3 = vocaStore.getValue(key + "_3_rv") == "true";
+    face->start4 = vocaStore.getValue(key + "_4").toInt();
+    face->inv4 = vocaStore.getValue(key + "_4_rv") == "true";
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_ConfigShowFace;
+    request->p = (void *)face;
+    realBox.feedCommand(request,
+                        [request,face](RealBoxCommandBundle result)
+                        {
+                            delete request;
+                            delete face;
+                        });
 }
 #endif

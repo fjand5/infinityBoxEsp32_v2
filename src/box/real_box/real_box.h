@@ -31,7 +31,17 @@ typedef struct
     uint16_t speed;
     void *p;
 } RealBoxCommandBundle;
-
+typedef struct
+{
+    uint16_t start1;
+    bool inv1;
+    uint16_t start2;
+    bool inv2;
+    uint16_t start3;
+    bool inv3;
+    uint16_t start4;
+    bool inv4;
+} Face;
 typedef std::function<void(RealBoxCommandBundle)> ResponseCommand;
 typedef enum
 {
