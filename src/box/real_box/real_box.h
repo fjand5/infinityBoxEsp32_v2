@@ -11,12 +11,11 @@
 
 #define NUM_OF_COMMAND_WAITING 8
 
-
-
 typedef struct
 {
     uint32_t id;
-    uint32_t color;
+    uint8_t colorIndex;
+    uint32_t* color;
     int8_t cmd;
     uint8_t layer;
     uint8_t brightness;

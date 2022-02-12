@@ -17,6 +17,7 @@ private:
     bool _isConfig = false;
     void splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX);
     DEFINE_DEFAULT_SPEED;
+    DEFINE_DEFAULT_COLOR(MAX_NUM_COLORS);
 protected:
     struct Face
     {
@@ -62,7 +63,7 @@ protected:
     uint8_t nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
     uint8_t previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
 
-    void setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color);
+    uint32_t* setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color);
 
     void setVirtualBoxBrightness(uint8_t index, uint8_t brightness);
 

@@ -157,7 +157,8 @@ void RealBox::commandHandle()
             }
             else if (commandInfo.cmd == BoxCommand_SetColor)
             {
-                setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.color);
+                uint32_t* color = setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.colorIndex);
+                commandInfo.color = color;
                 responseResult(commandInfo);
             }
             else if (commandInfo.cmd == BoxCommand_SetBrightness)

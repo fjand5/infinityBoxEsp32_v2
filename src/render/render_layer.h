@@ -66,36 +66,42 @@ void setup_render_layer()
     {
         String tab_name;
         tab_name = String("Layer ") + i;
+
+        vocaRender.renderSelect(tab_name, String("clLyr_") + i, F(R"({
+    "name":"Mẫu màu",
+    "options":[
+    "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"],
+    "span":{
+        "xs":24,
+        "sm":24,
+        "md":12,
+        "xl":12
+    },
+    "newLine":true
+  })"),
+                                [](String key, String value)
+                                {
+                                    int li;
+                                    key.replace("clLyr_", "");
+                                    li = key.toInt();
+                                    box_setColor(li, value.toInt());
+                                });
+
         vocaRender.renderColorPicker(tab_name, String("cl0Lyr_") + i, F(R"({
     "name":"Màu 0"
   })"),
-                                     [](String key, String value)
-                                     {
-                                         int li;
-                                         key.replace("cl0Lyr_", "");
-                                         li = key.toInt();
-                                         box_setColor(li, 0, value);
+                                     [](String key, String value) {
                                      });
         vocaRender.renderColorPicker(tab_name, String("cl1Lyr_") + i, F(R"({
     "name":"Màu 1"
   })"),
-                                     [](String key, String value)
-                                     {
-                                         int li;
-                                         key.replace("cl1Lyr_", "");
-                                         li = key.toInt();
-                                         box_setColor(li, 1, value);
+                                     [](String key, String value) {
                                      });
         vocaRender.renderColorPicker(tab_name, String("cl2Lyr_") + i, F(R"({
     "name":"Màu 2",
     "newLine":true
   })"),
-                                     [](String key, String value)
-                                     {
-                                         int li;
-                                         key.replace("cl2Lyr_", "");
-                                         li = key.toInt();
-                                         box_setColor(li, 2, value);
+                                     [](String key, String value) {
                                      });
     };
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
@@ -120,11 +126,7 @@ void setup_render_layer()
   })"),
                                 [](String key, String value)
                                 {
-                                    int li;
-                                    key.replace("mdLyr_", "");
-                                    key.replace("_nxt", "");
-                                    li = key.toInt();
-                                    box_randomMode(li);
+                                    box_randomModeAll();
                                 });
         vocaRender.renderButton(tab_name, String("mdLyr_") + i + "_nxt", F(R"({
     "name":"Next",

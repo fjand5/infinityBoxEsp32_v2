@@ -323,10 +323,16 @@ uint8_t ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSp
     return currentMode;
 };
 
-void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
+uint32_t* ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
 {
     VirtualBox *layer = virtualBoxes[indexLayer];
-    layer->setColorByIndex(indexColor, color);
+    uint32_t* ret = new uint32_t[MAX_NUM_COLORS]();
+    for (size_t i = 0; i < MAX_NUM_COLORS; i++)
+    {
+        layer->setColorByIndex(i, listColors[indexColor][i]);
+        ret[i] = listColors[indexColor][i];
+    }
+    return ret;
 };
 void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness)
 {

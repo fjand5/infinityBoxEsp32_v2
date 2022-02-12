@@ -115,17 +115,25 @@ void box_prevMode(int8_t layer)
                             delete request;
                         });
 }
-void box_setColor(int8_t layer, int8_t colorIndex, String color)
+void box_setColor(int8_t layer, int8_t colorIndex)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
     request->cmd = BoxCommand_SetColor;
     request->layer = layer;
     request->option = colorIndex;
-    request->color = realBox.stringToColor(color);
+    request->colorIndex = colorIndex;
     realBox.feedCommand(request,
-                        [colorIndex, request, color](RealBoxCommandBundle result)
+                        [request](RealBoxCommandBundle result)
                         {
-                            vocaStore.setValue(String("cl") + colorIndex + "Lyr_" + result.layer, String(color), false);
+                            char str[8];
+                            sprintf(str, "#%06x", result.color[0]);
+                            vocaStore.setValue(String("cl0Lyr_") + result.layer, String(str), false);
+                            sprintf(str, "#%06x", result.color[1]);
+                            vocaStore.setValue(String("cl1Lyr_") + result.layer, String(str), false);
+                            sprintf(str, "#%06x", result.color[2]);
+                            vocaStore.setValue(String("cl2Lyr_") + result.layer, String(str), false);
+                            vocaStore.setValue(String("clLyr_") + result.layer, String(result.colorIndex), false);
+                            delete result.color;
                             delete request;
                         });
 }
