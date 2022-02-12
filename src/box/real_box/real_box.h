@@ -7,12 +7,8 @@
 #include "driver_show.h"
 
 #include "connect_virtual_box.h"
-// #include "box_utils.h"
-
-// #include "../../control_button/control_button.h"
 // #include "../microphone/microphone.h"
 
-#define FLAG_BOX_READY (1 << 0)
 #define NUM_OF_COMMAND_WAITING 8
 
 
@@ -50,6 +46,7 @@ typedef enum
     BoxCommand_Disable,
     BoxCommand_SetMode,
     BoxCommand_GetMode,
+    BoxCommand_RandomMode,
     BoxCommand_NextMode,
     BoxCommand_PreviousMode,
     BoxCommand_SetColor,
@@ -64,17 +61,15 @@ private:
     RealBoxCommandBundle commandInfo;
 
     EventGroupHandle_t box_status;
-    TimerHandle_t nextModeTimer;
 
     QueueHandle_t queueCommand;
-    QueueHandle_t queueResoponse;
 
     std::map<uint32_t, ResponseCommand> responseCommandIndex;
     static void IRAM_ATTR boxShow();
-
     void responseResult(RealBoxCommandBundle realBoxCommandBundle);
     BaseType_t checkCommand(RealBoxCommandBundle *realBoxCommandBundle);
     void commandHandle();
+    bool isCustomMode(uint8_t mode);
 
 public:
     RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type);

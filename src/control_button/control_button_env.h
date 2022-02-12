@@ -1,7 +1,9 @@
+#ifndef CONTROL_BUTTON_ENV
+#define CONTROL_BUTTON_ENV
 #define LED_BUTTON_PIN 19
 #define BUTTON_PIN 4
 #define PRESS_TIME 10000
-#define DOUBLE_CLICK_DURATION 300
+#define DOUBLE_CLICK_DURATION 200
 #define BUTTON_CORE_CPU 0
 
 #define LEDC_CHANNEL_0 0
@@ -11,3 +13,4 @@
 #define BLINK_CYCLE 500   // ms
 #define FADE_FAST_FACTOR 5   // ms
 #define FADE_SLOW_FACTOR 10   // ms
+#endif

@@ -1,6 +1,6 @@
 #pragma once
-#include "voca_env.h"
-#include "voca_dist.h"
+#include "../voca_env.h"
+#include "../voca_dist.h"
 #include <WebServer.h>
 #include <ArduinoJson.h>
 #include <HTTPUpdateServer.h>
@@ -20,7 +20,7 @@ public:
   void sendComHeader();
   VocaWebserver(int port);
   void begin();
-  void addHttpApi(const String url, Response response);
+  void addHttpApi(const String url, Response response,bool security = true);
   ~VocaWebserver();
 };
 extern VocaWebserver vocaWebserver;

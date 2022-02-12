@@ -295,10 +295,21 @@ uint8_t ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
 {
     uint8_t currentMode = getVirtualBoxMode(index);
     currentMode++;
-    if (currentMode >= virtualBoxes[0]->getModeCount())
+    if (currentMode >= FX_MODE_CUSTOM)
         currentMode = 0;
     ;
     setVirtualBoxMode(index, currentMode, newSpeed);
+    return currentMode;
+};
+uint8_t ConnectVirtualBox::randomVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
+{
+    uint8_t currentMode = getVirtualBoxMode(index);
+    uint8_t newMode = currentMode;
+    do
+    {
+        newMode = random(FX_MODE_CUSTOM + 1);
+    } while (currentMode == newMode);
+    setVirtualBoxMode(index, newMode, newSpeed);
     return currentMode;
 };
 
@@ -307,7 +318,7 @@ uint8_t ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSp
     int8_t currentMode = getVirtualBoxMode(index);
     currentMode--;
     if (currentMode <= 0)
-        currentMode = virtualBoxes[0]->getModeCount() - 1;
+        currentMode = FX_MODE_CUSTOM - 1;
     setVirtualBoxMode(index, currentMode, newSpeed);
     return currentMode;
 };
@@ -359,7 +370,7 @@ void ConnectVirtualBox::initVirtualBoxes()
     {
         String tmp;
         tmp = String("enLyr_") + i;
-        if (vocaStore.getValue(tmp, "true") == "true")
+        if (vocaStore.getValue(tmp, "true", true, false) == "true")
         {
             virtualBoxes[i]->enable();
         }
@@ -373,34 +384,34 @@ void ConnectVirtualBox::initVirtualBoxes()
         for (size_t mi = 0; mi < virtualBoxes[i]->getModeCount(); mi++)
         {
             String spdKey = "spdLyr_";
-            spdKey += String(i)+"_";
+            spdKey += String(i) + "_";
             spdKey += String(mi);
-            virtualBoxes[i]->setSpeedForMode(mi, vocaStore.getValue(spdKey).toInt());
+            virtualBoxes[i]->setSpeedForMode(mi, vocaStore.getValue(spdKey, String(mapSpeedDefault[mi]), true, false).toInt());
         }
-        
 
         tmp = String("mdLyr_") + i;
-        uint8_t currentMode = vocaStore.getValue(tmp, "0").toInt();
+        uint8_t currentMode = vocaStore.getValue(tmp, "2", true, false).toInt();
         uint16_t newSpeed;
         setVirtualBoxMode(i, currentMode, &newSpeed);
         setVirtualBoxSpeed(i, newSpeed);
 
         tmp = String("cl0Lyr_") + i;
         uint32_t color;
-        color = stringToColor(vocaStore.getValue(tmp, "0xff0000"));
+        color = stringToColor(vocaStore.getValue(tmp, "#ff0000", true, false));
         setVirtualBoxColor(i, 0, color);
 
         tmp = String("cl1Lyr_") + i;
-        color = stringToColor(vocaStore.getValue(tmp, "0x00ff00"));
+        color = stringToColor(vocaStore.getValue(tmp, "#00ff00", true, false));
         setVirtualBoxColor(i, 1, color);
 
         tmp = String("cl2Lyr_") + i;
-        color = stringToColor(vocaStore.getValue(tmp, "0x0000ff"));
+        color = stringToColor(vocaStore.getValue(tmp, "#0000ff", true, false));
         setVirtualBoxColor(i, 1, color);
 
         tmp = String("brgLyr_") + i;
-        setVirtualBoxBrightness(i, vocaStore.getValue(tmp, "50").toInt());
+        setVirtualBoxBrightness(i, vocaStore.getValue(tmp, "50", true, false).toInt());
     }
+    vocaStore.updateStore();
 };
 void ConnectVirtualBox::beginVirtualBoxes()
 {

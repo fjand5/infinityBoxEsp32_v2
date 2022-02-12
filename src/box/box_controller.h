@@ -45,6 +45,50 @@ void box_setMode(int8_t layer, uint8_t mode)
                             delete request;
                         });
 }
+void box_randomMode(int8_t layer)
+{
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_RandomMode;
+    request->layer = layer;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(String("spdLyr_") + result.layer, String(result.speed), false);
+                            vocaStore.setValue(String("mdLyr_") + result.layer, String(result.mode), false);
+                            delete request;
+                        });
+}
+void box_randomModeAll()
+{
+
+    for (size_t i = 0; i < NUM_OF_LAYER; i++)
+    {
+        box_randomMode(i);
+    }
+}
+void box_setTimerRandomMode(bool state)
+{
+    static TimerHandle_t randomModeTimer = NULL;
+    if (randomModeTimer == NULL)
+    {
+        randomModeTimer = xTimerCreate(
+            "randomModeTimer",
+            5000 / portTICK_PERIOD_MS,
+            pdTRUE, (void *)1,
+            [](TimerHandle_t xTimer)
+            {
+                box_randomModeAll();
+            });
+    }
+    if (state)
+    {
+        xTimerStart(randomModeTimer, portMAX_DELAY);
+    }
+    else
+    {
+        xTimerStop(randomModeTimer, portMAX_DELAY);
+    }
+}
 void box_nextMode(int8_t layer)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
@@ -147,7 +191,7 @@ void box_config_segment(String key, String value)
                             String tmp = String(segName);
                             vocaStore.setValue(tmp, String(result.numSeg), true);
                             tmp += "_rv";
-                            vocaStore.setValue(tmp, String(result.rev?"true":"false"), true);
+                            vocaStore.setValue(tmp, String(result.rev ? "true" : "false"), true);
                             delete request;
                             delete segName;
                         });
@@ -155,7 +199,7 @@ void box_config_segment(String key, String value)
 void box_config_show_face(String key, String value)
 {
     key.replace("shw_", "");
-    Face* face = new Face;
+    Face *face = new Face;
     face->start1 = vocaStore.getValue(key + "_1").toInt();
     face->inv1 = vocaStore.getValue(key + "_1_rv") == "true";
     face->start2 = vocaStore.getValue(key + "_2").toInt();
@@ -168,7 +212,7 @@ void box_config_show_face(String key, String value)
     request->cmd = BoxCommand_ConfigShowFace;
     request->p = (void *)face;
     realBox.feedCommand(request,
-                        [request,face](RealBoxCommandBundle result)
+                        [request, face](RealBoxCommandBundle result)
                         {
                             delete request;
                             delete face;

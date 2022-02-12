@@ -1,10 +1,13 @@
-#pragma once
+#ifndef CONTROL_BUTTON
+#define CONTROL_BUTTON
 #include "control_button_env.h"
 
 #include <EasyButton.h>
 #include <Arduino.h>
+
+
 #include "FS.h"
-#include "SPIFFS.h"
+#include "SPIFFS.h" // Dùng cho việc format factory
 
 typedef std::function<void(void)> ClickEvent;
 typedef std::function<void(void)> DoubleClickEvent;
@@ -48,3 +51,4 @@ extern ControlButton controlButton;
 //     log_d(" doubleClick");
 //     lastClickTime = 0;
 // }
+#endif

@@ -20,7 +20,6 @@ public:
     void enable();
     void disable();
     void setColorByIndex(uint8_t index, uint32_t color);
-    // uint8_t getNumModeName(String name);
     uint16_t getSpeedByMode(uint8_t mode);
     void setSpeedForMode(uint8_t mode, uint16_t speed);
 };

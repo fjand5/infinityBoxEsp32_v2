@@ -1,18 +1,13 @@
 #include <Arduino.h>
 #include "voca_core.h"
 #include "render/render.h"
-#include "control_button/control_button.h"
-#include "box/real_box/real_box.h"
-// #include "microphone/microphone.h"
-
+#include "controller.h"
 void setup(void)
 {
   log_w("main starting: %d", xPortGetCoreID());
-  realBox.begin();
+  settupSystem();
   setup_voca();
   // microphone.begin();
-  // controlButton.begin();
-
 
   render();
 

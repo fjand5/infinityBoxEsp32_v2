@@ -16,7 +16,7 @@ class ConnectVirtualBox
 private:
     bool _isConfig = false;
     void splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX);
-
+    DEFINE_DEFAULT_SPEED;
 protected:
     struct Face
     {
@@ -56,6 +56,9 @@ protected:
     uint8_t getVirtualBoxMode(uint8_t index);
     void setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed);
 
+
+
+    uint8_t randomVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
     uint8_t nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
     uint8_t previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
 

@@ -138,7 +138,6 @@ void ControlButton::begin()
 
     ledcSetup(LEDC_CHANNEL_0, LEDC_BASE_FREQ, LEDC_TIMER_8_BIT);
     ledcAttachPin(LED_BUTTON_PIN, LEDC_CHANNEL_0);
-
     xTaskCreatePinnedToCore(
         [](void *param)
         {

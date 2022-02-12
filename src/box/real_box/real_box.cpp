@@ -42,20 +42,9 @@ void RealBox::boxHandle()
         serviceVirtualBoxes();
     }
 }
-void RealBox::startNextModeTimer()
-{
-    xTimerStart(nextModeTimer, portMAX_DELAY);
-    // controlButton.setLedMode(LedMode_FadeFast);
-}
-void RealBox::stopNextModeTimer()
-{
-    xTimerStop(nextModeTimer, portMAX_DELAY);
-    // controlButton.setLedMode(LedMode_Blink);
-}
-
 void RealBox::feedCommand(RealBoxCommandBundle *realBoxCommandBundle, ResponseCommand cbResponseCommand)
 {
-    uint32_t id = millis();
+    uint32_t id = micros();
     realBoxCommandBundle->id = id;
     responseCommandIndex[id] = cbResponseCommand;
     xQueueSend(queueCommand, (void *)realBoxCommandBundle, portMAX_DELAY);
@@ -142,6 +131,14 @@ void RealBox::commandHandle()
                 commandInfo.speed = newSpeed;
                 responseResult(commandInfo);
             }
+            else if (commandInfo.cmd == BoxCommand_RandomMode)
+            {
+                uint16_t newSpeed;
+                uint8_t newMode = randomVirtualBoxMode(commandInfo.layer, &newSpeed);
+                commandInfo.speed = newSpeed;
+                commandInfo.mode = newMode;
+                responseResult(commandInfo);
+            }
             else if (commandInfo.cmd == BoxCommand_NextMode)
             {
                 uint16_t newSpeed;
@@ -184,35 +181,18 @@ void RealBox::commandHandle()
         }
     }
 }
+bool RealBox::isCustomMode(uint8_t mode)
+{
+    return mode >= FX_MODE_CUSTOM;
+}
 void RealBox::begin()
 {
     BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
     beginVirtualBoxes();
     box_status = xEventGroupCreate();
-
-    // controlButton.setClickEvent([]()
-    //                             { box_nextMode(0); });
-    // controlButton.setDoubleClickEvent(
-    //     []()
-    //     {
-    //         if (xTimerIsTimerActive(nextModeTimer) == pdTRUE)
-    //         {
-    // stopNextModeTimer();
-    //         }
-    //         else
-    //         {
-    //             startNextModeTimer();
-    //         }
-    //     });
-    nextModeTimer = xTimerCreate(
-        "nextModeTimer",
-        5000 / portTICK_PERIOD_MS,
-        pdTRUE, (void *)1,
-        [](TimerHandle_t xTimer)
-        {
-            // box_nextMode(0);
-        });
+    
+  
     xReturned = xTaskCreatePinnedToCore(
         [](void *prams)
         {
@@ -225,16 +205,6 @@ void RealBox::begin()
         0,             /* priority of the task */
         NULL,          /* Task handle to keep track of created task */
         BOX_CORE_CPU); /* pin task to core 0 */
-    if (xReturned == pdPASS)
-    {
-        /* The task was created.  Use the task's handle to delete the task. */
-        log_w("setup_box created: %d", xPortGetCoreID());
-        startNextModeTimer();
-    }
-    else
-    {
-        log_w("setup_box create faile: %d", xPortGetCoreID());
-    }
 }
 
 RealBox::~RealBox()
