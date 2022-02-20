@@ -7,7 +7,7 @@
 #include "driver_show.h"
 
 #include "connect_virtual_box.h"
-// #include "../microphone/microphone.h"
+#include "microphone/microphone.h"
 
 #define NUM_OF_COMMAND_WAITING 8
 

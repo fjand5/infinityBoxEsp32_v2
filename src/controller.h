@@ -3,9 +3,8 @@
 
 #include "render/render.h"
 #include "control_button/control_button.h"
+#include "microphone/microphone.h"
 #include "box/real_box/real_box.h"
-// #include "microphone/microphone.h"
-
 void onTimerMode()
 {
     box_setTimerRandomMode(true);
@@ -24,6 +23,8 @@ void settupSystem()
         []()
         {
             realBox.begin();
+            microphone.begin();
+
             if (vocaStore.getValue("rdmTmrMd", "true") == "true")
             {
                 onTimerMode();

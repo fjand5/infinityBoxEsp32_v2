@@ -28,16 +28,16 @@ void RealBox::boxHandle()
             lastUxHighWaterMark = uxHighWaterMark;
             log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
         }
-        // microphone.handleMicrophone([](double val, double freq){
-        //     String tmp;
-        //     for (size_t i = 0; i < val; i++)
-        //     {
-        //         tmp+="=";
-        //     }
+        microphone.handleMicrophone([](double val, double freq){
+            String tmp;
+            for (size_t i = 0; i < val; i++)
+            {
+                tmp+="=";
+            }
 
-        //     log_w("handleMicrophone: %s", tmp.c_str());
+            log_w("handleMicrophone: %s", tmp.c_str());
 
-        // });
+        });
         commandHandle();
         serviceVirtualBoxes();
     }

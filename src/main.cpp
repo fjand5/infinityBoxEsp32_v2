@@ -7,12 +7,11 @@ void setup(void)
   log_w("main starting: %d", xPortGetCoreID());
   settupSystem();
   setup_voca();
-  // microphone.begin();
 
   render();
 
   const char compile_date[] = __TIME__ " " __DATE__;
-  // vocaStore.setValue("_version", compile_date);
+  vocaStore.setValue("_version", compile_date);
   vTaskDelete(NULL);
 }
 
