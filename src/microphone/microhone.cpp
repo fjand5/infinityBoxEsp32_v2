@@ -92,7 +92,7 @@ double Microphone::calcData()
     FFT.ComplexToMagnitude();
     return ret / double(SAMPLES);
 }
-double Microphone::handleMicrophone(void (*onChangeMax)(double val, double freq))
+double Microphone::handleMicrophone(void (*onChangeMax)(void* param, double val, double freq), void* param)
 {
     static double lastFreq = 0;
     static double lastIntensity = 0;
@@ -144,7 +144,7 @@ double Microphone::handleMicrophone(void (*onChangeMax)(double val, double freq)
         lastIntensity = curentIntensity;
         if (onChangeMax != NULL)
         {
-            onChangeMax(micVal, freqVal);
+            onChangeMax(param, micVal, freqVal);
         }
     }
     return mapf(micVal, 0.0, 2 ^ 24, 0.0, 100.0);

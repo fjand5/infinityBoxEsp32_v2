@@ -21,23 +21,20 @@ void RealBox::boxHandle()
     log_w("Box has initialze !!!");
     while (1)
     {
-        static UBaseType_t lastUxHighWaterMark = 0;
-        UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-        if (lastUxHighWaterMark != uxHighWaterMark)
-        {
-            lastUxHighWaterMark = uxHighWaterMark;
-            log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
-        }
-        microphone.handleMicrophone([](double val, double freq){
-            String tmp;
-            for (size_t i = 0; i < val; i++)
+        // static UBaseType_t lastUxHighWaterMark = 0;
+        // UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+        // if (lastUxHighWaterMark != uxHighWaterMark)
+        // {
+        //     lastUxHighWaterMark = uxHighWaterMark;
+        //     log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
+        // }
+        microphone.handleMicrophone(
+            [](void *param, double val, double freq)
             {
-                tmp+="=";
-            }
-
-            log_w("handleMicrophone: %s", tmp.c_str());
-
-        });
+                RealBox *realBox = (RealBox *)param;
+                realBox->onBeatVirtualBoxes(val, freq);
+            },
+            this);
         commandHandle();
         serviceVirtualBoxes();
     }
@@ -50,15 +47,16 @@ void RealBox::feedCommand(RealBoxCommandBundle *realBoxCommandBundle, ResponseCo
     xQueueSend(queueCommand, (void *)realBoxCommandBundle, portMAX_DELAY);
 };
 
-uint8_t RealBox::getModeNum(String mode){
-    for (size_t i = 0; i <getModeCount(); i++)
+uint8_t RealBox::getModeNum(String mode)
+{
+    for (size_t i = 0; i < getModeCount(); i++)
     {
-        if (mode == getModeName(i)){
+        if (mode == getModeName(i))
+        {
             return i;
         }
     }
     return 0;
-    
 };
 void RealBox::responseResult(RealBoxCommandBundle realBoxCommandBundle)
 {
@@ -157,9 +155,11 @@ void RealBox::commandHandle()
             }
             else if (commandInfo.cmd == BoxCommand_SetColor)
             {
-                uint32_t* color = setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.colorIndex);
-                commandInfo.color = color;
+                uint32_t *colors = new uint32_t[MAX_NUM_COLORS]();
+                setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.colorIndex, colors);
+                commandInfo.colors = colors;
                 responseResult(commandInfo);
+                delete colors;
             }
             else if (commandInfo.cmd == BoxCommand_SetBrightness)
             {
@@ -175,7 +175,12 @@ void RealBox::commandHandle()
                 commandInfo.p = (void *)tmp.c_str();
                 responseResult(commandInfo);
             }
-            else
+            
+            else if (commandInfo.cmd == BoxCommand_SetMusicMode)
+            {
+                setMusicMode(commandInfo.layer, commandInfo.musicModeState);
+                responseResult(commandInfo);
+            }else
             {
                 responseResult(commandInfo);
             }
@@ -192,8 +197,7 @@ void RealBox::begin()
     log_w("setup_box starting: %d", xPortGetCoreID());
     beginVirtualBoxes();
     box_status = xEventGroupCreate();
-    
-  
+
     xReturned = xTaskCreatePinnedToCore(
         [](void *prams)
         {

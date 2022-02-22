@@ -7,141 +7,172 @@
 
 void setup_render_layer()
 {
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
+    for (int i = 0; i < NUM_OF_LAYER; i++)
     {
         String tab_name;
         tab_name = String("Layer ") + i;
+        int *index = new int(i);
 
-        vocaRender.renderSwitch(tab_name, String("enLyr_") + i, F(R"({
-    "name":"Chạy"
-  })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("enLyr_", "");
-                                    li = key.toInt();
-                                    if (value == "true")
-                                        box_enable(li);
-                                    else
-                                        box_disable(li);
-                                });
+        vocaRender.renderSwitch(
+            tab_name, String("enLyr_") + i,
+            F(R"({
+                    "name":"Chạy",
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                if (value == "true")
+                    box_enable(li);
+                else
+                    box_disable(li);
+            },
+            (void *)index);
 
-        vocaRender.renderSwitch(tab_name, String("rdmTmrMd"), F(R"({
-    "name":"Timer Mode"
-  })"),
-                                [](String key, String value)
-                                {
-                                    if (value == "true")
-                                    {
-                                        onTimerMode();
-                                    }
-                                    else
-                                    {
-                                        offTimerMode();
-                                    }
-                                });
-        vocaRender.renderButton(tab_name, String("save_layer_") + i, F(R"({
-    "name":"Lưu",
-    "newLine":true
-  })"),
-                                [](String key, String value)
-                                {
-                                    vocaStore.updateStore();
-                                });
-        vocaRender.renderSlider(tab_name, String("brgLyr_") + i, F(R"({
-    "name":"Độ sáng",
-    "min":0,
-    "max":255,
-    "newLine":true
-  })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("brgLyr_", "");
-                                    li = key.toInt();
-                                    box_setBrightness(li, value.toInt());
-                                });
-    };
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        String tab_name;
-        tab_name = String("Layer ") + i;
+        vocaRender.renderSwitch(
+            tab_name, String("rdmTmrMd"),
+            F(R"({
+                    "name":"Timer Mode",
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                if (value == "true")
+                {
+                    onTimerMode();
+                }
+                else
+                {
+                    offTimerMode();
+                }
+            },
+            (void *)index);
 
-        vocaRender.renderSelect(tab_name, String("clLyr_") + i, F(R"({
-    "name":"Mẫu màu",
-    "options":[
-    "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"],
-    "span":{
-        "xs":24,
-        "sm":24,
-        "md":12,
-        "xl":12
-    },
-    "newLine":true
-  })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("clLyr_", "");
-                                    li = key.toInt();
-                                    box_setColor(li, value.toInt());
-                                });
+        vocaRender.renderSwitch(
+            tab_name, String("msMd"),
+            F(R"({
+                    "name":"Music Mode",
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
 
-        vocaRender.renderColorPicker(tab_name, String("cl0Lyr_") + i, F(R"({
-    "name":"Màu 0"
-  })"),
-                                     [](String key, String value) {
-                                     });
-        vocaRender.renderColorPicker(tab_name, String("cl1Lyr_") + i, F(R"({
-    "name":"Màu 1"
-  })"),
-                                     [](String key, String value) {
-                                     });
-        vocaRender.renderColorPicker(tab_name, String("cl2Lyr_") + i, F(R"({
-    "name":"Màu 2",
-    "newLine":true
-  })"),
-                                     [](String key, String value) {
-                                     });
-    };
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        String tab_name;
-        tab_name = String("Layer ") + i;
-        vocaRender.renderButton(tab_name, String("mdLyr_") + i + "_prv", F(R"({
+                if (value == "true")
+                {
+                    box_setMusicMode(li, true);
+                }
+                else
+                {
+                    box_setMusicMode(li, false);
+                }
+            },
+            (void *)index);
+        vocaRender.renderButton(
+            tab_name, String("save_layer_") + i,
+            F(R"({
+                    "name":"Lưu",
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                vocaStore.updateStore();
+            },
+            NULL);
+        vocaRender.renderSlider(
+            tab_name, String("brgLyr_") + i,
+            F(R"({
+                    "name":"Độ sáng",
+                    "min":0,
+                    "max":255,
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_setBrightness(li, value.toInt());
+            },
+            (void *)index);
+
+        vocaRender.renderSelect(
+            tab_name, String("clLyr_") + i,
+            F(R"({
+                    "name":"Mẫu màu",
+                    "options":[
+                    "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"],
+                    "span":{
+                        "xs":24,
+                        "sm":24,
+                        "md":12,
+                        "xl":12
+                    },
+                    "newLine":true
+                })"),
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_setColor(li, value.toInt());
+            },
+            (void *)index);
+
+        vocaRender.renderColorPicker(
+            tab_name, String("cl0Lyr_") + i, F(R"({
+            "name":"Màu 0"
+          })"),
+            [](String key, String value, void *param) {
+            },
+            NULL);
+        vocaRender.renderColorPicker(
+            tab_name, String("cl1Lyr_") + i, F(R"({
+            "name":"Màu 1"
+          })"),
+            [](String key, String value, void *param) {
+            },
+            NULL);
+        vocaRender.renderColorPicker(
+            tab_name, String("cl2Lyr_") + i, F(R"({
+            "name":"Màu 2",
+            "newLine":true
+          })"),
+            [](String key, String value, void *param) {
+            },
+            NULL);
+
+        vocaRender.renderButton(
+            tab_name, String("mdLyr_") + i + "_prv", F(R"({
     "name":"Prev"
   })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("mdLyr_", "");
-                                    key.replace("_prv", "");
-                                    li = key.toInt();
-                                    box_prevMode(li);
-                                });
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_prevMode(li);
+            },
+            (void *)index);
 
-        vocaRender.renderButton(tab_name, String("mdLyr_") + i + "_rnd", F(R"({
+        vocaRender.renderButton(
+            tab_name, String("mdLyr_") + i + "_rnd", F(R"({
     "name":"Random",
     "newLine":true
   })"),
-                                [](String key, String value)
-                                {
-                                    box_randomModeAll();
-                                });
-        vocaRender.renderButton(tab_name, String("mdLyr_") + i + "_nxt", F(R"({
+            [](String key, String value, void *param)
+            {
+                box_randomModeAll();
+            },
+            NULL);
+        vocaRender.renderButton(
+            tab_name, String("mdLyr_") + i + "_nxt", F(R"({
     "name":"Next",
     "newLine":true
   })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("mdLyr_", "");
-                                    key.replace("_nxt", "");
-                                    li = key.toInt();
-                                    box_nextMode(li);
-                                });
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_nextMode(li);
+            },
+            (void *)index);
 
-        vocaRender.renderSelect(tab_name, String("mdLyr_") + i, F(R"({
+        vocaRender.renderSelect(
+            tab_name, String("mdLyr_") + i, F(R"({
     "name":"Hiệu ứng",
     "options":[
     "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20",
@@ -156,28 +187,23 @@ void setup_render_layer()
     },
     "newLine":true
   })"),
-                                [](String key, String value)
-                                {
-                                    int li;
-                                    key.replace("mdLyr_", "");
-                                    li = key.toInt();
-                                    box_setMode(li, value.toInt());
-                                });
-    };
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        String tab_name;
-        tab_name = String("Layer ") + i;
-        vocaRender.renderInput(tab_name, String("spdLyr_") + i, F(R"({
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_setMode(li, value.toInt());
+            },
+            (void *)index);
+
+        vocaRender.renderInput(
+            tab_name, String("spdLyr_") + i, F(R"({
     "name":"Tốc độ",
     "newLine":true
   })"),
-                               [](String key, String value)
-                               {
-                                   int li;
-                                   key.replace("spdLyr_", "");
-                                   li = key.toInt();
-                                   box_setSpeed(li, value.toInt());
-                               });
+            [](String key, String value, void *param)
+            {
+                int li = *((int *)param);
+                box_setSpeed(li, value.toInt());
+            },
+            (void *)index);
     };
 };

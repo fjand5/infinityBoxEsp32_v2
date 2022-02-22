@@ -323,16 +323,18 @@ uint8_t ConnectVirtualBox::previousVirtualBoxMode(uint8_t index, uint16_t *newSp
     return currentMode;
 };
 
-uint32_t* ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color)
+void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color, uint32_t *colors)
 {
     VirtualBox *layer = virtualBoxes[indexLayer];
-    uint32_t* ret = new uint32_t[MAX_NUM_COLORS]();
     for (size_t i = 0; i < MAX_NUM_COLORS; i++)
     {
         layer->setColorByIndex(i, listColors[indexColor][i]);
-        ret[i] = listColors[indexColor][i];
+        if (colors != NULL)
+        {
+
+            colors[i] = listColors[indexColor][i];
+        }
     }
-    return ret;
 };
 void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness)
 {
@@ -363,6 +365,18 @@ void ConnectVirtualBox::serviceVirtualBoxes()
         virtualBoxes[i]->service();
     }
 }
+void ConnectVirtualBox::onBeatVirtualBoxes(double val, double freq)
+{
+    for (size_t i = 0; i < NUM_OF_LAYER; i++)
+    {
+        virtualBoxes[i]->onBeat(val, freq);
+    }
+}
+void ConnectVirtualBox::setMusicMode(uint8_t index, bool state)
+{
+    virtualBoxes[index]->setMusicMode(state);
+};
+
 void ConnectVirtualBox::initVirtualBoxes()
 {
     vocaStatus.waitStatus(Status_Store_Initialized);
@@ -404,15 +418,15 @@ void ConnectVirtualBox::initVirtualBoxes()
         tmp = String("cl0Lyr_") + i;
         uint32_t color;
         color = stringToColor(vocaStore.getValue(tmp, "#ff0000", true, false));
-        setVirtualBoxColor(i, 0, color);
+        setVirtualBoxColor(i, 0, color, NULL);
 
         tmp = String("cl1Lyr_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "#00ff00", true, false));
-        setVirtualBoxColor(i, 1, color);
+        setVirtualBoxColor(i, 1, color, NULL);
 
         tmp = String("cl2Lyr_") + i;
         color = stringToColor(vocaStore.getValue(tmp, "#0000ff", true, false));
-        setVirtualBoxColor(i, 1, color);
+        setVirtualBoxColor(i, 1, color, NULL);
 
         tmp = String("brgLyr_") + i;
         setVirtualBoxBrightness(i, vocaStore.getValue(tmp, "50", true, false).toInt());

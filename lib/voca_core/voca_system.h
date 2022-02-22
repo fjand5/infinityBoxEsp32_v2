@@ -13,30 +13,30 @@ void renderUI()
       
     }
   })"),
-                         [](String key, String value)
+                         [](String key, String value, void* param)
                          {
                            vocaStore.setValue(key, value, true);
-                         });
+                         }, NULL);
   vocaRender.renderInput(F("System"), F("_appw"), F(R"({
     "name":"Mật khẩu wifi",
     "description":"",
     "newLine":true,
     "password":true
   })"),
-                         [](String key, String value)
+                         [](String key, String value, void* param)
                          {
                            vocaStore.setValue(key, value, true);
-                         });
+                         }, NULL);
   vocaRender.renderButton(F("System"), F("_reset"), F(R"({
     "name":"Khởi động lại",
     "description":"",
     "confirm":"Bạn có chắc muốn khởi động lại hệ thống không?",
     "span":{}
   })"),
-                          [](String key, String value)
+                          [](String key, String value, void* param)
                           {
                             ESP.restart();
-                          });
+                          }, NULL);
   vocaRender.renderButton(F("System"), F("_format"), F(R"({
     "name":"Xóa dữ liệu",
     "description":"",
@@ -45,16 +45,16 @@ void renderUI()
     "span":{
     }
   })"),
-                          [](String key, String value)
+                          [](String key, String value, void* param)
                           {
                             SPIFFS.format();
-                          });
+                          }, NULL);
   vocaRender.renderInput(F("System"), F("_version"), F(R"({
     "name":"Phiên bản",
     "description":""
   })"),
-                         [](String key, String value) {
-                         });
+                         [](String key, String value, void* param) {
+                         }, NULL);
 }
 void setupSystem()
 {

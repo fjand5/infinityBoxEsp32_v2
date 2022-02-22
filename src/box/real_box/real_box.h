@@ -15,12 +15,13 @@ typedef struct
 {
     uint32_t id;
     uint8_t colorIndex;
-    uint32_t* color;
+    uint32_t* colors;
     int8_t cmd;
     uint8_t layer;
     uint8_t brightness;
     uint8_t mode;
     uint8_t numSeg;
+    bool musicModeState;
     bool rev;
     int8_t option;
     uint16_t speed;
@@ -53,6 +54,7 @@ typedef enum
     BoxCommand_ConfigSegment,
     BoxCommand_ConfigShowFace,
     BoxCommand_SetSpeed,
+    BoxCommand_SetMusicMode,
 } BoxCommand;
 class RealBox : public WS2812FX, public ConnectVirtualBox
 {

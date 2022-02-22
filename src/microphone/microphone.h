@@ -21,7 +21,7 @@ public:
   double mapf(double x, double in_min, double in_max, double out_min, double out_max);
   int32_t getMIC_RAW();
   double calcData();
-  double handleMicrophone(void (*onChangeMax)(double val, double freq) = NULL);
+  double handleMicrophone(void (*onChangeMax)(void* param, double val, double freq), void* param);
   void setMicGain(double gain);
   double getMicGain();
   void setTakeBeat(double beat);

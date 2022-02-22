@@ -5,7 +5,6 @@
 // #include "box_utils.h"
 
 extern RealBox realBox;
-
 void box_enable(int8_t layer)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
@@ -27,6 +26,22 @@ void box_disable(int8_t layer)
                         [request](RealBoxCommandBundle result)
                         {
                             vocaStore.setValue(String("enLyr_") + result.layer, "false", false);
+                            delete request;
+                        });
+}
+void box_setMusicMode(int8_t layer, bool state)
+{
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_SetMusicMode;
+    request->layer = layer;
+    request->musicModeState = state;
+    realBox.feedCommand(request,
+                        [request](RealBoxCommandBundle result)
+                        {
+                            vocaStore.setValue(
+                                String("msMd_") + result.layer,
+                                result.musicModeState ? "true" : "false",
+                                false);
                             delete request;
                         });
 }
@@ -126,14 +141,13 @@ void box_setColor(int8_t layer, int8_t colorIndex)
                         [request](RealBoxCommandBundle result)
                         {
                             char str[8];
-                            sprintf(str, "#%06x", result.color[0]);
+                            sprintf(str, "#%06x", result.colors[0]);
                             vocaStore.setValue(String("cl0Lyr_") + result.layer, String(str), false);
-                            sprintf(str, "#%06x", result.color[1]);
+                            sprintf(str, "#%06x", result.colors[1]);
                             vocaStore.setValue(String("cl1Lyr_") + result.layer, String(str), false);
-                            sprintf(str, "#%06x", result.color[2]);
+                            sprintf(str, "#%06x", result.colors[2]);
                             vocaStore.setValue(String("cl2Lyr_") + result.layer, String(str), false);
                             vocaStore.setValue(String("clLyr_") + result.layer, String(result.colorIndex), false);
-                            delete result.color;
                             delete request;
                         });
 }
@@ -165,7 +179,7 @@ void box_setSpeed(int8_t layer, uint16_t speed)
                             delete request;
                         });
 }
-void box_config_segment(String key, String value)
+void box_config_segment(String key, String value, void* param)
 {
     bool rev;
     uint8_t num;
@@ -204,7 +218,7 @@ void box_config_segment(String key, String value)
                             delete segName;
                         });
 }
-void box_config_show_face(String key, String value)
+void box_config_show_face(String key, String value, void* param)
 {
     key.replace("shw_", "");
     Face *face = new Face;

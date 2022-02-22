@@ -47,3 +47,10 @@ void VirtualBox::setSpeedForMode(uint8_t mode, uint16_t speed)
 {
     speedOfMode[mode] = speed;
 };
+void VirtualBox::setMusicMode(bool state){
+    _musicMode = state;
+};
+void VirtualBox::onBeat(double val, double freq){
+    if(_musicMode == false)
+        return;
+};

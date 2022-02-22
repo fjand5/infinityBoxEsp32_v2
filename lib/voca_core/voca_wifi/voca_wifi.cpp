@@ -107,7 +107,6 @@ void VocaWifi::begin()
     char *sspw = vocaStore.getValueByCStr("_sspw", "78787878");
     WiFi.begin(ssid, sspw);
     
-
     while (WiFi.status() != WL_CONNECTED && millis() < 30000)
     {
         delay(500);

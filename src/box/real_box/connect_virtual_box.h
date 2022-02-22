@@ -47,7 +47,9 @@ protected:
     static void mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes);
     void setVirtualBoxesDisplay(void (*p)());
     void serviceVirtualBoxes();
-
+    // music
+    void onBeatVirtualBoxes(double val, double freq);
+    void setMusicMode(uint8_t index, bool state);
     // control
     void enableVirtualBox(uint8_t index);
     void disableVirtualBox(uint8_t index);
@@ -63,7 +65,7 @@ protected:
     uint8_t nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
     uint8_t previousVirtualBoxMode(uint8_t index, uint16_t *newSpeed);
 
-    uint32_t* setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color);
+    void setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColor, uint32_t color, uint32_t *colors);
 
     void setVirtualBoxBrightness(uint8_t index, uint8_t brightness);
 
