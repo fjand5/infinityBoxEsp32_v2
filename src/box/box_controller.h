@@ -75,7 +75,6 @@ void box_randomMode(int8_t layer)
 }
 void box_randomModeAll()
 {
-
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         box_randomMode(i);
@@ -89,7 +88,7 @@ void box_setTimerRandomMode(bool state)
         randomModeTimer = xTimerCreate(
             "randomModeTimer",
             5000 / portTICK_PERIOD_MS,
-            pdTRUE, (void *)1,
+            pdTRUE, (void *)0,
             [](TimerHandle_t xTimer)
             {
                 box_randomModeAll();
@@ -179,7 +178,7 @@ void box_setSpeed(int8_t layer, uint16_t speed)
                             delete request;
                         });
 }
-void box_config_segment(String key, String value, void* param)
+void box_config_segment(String key, String value, void *param)
 {
     bool rev;
     uint8_t num;
@@ -218,7 +217,7 @@ void box_config_segment(String key, String value, void* param)
                             delete segName;
                         });
 }
-void box_config_show_face(String key, String value, void* param)
+void box_config_show_face(String key, String value, void *param)
 {
     key.replace("shw_", "");
     Face *face = new Face;

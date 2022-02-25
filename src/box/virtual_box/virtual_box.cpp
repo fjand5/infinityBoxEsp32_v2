@@ -6,6 +6,9 @@ VirtualBox::VirtualBox(uint16_t num_leds, uint8_t pin, neoPixelType type,
                                                                    max_num_active_segments)
 {
     speedOfMode = new uint16_t[getModeCount()];
+    Sem_VirtualBox = xSemaphoreCreateBinary();
+    xSemaphoreGive(Sem_VirtualBox);
+
 }
 void VirtualBox::beforeService()
 {
@@ -47,10 +50,22 @@ void VirtualBox::setSpeedForMode(uint8_t mode, uint16_t speed)
 {
     speedOfMode[mode] = speed;
 };
-void VirtualBox::setMusicMode(bool state){
+void VirtualBox::setMusicMode(bool state)
+{
     _musicMode = state;
 };
-void VirtualBox::onBeat(double val, double freq){
-    if(_musicMode == false)
+void VirtualBox::onBeat(double val, double freq)
+{
+    if (_musicMode == false)
         return;
+};
+
+void VirtualBox::controlVirtualBox(CbControlVirtualBox cbControlVirtualBox, void* param)
+{
+    if (xSemaphoreTake(Sem_VirtualBox, portMAX_DELAY) == pdTRUE)
+    {
+        cbControlVirtualBox(this, param);
+        xSemaphoreGive(Sem_VirtualBox);
+     
+    }
 };

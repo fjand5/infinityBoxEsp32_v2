@@ -113,6 +113,7 @@ void VocaStore::setValue(const String key, const String value, const bool save)
     eventBusData->key = key;
     eventBusData->val = value;
     vocaEventBus.executeEventBus(VOCA_STORE_NAME, 0, (void *)eventBusData, sizeof(EventBusData));
+    delete eventBusData;
     // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
     if (!save || isNoChange)
     {

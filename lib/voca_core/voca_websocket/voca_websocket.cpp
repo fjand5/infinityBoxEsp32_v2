@@ -127,7 +127,7 @@ void VocaWebsocket::begin()
             while (1)
             {
                 vocaWebsocket->loop();
-                delay(10);
+                delay(20);
             }
         },
         "loopSocket",

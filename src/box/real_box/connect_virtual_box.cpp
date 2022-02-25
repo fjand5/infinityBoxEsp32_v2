@@ -29,41 +29,55 @@ ConnectVirtualBox::ConnectVirtualBox(/* args */)
 
 void ConnectVirtualBox::configSegment(uint16_t num, bool rev)
 {
+    setConfigState(true);
+
     for (uint8_t i = 0; i < NUM_OF_LAYER; i++)
     {
-        virtualBoxes[i]->resetSegments();
-        virtualBoxes[i]->clear();
-        virtualBoxes[i]->setSegment(0,
-                                    LED_COUNT_ONE_SEG * num,
-                                    LED_COUNT_ONE_SEG * (num + 1) - 1,
-                                    FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, rev);
-        setConfigState(true);
+        virtualBoxes[i]->controlVirtualBox(
+            [num, rev](void *virtualBox, void *param)
+            {
+                VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+                _virtualBox->resetSegments();
+                _virtualBox->clear();
+                _virtualBox->setSegment(0,
+                                        LED_COUNT_ONE_SEG * num,
+                                        LED_COUNT_ONE_SEG * (num + 1) - 1,
+                                        FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, rev);
+            },
+            NULL);
     }
 };
 
 void ConnectVirtualBox::configShowFace(Face face)
 {
+    setConfigState(true);
+
     for (uint8_t i = 0; i < NUM_OF_LAYER; i++)
     {
-        virtualBoxes[i]->resetSegments();
-        virtualBoxes[i]->clear();
-        virtualBoxes[i]->setSegment(0,
-                                    LED_COUNT_ONE_SEG * face.start1,
-                                    LED_COUNT_ONE_SEG * (face.start1 + 1) - 1,
-                                    FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv1);
-        virtualBoxes[i]->setSegment(1,
-                                    LED_COUNT_ONE_SEG * face.start2,
-                                    LED_COUNT_ONE_SEG * (face.start2 + 1) - 1,
-                                    FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv2);
-        virtualBoxes[i]->setSegment(2,
-                                    LED_COUNT_ONE_SEG * face.start3,
-                                    LED_COUNT_ONE_SEG * (face.start3 + 1) - 1,
-                                    FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv3);
-        virtualBoxes[i]->setSegment(3,
-                                    LED_COUNT_ONE_SEG * face.start4,
-                                    LED_COUNT_ONE_SEG * (face.start4 + 1) - 1,
-                                    FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv4);
-        setConfigState(true);
+        virtualBoxes[i]->controlVirtualBox(
+            [face](void *virtualBox, void *param)
+            {
+                VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+                _virtualBox->resetSegments();
+                _virtualBox->clear();
+                _virtualBox->setSegment(0,
+                                        LED_COUNT_ONE_SEG * face.start1,
+                                        LED_COUNT_ONE_SEG * (face.start1 + 1) - 1,
+                                        FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv1);
+                _virtualBox->setSegment(1,
+                                        LED_COUNT_ONE_SEG * face.start2,
+                                        LED_COUNT_ONE_SEG * (face.start2 + 1) - 1,
+                                        FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv2);
+                _virtualBox->setSegment(2,
+                                        LED_COUNT_ONE_SEG * face.start3,
+                                        LED_COUNT_ONE_SEG * (face.start3 + 1) - 1,
+                                        FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv3);
+                _virtualBox->setSegment(3,
+                                        LED_COUNT_ONE_SEG * face.start4,
+                                        LED_COUNT_ONE_SEG * (face.start4 + 1) - 1,
+                                        FX_MODE_COLOR_WIPE, DEFAULT_COLOR, DEFAULT_SPEED, face.inv4);
+            },
+            NULL);
     }
 };
 void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type)
@@ -236,18 +250,37 @@ void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type)
 
 void ConnectVirtualBox::enableVirtualBox(uint8_t index)
 {
-
-    virtualBoxes[index]->enable();
+    virtualBoxes[index]->controlVirtualBox(
+        [](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+            _virtualBox->enable();
+        },
+        NULL);
 };
 
 void ConnectVirtualBox::disableVirtualBox(uint8_t index)
 {
-    virtualBoxes[index]->disable();
+    virtualBoxes[index]->controlVirtualBox(
+        [](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+            _virtualBox->disable();
+        },
+        NULL);
 };
 
 uint8_t ConnectVirtualBox::getVirtualBoxMode(uint8_t index)
 {
-    return virtualBoxes[index]->getMode();
+    uint8_t ret;
+    virtualBoxes[index]->controlVirtualBox(
+        [&ret](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+            ret = _virtualBox->getMode();
+        },
+        NULL);
+    return ret;
 };
 
 void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed)
@@ -264,19 +297,40 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
     setModeBundle->mode = mode;
     if (newSpeed != NULL)
     {
-        *newSpeed = virtualBoxes[index]->getSpeedByMode(setModeBundle->mode);
+        virtualBoxes[index]->controlVirtualBox(
+            [newSpeed, setModeBundle](void *virtualBox, void *param)
+            {
+                VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+                *newSpeed = _virtualBox->getSpeedByMode(setModeBundle->mode);
+            },
+            NULL);
     }
     xTaskCreatePinnedToCore(
         [](void *p)
         {
             SetModeBundle *setModeBundle = (SetModeBundle *)p;
-            uint8_t numOfSegment = setModeBundle->layer->getNumSegments();
+            VirtualBox *virtualBox = setModeBundle->layer;
+            uint8_t numOfSegment;
+            virtualBox->controlVirtualBox(
+                [&numOfSegment](void *virtualBox, void *param)
+                {
+                    VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+                    numOfSegment = _virtualBox->getNumSegments();
+                },
+                NULL);
             for (int i = 0; i < numOfSegment; i++)
             {
 
-                uint16_t _newSpeed = setModeBundle->layer->getSpeedByMode(setModeBundle->mode);
-                setModeBundle->layer->setMode(i, setModeBundle->mode);
-                setModeBundle->layer->setSpeed(i, _newSpeed);
+                virtualBox->controlVirtualBox(
+                    [&numOfSegment, i, setModeBundle](void *virtualBox, void *param)
+                    {
+                        VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+
+                        uint16_t _newSpeed = _virtualBox->getSpeedByMode(setModeBundle->mode);
+                        _virtualBox->setMode(i, setModeBundle->mode);
+                        _virtualBox->setSpeed(i, _newSpeed);
+                    },
+                    NULL);
 
                 delay(TRANSITION_TIME / numOfSegment);
             };
@@ -293,11 +347,11 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
 
 uint8_t ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
 {
+
     uint8_t currentMode = getVirtualBoxMode(index);
     currentMode++;
     if (currentMode >= FX_MODE_CUSTOM)
         currentMode = 0;
-    ;
     setVirtualBoxMode(index, currentMode, newSpeed);
     return currentMode;
 };
@@ -305,10 +359,17 @@ uint8_t ConnectVirtualBox::randomVirtualBoxMode(uint8_t index, uint16_t *newSpee
 {
     uint8_t currentMode = getVirtualBoxMode(index);
     uint8_t newMode = currentMode;
+    uint32_t timeout = micros();
+    // Nếu trong chế độ config thì không cho phép tự chuyển mode
+    if (getConfigState() == true)
+        return currentMode;
+    // Thời gian tối đa để chọn mode là 1ms
     do
     {
         newMode = random(FX_MODE_CUSTOM + 1);
-    } while (currentMode == newMode);
+    } while (
+        (currentMode == newMode) &&
+        (micros() - timeout < 1000));
     setVirtualBoxMode(index, newMode, newSpeed);
     return currentMode;
 };
@@ -339,19 +400,31 @@ void ConnectVirtualBox::setVirtualBoxColor(uint8_t indexLayer, uint8_t indexColo
 void ConnectVirtualBox::setVirtualBoxBrightness(uint8_t index, uint8_t brightness)
 {
 
-    VirtualBox *layer = virtualBoxes[index];
-    layer->setBrightness(brightness);
+    virtualBoxes[index]->controlVirtualBox(
+        [brightness](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+            _virtualBox->setBrightness(brightness);
+        },
+        NULL);
 };
 void ConnectVirtualBox::setVirtualBoxSpeed(uint8_t index, uint16_t speed)
 {
-    VirtualBox *layer = virtualBoxes[index];
-    for (int i = 0; i < layer->getNumSegments(); i++)
-    {
-        layer->setSpeed(i, speed);
-    }
+    virtualBoxes[index]->controlVirtualBox(
+        [speed](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+
+            for (int i = 0; i < _virtualBox->getNumSegments(); i++)
+            {
+                _virtualBox->setSpeed(i, speed);
+            }
+        },
+        NULL);
 }
 void ConnectVirtualBox::setVirtualBoxesDisplay(void (*p)())
 {
+
     for (size_t i = 0; i < NUM_OF_LAYER; i++)
     {
         virtualBoxes[i]->setCustomShow(p);
@@ -374,7 +447,14 @@ void ConnectVirtualBox::onBeatVirtualBoxes(double val, double freq)
 }
 void ConnectVirtualBox::setMusicMode(uint8_t index, bool state)
 {
-    virtualBoxes[index]->setMusicMode(state);
+    virtualBoxes[index]->controlVirtualBox(
+        [state](void *virtualBox, void *param)
+        {
+            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+
+            _virtualBox->setMusicMode(state);
+        },
+        NULL);
 };
 
 void ConnectVirtualBox::initVirtualBoxes()

@@ -119,7 +119,7 @@ void RealBox::commandHandle()
                 uint8_t modeInt = getVirtualBoxMode(commandInfo.layer);
                 RealBoxCommandBundle res;
                 res.id = commandInfo.id;
-                res.p = &modeInt;
+                res.mode = modeInt;
                 responseResult(res);
             }
             else if (commandInfo.cmd == BoxCommand_SetMode)

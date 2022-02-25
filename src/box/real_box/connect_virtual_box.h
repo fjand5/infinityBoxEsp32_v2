@@ -19,6 +19,7 @@ private:
     DEFINE_DEFAULT_SPEED;
     DEFINE_DEFAULT_COLOR(MAX_NUM_COLORS);
 protected:
+
     struct Face
     {
         uint16_t start1;
