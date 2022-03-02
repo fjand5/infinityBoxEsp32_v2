@@ -1,5 +1,6 @@
 #ifndef CONTROLLER
 #define CONTROLLER
+#include "box/box_controller.h"
 
 #include "render/render.h"
 #include "control_button/control_button.h"
@@ -14,23 +15,24 @@ void onTimerMode()
 {
     box_setTimerRandomMode(true);
     controlButton.setLedMode(LedMode_FadeFast);
-    vocaStore.setValue("rdmTmrMd", "true");
+    vocaStore.setValue("rndTmrMd", "true");
 }
 void offTimerMode()
 {
     box_setTimerRandomMode(false);
     controlButton.setLedMode(LedMode_Blink);
-    vocaStore.setValue("rdmTmrMd", "false");
+    vocaStore.setValue("rndTmrMd", "false");
 }
 void settupSystem()
 {
     vocaStore.setOnReady(
         []()
         {
-            realBox.begin();
             microphone.begin();
+            realBox.begin();
 
-            if (vocaStore.getValue("rdmTmrMd", "true") == "true")
+            std::string value = vocaStore.getValue("rndTmrMd", "true");
+            if (!value.compare("true"))
             {
                 onTimerMode();
             }
@@ -38,6 +40,8 @@ void settupSystem()
             {
                 offTimerMode();
             }
+            value = vocaStore.getValue("rndClTm", "true");
+            box_setTimerRandomColor(!value.compare("true"));
         });
     controlButton.begin();
     controlButton.setClickEvent(

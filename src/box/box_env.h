@@ -1,5 +1,6 @@
 #ifndef BOX_ENV
 #define BOX_ENV
+#include "../box_ultis.h"
 #define NUM_OF_LAYER 3
 #define LED_COUNT (12 * 4 * 6)
 // #define LED_COUNT 8*4*6
@@ -21,7 +22,7 @@
 
 #define COLOR_COUNT 15
 #define DEFINE_DEFAULT_COLOR(num)                \
-    uint32_t listColors[COLOR_COUNT][num] = { \
+    uint32_t listDefaulColors[COLOR_COUNT][num] = { \
         {0x0f2557, 0xee7879, 0xf3a51a},     \
         {0xff6700, 0x191970, 0xe0e722},     \
         {0x3e090d, 0xc75f5f, 0x89feff},     \
@@ -38,5 +39,4 @@
         {0xb0acb0, 0x85ebd9, 0x2f404d},     \
         {0xff577d, 0xffccdc, 0x0a9cf5},     \
     }
-
 #endif

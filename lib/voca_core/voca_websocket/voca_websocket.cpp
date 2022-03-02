@@ -60,9 +60,9 @@ void VocaWebsocket::cbWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
                     if (item != NULL)
                         item(obj);
                 }
-                String _key = obj["espKey"];
+                std::string _key = obj["espKey"];
                 obj = _doc.to<JsonObject>();
-                vocaStore.readValueToObject(_key, obj);
+                vocaStore.readValueToObject(_key.c_str(), obj);
             }
             else if (obj["cmd"] == "gal")
             {
@@ -111,7 +111,7 @@ void VocaWebsocket::begin()
             vocaStatus.waitStatus(Status_Store_Initialized);
 
             vocaStore.addStoreChangeEvent(
-                [](String key, String value, void *p)
+                [](std::string key, std::string value, void *p)
                 {
                     VocaWebsocket *_ws = (VocaWebsocket *)p;
                     DynamicJsonDocument _doc(2048);
@@ -133,7 +133,7 @@ void VocaWebsocket::begin()
         "loopSocket",
         5000,
         (void *)this,
-        2,
+        0,
         NULL,
         VOCA_CORE_CPU);
 }

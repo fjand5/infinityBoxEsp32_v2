@@ -206,7 +206,7 @@ void VocaWebserver::begin(/* args */)
         "loopWebserver",
         4096,
         (void *)this,
-        1,
+        0,
         NULL,
         VOCA_CORE_CPU);
 }

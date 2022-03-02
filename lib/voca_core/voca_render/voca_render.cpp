@@ -4,13 +4,14 @@ VocaRender::VocaRender(/* args */)
 {
 }
 
-void VocaRender::addComponentEvents(String key, ComponentEvent cb, void* param)
+void VocaRender::addComponentEvents(std::string key, ComponentEvent cb, void* param)
 {
+  std::string _key(key);
   ComponentEventParam componentEventParam = std::make_pair(cb,param);
-  componentEvents[key] = componentEventParam;
+  componentEvents[_key] = componentEventParam;
 }
 
-void VocaRender::renderComponent(String compt, String tab, String espKey, String props)
+void VocaRender::renderComponent(std::string compt, std::string tab, std::string espKey, std::string props)
 {
   if (xSemaphoreTake(semVocaRender, portMAX_DELAY) == pdTRUE)
   {
@@ -51,46 +52,46 @@ void VocaRender::begin()
   vocaWebsocket.setWebsocketReceiveEvent(
       [this](JsonObject obj)
       {
-        for (std::pair<String, ComponentEventParam> e : componentEvents)
+        for (std::pair<std::string, ComponentEventParam> e : componentEvents)
         {
-          String k = e.first;
+          std::string k = e.first;
           ComponentEventParam componentEventParam = e.second;
           ComponentEvent cb = componentEventParam.first;
           void* _param = componentEventParam.second;
           if (obj["espKey"] == k)
           {
-            cb(k, obj["espValue"], _param);
+            cb(k.c_str(), obj["espValue"].as<std::string>(), _param);
           }
         }
       });
 }
 
-void VocaRender::renderInput(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderInput(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspInput", tab, espKey, option);
 }
-void VocaRender::renderSlider(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderSlider(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspSlider", tab, espKey, option);
 }
-void VocaRender::renderSwitch(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderSwitch(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspSwitch", tab, espKey, option);
 }
-void VocaRender::renderButton(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderButton(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspButton", tab, espKey, option);
 }
-void VocaRender::renderColorPicker(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderColorPicker(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspColorPicker", tab, espKey, option);
 }
-void VocaRender::renderSelect(String tab, String espKey, String option, ComponentEvent event, void* param)
+void VocaRender::renderSelect(std::string tab, std::string espKey, std::string option, ComponentEvent event, void* param)
 {
   addComponentEvents(espKey, event, param);
   renderComponent("EspSelect", tab, espKey, option);

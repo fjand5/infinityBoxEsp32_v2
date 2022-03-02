@@ -1,8 +1,7 @@
 #pragma once
 #include <Preferences.h>
-
 #define VOCA_CORE_CPU 1
-
+#define WAIT_TO_CONNECT_STA 30000
 // Bật/Tắt tính năng kiểm tra quá hạn token
 // #define AUTH_FEATURE
 #define CHECK_EXPIRE
@@ -15,5 +14,7 @@
 #define APID "vocaui"
 #define APPW "12345678"
 
+
+#define MAX_CHAR_IN_LINE 1024
 #define CONFIG_FILE "/config.txt"
 

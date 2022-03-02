@@ -4,11 +4,11 @@ bool VocaStore::mountSpiffs()
 {
     log_d("==== Initializing SPIFFS ====\n");
     delay(111);
-    if (!SPIFFS.begin())
+    if (!LITTLEFS.begin())
     {
         log_w("Can't mount SPIFFS, Try format\n");
-        SPIFFS.format();
-        if (!SPIFFS.begin())
+        LITTLEFS.format();
+        if (!LITTLEFS.begin())
         {
             log_w("Can't mount SPIFFS\n");
             log_e("==== Initialize SPIFFS failed ====\n");
@@ -29,30 +29,50 @@ bool VocaStore::mountSpiffs()
 
 bool VocaStore::loadFileToContent()
 {
-    File cfg_file = SPIFFS.open(CONFIG_FILE, "r");
+
+    File cfg_file = LITTLEFS.open(CONFIG_FILE, "r");
     if (cfg_file)
     {
-        String content = cfg_file.readString();
         // Mỗi dòng là một phần tử (một cặp key value) (key)=(value)
-        log_d("\n=======\n%s=======\n", content.c_str());
-        while (content.indexOf("\n") >= 0)
+        while (cfg_file.available())
         {
-            String curLine = content.substring(0, content.indexOf("\n"));
-            String key = curLine.substring(0, content.indexOf("="));
-            String value = curLine.substring(content.indexOf("=") + 1);
-            storeContent[key] = value;
-            content.remove(0, curLine.length() + 1);
+            // cấp phát ở đây để tất cả phần tử đều là zero
+            char *line = new char[MAX_CHAR_IN_LINE]();
+            cfg_file.readBytesUntil('\n', line, MAX_CHAR_IN_LINE);
+
+            std::string strLine(line);
+            uint32_t splitPos = strLine.find("=");
+            std::string key = strLine.substr(0, splitPos);
+            std::string val = strLine.substr(splitPos + 1);
+
+            storeContent[key] = val;
+            log_w("[%s: %s]", key.c_str(), val.c_str());
+            delete line;
         }
+
+        // String content = cfg_file.readString();
+        // Mỗi dòng là một phần tử (một cặp key value) (key)=(value)
+        // log_d("\n=======\n%s=======\n", content.c_str());
+        // while (content.indexOf("\n") >= 0)
+        // {
+        //     String curLine = content.substring(0, content.indexOf("\n"));
+        //     String key = curLine.substring(0, content.indexOf("="));
+        //     String value = curLine.substring(content.indexOf("=") + 1);
+        //     storeContent[key] = value;
+        //     content.remove(0, curLine.length() + 1);
+        // }
+
         semStoreContent = xSemaphoreCreateBinary();
         xSemaphoreGive(semStoreContent);
+        cfg_file.close();
+
         return true;
     }
     else
     {
         // create file if not exist
-        SPIFFS.open(CONFIG_FILE, "a");
+        LITTLEFS.open(CONFIG_FILE, "a");
     }
-    cfg_file.close();
 }
 VocaStore::VocaStore()
 {
@@ -64,39 +84,52 @@ void VocaStore::begin()
     {
         return;
     }
+    loadFileToContent();
     semSpiffs = xSemaphoreCreateBinary();
     xSemaphoreGive(semSpiffs);
-    loadFileToContent();
+
     vocaStatus.setStatus(Status_Store_Initialized);
     ready();
 }
-bool VocaStore::checkValidKey(const String key)
+bool VocaStore::checkValidKey(std::string key)
 {
-    if (key.startsWith("*")       // system key
-        || key.indexOf("=") >= 0  // invalid key
-        || key.indexOf("\n") >= 0 // invalid key
+ 
+    if (key.find("*") == 0                     // system key
+        || key.find("=") != std::string::npos  // invalid key
+        || key.find("\n") != std::string::npos // invalid key
     )
         return false;
     return true;
 }
-bool VocaStore::checkValidValue(const String value)
+bool VocaStore::checkValidValue(std::string value)
 {
-    if (value.indexOf("=") >= 0     // invalid value
-        || value.indexOf("\n") >= 0 // invalid value
+    if (value.find("=") != std::string::npos     // invalid value
+        || value.find("\n") != std::string::npos // invalid value
     )
         return false;
     return true;
 }
-void VocaStore::setValue(const String key, const String value, const bool save)
+void VocaStore::setValue(std::string key, std::string value, const bool save)
 {
+
     log_d("Setting Value: key: %s; value: %s\n", key.c_str(), value.c_str());
-    bool isNoChange = storeContent[key] == value;
+    bool isNoChange = false;
+    if (checkKey(key))
+    {
+        if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
+        {
+
+            isNoChange = storeContent[key] == value;
+            xSemaphoreGive(semStoreContent);
+        }
+    }
     if (!isNoChange)
     {
         if (!checkValidKey(key) || !checkValidValue(value))
         {
             return;
         }
+        log_d("checked ValidKey Value: key: %s; value: %s\n", key.c_str(), value.c_str());
 
         if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
         {
@@ -113,9 +146,12 @@ void VocaStore::setValue(const String key, const String value, const bool save)
     eventBusData->key = key;
     eventBusData->val = value;
     vocaEventBus.executeEventBus(VOCA_STORE_NAME, 0, (void *)eventBusData, sizeof(EventBusData));
+    // dữ liệu đã được copy nên có thể xóa
     delete eventBusData;
     // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
-    if (!save || isNoChange)
+    if (
+        !save ||
+        isNoChange)
     {
         return;
     }
@@ -126,23 +162,24 @@ bool VocaStore::updateStore()
     if (xSemaphoreTake(semSpiffs, portMAX_DELAY) == pdTRUE)
     {
     REOPEN:
-        File cfg_file = SPIFFS.open(CONFIG_FILE, "w");
+        File cfg_file = LITTLEFS.open(CONFIG_FILE, "w");
         if (!cfg_file)
         {
             cfg_file.close();
             delay(100);
             log_e("Can't open file, reopening...");
-            SPIFFS.end();
-            SPIFFS.begin();
+            LITTLEFS.end();
+            LITTLEFS.begin();
             goto REOPEN;
         }
         if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
         {
-            for (std::pair<String, String> e : storeContent)
+            for (std::pair<std::string, std::string> e : storeContent)
             {
-                String k = e.first;
-                String v = e.second;
-                cfg_file.print(k + "=" + v + "\n");
+                std::string k = e.first;
+                std::string v = e.second;
+                cfg_file.printf("%s=%s\n", k.c_str(), v.c_str());
+                // log_w("[%s: %s]", k.c_str(), v.c_str());
             }
             xSemaphoreGive(semStoreContent);
         }
@@ -159,7 +196,7 @@ void VocaStore::addStoreChangeEvent(EventBusFunction cb, void *prams)
                              prams, true);
 }
 
-bool VocaStore::checkKey(const String key)
+bool VocaStore::checkKey(std::string key)
 {
     if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
     {
@@ -169,7 +206,25 @@ bool VocaStore::checkKey(const String key)
     }
     return false;
 }
-const String VocaStore::getValue(const String key, const String def, bool createIfNotExist, bool save)
+
+// uint32_t VocaStore::getValueSize(std::string key)
+// {
+//     if (checkKey(key))
+//     {
+//         if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
+//         {
+//             std::string _key(key);
+//             std::string ret = storeContent[_key];
+//             xSemaphoreGive(semStoreContent);
+//             return ret.length();
+//         }
+//     }
+//     else
+//     {
+//         return 0;
+//     }
+// };
+std::string VocaStore::getValue(std::string key, std::string def, bool createIfNotExist, bool save)
 {
     if (!checkValidKey(key))
         return "";
@@ -177,9 +232,9 @@ const String VocaStore::getValue(const String key, const String def, bool create
     {
         if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
         {
-            String ret = storeContent[key];
+            std::string value = storeContent[key];
             xSemaphoreGive(semStoreContent);
-            return ret;
+            return value;
         }
     }
     else
@@ -191,73 +246,79 @@ const String VocaStore::getValue(const String key, const String def, bool create
         return def;
     }
 }
-void VocaStore::readValueToObject(const String key, JsonObject objectValue, const String def, bool createIfNotExist)
+void VocaStore::readValueToObject(std::string key, JsonObject objectValue, std::string def, bool createIfNotExist)
 {
-    if (!checkValidKey(key))
+    if (!checkKey(key))
+    {
         return;
-    String value = getValue(key, def, createIfNotExist);
+    }
+    if (!checkValidKey(key))
+    {
+
+        return;
+    }
+    std::string value = getValue(key, def, createIfNotExist);
     objectValue[key] = value;
 }
-char *VocaStore::getValueByCStr(const String key, const String def, bool createIfNotExist)
+// uint32_t VocaStore::getStoreSize()
+// {
+//     uint32_t ret = 0;
+//     if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
+//     {
+//         for (std::pair<std::string, std::string> e : storeContent)
+//         {
+//             std::string k = e.first;
+//             if (k.find("*") == 0)
+//                 continue;
+//             std::string v = e.second;
+//             std::string line = k + "=" + v + "\n";
+//             ret += line.length();
+//         }
+//         xSemaphoreGive(semStoreContent);
+//     }
+//     return ret;
+// };
+
+std::string VocaStore::getStore()
 {
-    char *ret = nullptr;
-    if (!checkValidKey(key))
-    {
-        return ret;
-    }
-    if (checkKey(key))
-    {
-        String tmp;
-        if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
-        {
-            tmp = storeContent[key];
-            xSemaphoreGive(semStoreContent);
-        }
-        ret = new char[tmp.length() + 1];
-        strcpy(ret, tmp.c_str());
-        return ret;
-    }
-    else
-    {
-        if (createIfNotExist)
-        {
-            setValue(key, def, true);
-        }
-        String tmp = def;
-        ret = new char[tmp.length() + 1];
-        strcpy(ret, tmp.c_str());
-        return ret;
-    }
-}
-String VocaStore::getStore()
-{
-    String ret = "";
+    std::string storeData;
     if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
     {
-        for (std::pair<String, String> e : storeContent)
+        for (std::pair<std::string, std::string> e : storeContent)
         {
-            String k = e.first;
-            if (k.startsWith("*"))
+            std::string k = e.first;
+            if (k.find("*") == 0)
                 continue;
-            String v = e.second;
-            ret += k + "=" + v + "\n";
+            std::string v = e.second;
+            std::string line = k + "=" + v + "\n";
+            storeData += line;
         }
         xSemaphoreGive(semStoreContent);
     }
-    return ret;
+    return storeData;
 }
 void VocaStore::readStore(JsonObject objectValues)
 {
     if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
     {
-        for (std::pair<String, String> e : storeContent)
+        for (std::pair<std::string, std::string> e : storeContent)
         {
-            String k = e.first;
-            if (k.startsWith("*"))
+            std::string k = e.first;
+            if (k.find("*") == 0)
                 continue;
-            String v = e.second;
+            std::string v = e.second;
             objectValues[k] = v;
         }
         xSemaphoreGive(semStoreContent);
     }
 }
+// char *VocaStore::createBuffer(const char *value)
+// {
+
+//     uint32_t curLen = strlen(value);
+//     if (curLen > maxLengthOfValue)
+//     {
+//         maxLengthOfValue = curLen;
+//     }
+//     return new char[maxLengthOfValue + 1]();
+// };

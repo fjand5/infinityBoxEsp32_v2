@@ -19,6 +19,7 @@ void RealBox::boxHandle()
     setVirtualBoxesDisplay(boxShow);
     initVirtualBoxes();
     log_w("Box has initialze !!!");
+
     while (1)
     {
         // static UBaseType_t lastUxHighWaterMark = 0;
@@ -156,7 +157,7 @@ void RealBox::commandHandle()
             else if (commandInfo.cmd == BoxCommand_SetColor)
             {
                 uint32_t *colors = new uint32_t[MAX_NUM_COLORS]();
-                setVirtualBoxColor(commandInfo.layer, commandInfo.option, commandInfo.colorIndex, colors);
+                setVirtualBoxColor(commandInfo.layer, commandInfo.colorIndex, colors);
                 commandInfo.colors = colors;
                 responseResult(commandInfo);
                 delete colors;
@@ -205,7 +206,7 @@ void RealBox::begin()
             _realBox->boxHandle();
         },             /* Task function. */
         "boxHandle",   /* name of task. */
-        4096,          /* Stack size of task */
+        10000,          /* Stack size of task */
         (void *)this,  /* parameter of the task */
         0,             /* priority of the task */
         NULL,          /* Task handle to keep track of created task */

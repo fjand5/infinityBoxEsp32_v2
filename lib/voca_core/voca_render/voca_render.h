@@ -7,16 +7,17 @@
 #include "../voca_webserver/voca_webserver.h"
 #include <map>
 #include <list>
+#include <string>
 
-typedef std::function<void(String key, String value, void *param)> ComponentEvent;
+typedef std::function<void(std::string key, std::string value, void *param)> ComponentEvent;
 typedef std::pair <ComponentEvent,void*> ComponentEventParam; 
 class VocaRender
 {
 private:
-  String renderData;
+  std::string renderData;
   SemaphoreHandle_t semVocaRender;
-  std::map<String, ComponentEventParam> componentEvents;
-  void addComponentEvents(String key, ComponentEvent cb, void *param);
+  std::map<std::string, ComponentEventParam> componentEvents;
+  void addComponentEvents(std::string key, ComponentEvent cb, void *param);
 
   /*
 option.span : số cột component chiếm
@@ -29,17 +30,17 @@ option.offset : số cột component dịch sang phải (những components phí
 option.pull : di chuyển component sang phải (những components khác KHÔNG bị dịch theo)
 option.push : di chuyển component sang trái
 */
-  void renderComponent(String compt, String tab, String espKey, String props);
+  void renderComponent(std::string compt, std::string tab, std::string espKey, std::string props);
 
 public:
   VocaRender();
   void begin();
-  void renderInput(String tab, String espKey, String option, ComponentEvent event, void *param);
-  void renderSlider(String tab, String espKey, String option, ComponentEvent event, void *param);
-  void renderSwitch(String tab, String espKey, String option, ComponentEvent event, void *param);
-  void renderButton(String tab, String espKey, String option, ComponentEvent event, void *param);
-  void renderColorPicker(String tab, String espKey, String option, ComponentEvent event, void *param);
-  void renderSelect(String tab, String espKey, String option, ComponentEvent event, void *param);
+  void renderInput(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
+  void renderSlider(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
+  void renderSwitch(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
+  void renderButton(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
+  void renderColorPicker(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
+  void renderSelect(std::string tab, std::string espKey, std::string option, ComponentEvent event, void *param);
   ~VocaRender();
 };
 extern VocaRender vocaRender;

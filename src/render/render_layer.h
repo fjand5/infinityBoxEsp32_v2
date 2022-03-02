@@ -9,20 +9,25 @@ void setup_render_layer()
 {
     for (int i = 0; i < NUM_OF_LAYER; i++)
     {
-        String tab_name;
-        tab_name = String("Layer ") + i;
+        std::string tab_name;
+        std::string key;
         int *index = new int(i);
+        std::string iStr = toString(i);
+        tab_name = "Layer ";
+        tab_name += iStr;
 
+        key = "enLyr_";
+        key += iStr;
         vocaRender.renderSwitch(
-            tab_name, String("enLyr_") + i,
-            F(R"({
+            tab_name.c_str(), key.c_str(),
+            R"({
                     "name":"Chạy",
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-                if (value == "true")
+                if (!value.compare("true"))
                     box_enable(li);
                 else
                     box_disable(li);
@@ -30,14 +35,14 @@ void setup_render_layer()
             (void *)index);
 
         vocaRender.renderSwitch(
-            tab_name, String("rdmTmrMd"),
-            F(R"({
+            tab_name.c_str(), "rndTmrMd",
+            R"({
                     "name":"Timer Mode",
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
-                if (value == "true")
+                if (!value.compare("true"))
                 {
                     onTimerMode();
                 }
@@ -46,19 +51,18 @@ void setup_render_layer()
                     offTimerMode();
                 }
             },
-            (void *)index);
+            NULL);
 
         vocaRender.renderSwitch(
-            tab_name, String("msMd"),
-            F(R"({
+            tab_name.c_str(), "msMd",
+            R"({
                     "name":"Music Mode",
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-
-                if (value == "true")
+                if (!value.compare("true"))
                 {
                     box_setMusicMode(li, true);
                 }
@@ -68,35 +72,43 @@ void setup_render_layer()
                 }
             },
             (void *)index);
+
+        key = "save_layer_";
+        key += std::string(iStr);
         vocaRender.renderButton(
-            tab_name, String("save_layer_") + i,
-            F(R"({
+            tab_name.c_str(), key.c_str(),
+            R"({
                     "name":"Lưu",
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
                 vocaStore.updateStore();
             },
             NULL);
+
+        key = "brgLyr_";
+        key += std::string(iStr);
         vocaRender.renderSlider(
-            tab_name, String("brgLyr_") + i,
-            F(R"({
+            tab_name.c_str(), key.c_str(),
+            R"({
                     "name":"Độ sáng",
                     "min":0,
                     "max":255,
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-                box_setBrightness(li, value.toInt());
+                box_setBrightness(li, atoi(value.c_str()));
             },
             (void *)index);
 
+        key = "clLyr_";
+        key += std::string(iStr);
         vocaRender.renderSelect(
-            tab_name, String("clLyr_") + i,
-            F(R"({
+            tab_name.c_str(), key.c_str(),
+            R"({
                     "name":"Mẫu màu",
                     "options":[
                     "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"],
@@ -107,72 +119,92 @@ void setup_render_layer()
                         "xl":12
                     },
                     "newLine":true
-                })"),
-            [](String key, String value, void *param)
+                })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-                box_setColor(li, value.toInt());
+                box_setColor(li, atoi(value.c_str()));
             },
             (void *)index);
 
+        key = "cl0Lyr_";
+        key += std::string(iStr);
         vocaRender.renderColorPicker(
-            tab_name, String("cl0Lyr_") + i, F(R"({
+            tab_name.c_str(), key.c_str(), R"({
             "name":"Màu 0"
-          })"),
-            [](String key, String value, void *param) {
-            },
-            NULL);
-        vocaRender.renderColorPicker(
-            tab_name, String("cl1Lyr_") + i, F(R"({
-            "name":"Màu 1"
-          })"),
-            [](String key, String value, void *param) {
-            },
-            NULL);
-        vocaRender.renderColorPicker(
-            tab_name, String("cl2Lyr_") + i, F(R"({
-            "name":"Màu 2",
-            "newLine":true
-          })"),
-            [](String key, String value, void *param) {
+          })",
+            [](std::string key, std::string value, void *param) {
             },
             NULL);
 
+        key = "cl1Lyr_";
+        key += std::string(iStr);
+        vocaRender.renderColorPicker(
+            tab_name.c_str(), key.c_str(), R"({
+            "name":"Màu 1"
+          })",
+            [](std::string key, std::string value, void *param) {
+            },
+            NULL);
+
+        key = "cl2Lyr_";
+        key += std::string(iStr);
+        vocaRender.renderColorPicker(
+            tab_name.c_str(), key.c_str(), R"({
+            "name":"Màu 2",
+            "newLine":true
+          })",
+            [](std::string key, std::string value, void *param) {
+            },
+            NULL);
+
+        key = "mdLyr_";
+        key += std::string(iStr);
+        key += "_prv";
         vocaRender.renderButton(
-            tab_name, String("mdLyr_") + i + "_prv", F(R"({
+            tab_name.c_str(), key.c_str(), R"({
     "name":"Prev"
-  })"),
-            [](String key, String value, void *param)
+  })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
                 box_prevMode(li);
             },
             (void *)index);
 
+        key = "mdLyr_";
+        key += std::string(iStr);
+        key += "_rnd";
         vocaRender.renderButton(
-            tab_name, String("mdLyr_") + i + "_rnd", F(R"({
+            tab_name.c_str(), key.c_str(), R"({
     "name":"Random",
     "newLine":true
-  })"),
-            [](String key, String value, void *param)
+  })",
+            [](std::string key, std::string value, void *param)
             {
                 box_randomModeAll();
             },
             NULL);
+
+        key = "mdLyr_";
+        key += std::string(iStr);
+        key += "_nxt";
         vocaRender.renderButton(
-            tab_name, String("mdLyr_") + i + "_nxt", F(R"({
+            tab_name.c_str(), key.c_str(), R"({
     "name":"Next",
     "newLine":true
-  })"),
-            [](String key, String value, void *param)
+  })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
                 box_nextMode(li);
             },
             (void *)index);
 
+        key = "mdLyr_";
+        key += std::string(iStr);
         vocaRender.renderSelect(
-            tab_name, String("mdLyr_") + i, F(R"({
+            tab_name.c_str(), key.c_str(), R"({
     "name":"Hiệu ứng",
     "options":[
     "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20",
@@ -186,23 +218,25 @@ void setup_render_layer()
         "xl":12
     },
     "newLine":true
-  })"),
-            [](String key, String value, void *param)
+  })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-                box_setMode(li, value.toInt());
+                box_setMode(li, atoi(value.c_str()));
             },
             (void *)index);
 
+        key = "spdLyr_";
+        key += std::string(iStr);
         vocaRender.renderInput(
-            tab_name, String("spdLyr_") + i, F(R"({
+            tab_name.c_str(), key.c_str(), R"({
     "name":"Tốc độ",
     "newLine":true
-  })"),
-            [](String key, String value, void *param)
+  })",
+            [](std::string key, std::string value, void *param)
             {
                 int li = *((int *)param);
-                box_setSpeed(li, value.toInt());
+                box_setSpeed(li, atoi(value.c_str()));
             },
             (void *)index);
     };

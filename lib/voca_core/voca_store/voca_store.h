@@ -7,44 +7,49 @@
 #include "../voca_eventbus/voca_eventbus.h"
 #include "../voca_base/voca_base.h"
 #include "FS.h"
-#include "SPIFFS.h"
+#include "LITTLEFS.h"
 #include <map>
 #include <list>
+#include <string>
+
 #include <ArduinoJson.h>
 extern VocaEventBus vocaEventBus;
 class VocaStore: public VocaBase
 {
 private:
-  std::map<String, String> storeContent;
-  std::map<int32_t, String> keyIndex;
+  std::map<std::string, std::string> storeContent;
+  std::map<int32_t, std::string> keyIndex;
   SemaphoreHandle_t semSpiffs;
   SemaphoreHandle_t semStoreContent;
   bool mountSpiffs();
   bool loadFileToContent();
-  bool checkValidKey(const String key);
-  bool checkValidValue(const String value);
+  bool checkValidKey(std::string key);
+  bool checkValidValue(std::string value);
 
 public:
   VocaStore();
   void begin();
-  void setValue(const String key, const String value, bool save = false);
+  void setValue(std::string key, std::string value, bool save = false);
   bool updateStore();
   void addStoreChangeEvent(EventBusFunction cb, void *prams);
-  bool checkKey(const String key);
-  const String getValue(const String key, const String def = "", bool createValueByDefault = true, bool save = true);
-  void readValueToObject(const String key, JsonObject objectValue, const String def = "", bool createIfNotExist = true);
-  char *getValueByCStr(const String key, const String def = "", bool createIfNotExist = true);
+  bool checkKey(std::string key);
+  // uint32_t getValueSize(std::string key);
 
-  String getStore();
+  std::string getValue(std::string key, std::string def = "", bool createValueByDefault = true, bool save = true);
+  void readValueToObject(std::string key, JsonObject objectValue, std::string def = "", bool createIfNotExist = true);
+
+  // uint32_t getStoreSize();
+  std::string getStore();
   void readStore(JsonObject objectValues);
+
 };
 extern VocaStore vocaStore;
 
 
 #if 0
-String getUsername()
+char* getUsername()
 {
-  String username;
+  char* username;
   if (!checkKey("*username"))
     return DEFAULT_USERNAME;
   if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
@@ -54,7 +59,7 @@ String getUsername()
   }
   return username;
 }
-void setUsername(String username)
+void setUsername(char* username)
 {
   if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
   {
@@ -63,7 +68,7 @@ void setUsername(String username)
   }
   saveConfigFile();
 }
-void setPassword(String password)
+void setPassword(char* password)
 {
   if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
   {
@@ -72,9 +77,9 @@ void setPassword(String password)
   }
   saveConfigFile();
 }
-String getPassword()
+char* getPassword()
 {
-  String password;
+  char* password;
   if (!checkKey("*password"))
     return DEFAULT_PASSWORD;
   if (xSemaphoreTake(configContent_sem, portMAX_DELAY) == pdTRUE)
@@ -84,7 +89,7 @@ String getPassword()
   }
   return password;
 }
-bool Authentication(String username, String password)
+bool Authentication(char* username, char* password)
 {
   if (getUsername() == username && getPassword() == password)
     return true;

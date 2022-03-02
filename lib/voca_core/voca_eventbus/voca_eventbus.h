@@ -3,12 +3,12 @@
 #define VOCA_EVENTBUS_NAME "eventBusArgs"
 #include <functional>
 
-typedef std::function<void(String, String, void *)> EventBusFunction;
+typedef std::function<void(std::string, std::string, void *)> EventBusFunction;
 
 typedef struct
 {
-    String key;
-    String val;
+    std::string key;
+    std::string val;
 } EventBusData;
 class VocaEventBus
 {
