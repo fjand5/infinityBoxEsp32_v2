@@ -270,67 +270,68 @@ void box_setSpeed(int8_t layer, uint16_t speed)
                         });
 }
 // config segment
-// void box_config_segment(const char* key, const char* value, void *param)
-// {
-//     bool rev;
-//     uint8_t num;
+void box_config_segment(std::string key, std::string value, void *param)
+{
+    bool isConfigReverce = key.find("_rv") != std::string::npos;
+    bool rev;
+    uint8_t num;
 
-//     char *segName;
-//     if (key.endsWith("_rv"))
-//     {
-//         std::string tmp = key;
-//         tmp.replace("_rv", "");
-//         rev = value == "true";
-//         num = vocaStore.getValue(tmp, "0").toInt();
-//         segName = new char[tmp.length() + 1]();
-//         strcpy(segName, tmp.c_str());
-//     }
-//     else
-//     {
+    char *segKeyName;
+    if (isConfigReverce)
+    {
+        std::string sgKey = key.substr(0, key.length() - 3); // bỏ 3 ký tự cuối: "_rv"
+        rev = !value.compare("true");
+        num = atoi(vocaStore.getValue(sgKey, "0").c_str());
+        segKeyName = new char[sgKey.length() + 1]();
+        strcpy(segKeyName, sgKey.c_str());
+    }
+    else
+    {
+        std::string rvKey = key;
+        rvKey += "_rv";
+        rev = !vocaStore.getValue( rvKey, "false").compare("true");
+        num = atoi(value.c_str());
+        segKeyName = new char[key.length() + 1]();
+        strcpy(segKeyName, key.c_str());
+    }
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_ConfigSegment;
+    request->rev = rev;
+    request->numSeg = num;
+    realBox.feedCommand(request,
+                        [request, segKeyName](RealBoxCommandBundle result)
+                        {
+                            std::string key(segKeyName);
+                            vocaStore.setValue(key, toString(result.numSeg), true);
+                            key += "_rv";
+                            vocaStore.setValue(key, std::string(result.rev ? "true" : "false"), true);
+                            delete request;
+                            delete segKeyName;
+                        });
+}
+void box_config_show_face(std::string key, std::string value, void *param)
+{
+    std::string fcKey = key.substr(4); // bỏ 4 ký tự đầu: "_rv"
 
-//         rev = vocaStore.getValue(key + "_rv", "false") == "true";
-//         num = value.toInt();
-//         segName = new char[key.length() + 1]();
-//         strcpy(segName, key);
-//     }
-
-//     RealBoxCommandBundle *request = new RealBoxCommandBundle;
-//     request->cmd = BoxCommand_ConfigSegment;
-//     request->rev = rev;
-//     request->numSeg = num;
-//     realBox.feedCommand(request,
-//                         [request, segName](RealBoxCommandBundle result)
-//                         {
-//                             String tmp = String(segName);
-//                             vocaStore.setValue(tmp, String(result.numSeg), true);
-//                             tmp += "_rv";
-//                             vocaStore.setValue(tmp, String(result.rev ? "true" : "false"), true);
-//                             delete request;
-//                             delete segName;
-//                         });
-// }
-// void box_config_show_face(String key, String value, void *param)
-// {
-//     key.replace("shw_", "");
-//     Face *face = new Face;
-//     face->start1 = vocaStore.getValue(key + "_1").toInt();
-//     face->inv1 = vocaStore.getValue(key + "_1_rv") == "true";
-//     face->start2 = vocaStore.getValue(key + "_2").toInt();
-//     face->inv2 = vocaStore.getValue(key + "_2_rv") == "true";
-//     face->start3 = vocaStore.getValue(key + "_3").toInt();
-//     face->inv3 = vocaStore.getValue(key + "_3_rv") == "true";
-//     face->start4 = vocaStore.getValue(key + "_4").toInt();
-//     face->inv4 = vocaStore.getValue(key + "_4_rv") == "true";
-//     RealBoxCommandBundle *request = new RealBoxCommandBundle;
-//     request->cmd = BoxCommand_ConfigShowFace;
-//     request->p = (void *)face;
-//     realBox.feedCommand(request,
-//                         [request, face](RealBoxCommandBundle result)
-//                         {
-//                             delete request;
-//                             delete face;
-//                         });
-// }
+    Face *face = new Face;
+    face->start1 = atoi(vocaStore.getValue(fcKey + "_1").c_str());
+    face->inv1 = !vocaStore.getValue(fcKey + "_1_rv").compare("true");
+    face->start2 = atoi(vocaStore.getValue(fcKey + "_2").c_str());
+    face->inv2 = !vocaStore.getValue(fcKey + "_2_rv").compare("true");
+    face->start3 = atoi(vocaStore.getValue(fcKey + "_3").c_str());
+    face->inv3 = !vocaStore.getValue(fcKey + "_3_rv").compare("true");
+    face->start4 = atoi(vocaStore.getValue(fcKey + "_4").c_str());
+    face->inv4 = !vocaStore.getValue(fcKey + "_4_rv").compare("true");
+    RealBoxCommandBundle *request = new RealBoxCommandBundle;
+    request->cmd = BoxCommand_ConfigShowFace;
+    request->p = (void *)face;
+    realBox.feedCommand(request,
+                        [request, face](RealBoxCommandBundle result)
+                        {
+                            delete request;
+                            delete face;
+                        });
+}
 // color
 void box_setCurrentSelectColor(uint8_t index)
 {
