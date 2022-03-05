@@ -9,16 +9,22 @@
 #include <Arduino.h>
 
 #include "../virtual_box/virtual_box.h"
+
 #include "../color_box/color_box.h"
 
 #include "voca_store/voca_store.h"
+#include "../music_box/music_box.h"
 extern ColorBox colorBox;
+extern MusicBox musicBox;
 
 class ConnectVirtualBox
 {
 private:
     bool _isConfig = false;
+    bool _isMusicMode = false;
     void splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX);
+    SemaphoreHandle_t Sem_WaitSetModeFinish;
+
     DEFINE_DEFAULT_SPEED;
 protected:
 
@@ -45,14 +51,14 @@ protected:
     {
         return _isConfig;
     }
-
+    // music
+    void setMusicMode(bool state);
     // display
     static void mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes);
     void setVirtualBoxesDisplay(void (*p)());
     void serviceVirtualBoxes();
     // music
     void onBeatVirtualBoxes(double val, double freq);
-    void setMusicMode(uint8_t index, bool state);
     // control
     void enableVirtualBox(uint8_t index);
     void disableVirtualBox(uint8_t index);
@@ -60,7 +66,7 @@ protected:
     void setVirtualBoxSpeed(uint8_t index, uint16_t speed);
 
     uint8_t getVirtualBoxMode(uint8_t index);
-    void setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed);
+    void setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed, bool wait = false);
 
 
 

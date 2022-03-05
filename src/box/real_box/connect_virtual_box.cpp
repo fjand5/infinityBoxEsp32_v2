@@ -1,4 +1,5 @@
 #include "connect_virtual_box.h"
+
 #include "Arduino.h"
 
 static VirtualBox *virtualBoxes[NUM_OF_LAYER];
@@ -25,6 +26,10 @@ void ConnectVirtualBox::mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes)
 }
 ConnectVirtualBox::ConnectVirtualBox(/* args */)
 {
+    Sem_WaitSetModeFinish = xSemaphoreCreateBinary();
+    xSemaphoreGive(Sem_WaitSetModeFinish);
+
+
 }
 
 void ConnectVirtualBox::configSegment(uint16_t num, bool rev)
@@ -153,11 +158,11 @@ void ConnectVirtualBox::splitSegment(VirtualBox *layer, int type)
         index++;
 
         // return;
-        value =  vocaStore.getValue("sg_ft_4", "12");
+        value = vocaStore.getValue("sg_ft_4", "12");
         tmp = atoi(value.c_str());
 
-        value =   vocaStore.getValue("sg_ft_4_rv", "true");
-        opt =  !value.compare("true");
+        value = vocaStore.getValue("sg_ft_4_rv", "true");
+        opt = !value.compare("true");
         opt = opt << 7;
         layer->setSegment(index, LED_COUNT_ONE_SEG * tmp + offset, LED_COUNT_ONE_SEG * (tmp + 1) - 1 + offset, mode, color, speed,
                           opt);
@@ -369,18 +374,26 @@ uint8_t ConnectVirtualBox::getVirtualBoxMode(uint8_t index)
     return ret;
 };
 
-void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed)
+void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t *newSpeed, bool wait)
 {
+    
+    // Không cho điều khiển mode ở layer0 trong chế độ music
+    if (index == 0 && _isMusicMode == true)
+    {
+        return;
+    }
     struct SetModeBundle
     {
         VirtualBox *layer;
         uint8_t index;
         uint8_t mode;
+        SemaphoreHandle_t sem;
     };
     SetModeBundle *setModeBundle = new SetModeBundle;
     setModeBundle->layer = virtualBoxes[index];
     setModeBundle->index = index;
     setModeBundle->mode = mode;
+    setModeBundle->sem = Sem_WaitSetModeFinish; 
     if (newSpeed != NULL)
     {
         virtualBoxes[index]->controlVirtualBox(
@@ -391,6 +404,7 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
             },
             NULL);
     }
+    xSemaphoreTake(Sem_WaitSetModeFinish, portMAX_DELAY);
     xTaskCreatePinnedToCore(
         [](void *p)
         {
@@ -421,6 +435,8 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
                 delay(TRANSITION_TIME / numOfSegment);
             };
             delete setModeBundle;
+            xSemaphoreGive(setModeBundle->sem);
+
             vTaskDelete(NULL);
         },
         "setVirtualBoxMode",
@@ -429,6 +445,10 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
         0,
         NULL,
         BOX_CORE_CPU);
+        if(wait ){
+            xSemaphoreTake(Sem_WaitSetModeFinish, portMAX_DELAY);
+            xSemaphoreGive(Sem_WaitSetModeFinish);
+        }
 };
 
 uint8_t ConnectVirtualBox::nextVirtualBoxMode(uint8_t index, uint16_t *newSpeed)
@@ -452,7 +472,7 @@ uint8_t ConnectVirtualBox::randomVirtualBoxMode(uint8_t index, uint16_t *newSpee
     // Thời gian tối đa để chọn mode là 1ms
     do
     {
-        newMode = random(FX_MODE_CUSTOM + 1);
+        newMode = random(FX_MODE_CUSTOM);
     } while (
         (currentMode == newMode) &&
         (micros() - timeout < 1000));
@@ -529,23 +549,31 @@ void ConnectVirtualBox::serviceVirtualBoxes()
 }
 void ConnectVirtualBox::onBeatVirtualBoxes(double val, double freq)
 {
-    for (size_t i = 0; i < NUM_OF_LAYER; i++)
-    {
-        virtualBoxes[i]->onBeat(val, freq);
-    }
+   
+        // virtualBoxes[i]->onBeat(val, freq);
+    musicBox.onBeat(val, freq);
 }
-void ConnectVirtualBox::setMusicMode(uint8_t index, bool state)
+void ConnectVirtualBox::setMusicMode(bool state)
 {
-    virtualBoxes[index]->controlVirtualBox(
-        [state](void *virtualBox, void *param)
-        {
-            VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
-
-            _virtualBox->setMusicMode(state);
-        },
-        NULL);
+    _isMusicMode = state;
+    if (state)
+    {
+        virtualBoxes[0]->controlVirtualBox(
+            [](void *virtualBox, void *param)
+            {
+                VirtualBox *_virtualBox = (VirtualBox *)virtualBox;
+                for (int i = 0; i < _virtualBox->getNumSegments(); i++)
+                {
+                    _virtualBox->setMode(i, FX_MODE_CUSTOM_0);
+                };
+            },
+            NULL);
+    }
+    else
+    {
+        randomVirtualBoxMode(0, NULL);
+    }
 };
-
 void ConnectVirtualBox::initVirtualBoxes()
 {
     vocaStatus.waitStatus(Status_Store_Initialized);
@@ -571,14 +599,15 @@ void ConnectVirtualBox::initVirtualBoxes()
         }
         splitSegment(virtualBoxes[i]);
 
-        for (int mi = 0; mi < virtualBoxes[i]->getModeCount(); mi++)
+        // chỉ thiết lập với mode có sẵn, mode custom thì không đụng tới
+        for (int mi = 0; mi < FX_MODE_CUSTOM; mi++)
         {
             std::string spdKey = "spdLyr_";
             spdKey += toString(i);
             spdKey += "_";
             spdKey += toString(mi);
 
-            std::string _value =vocaStore.getValue(spdKey, toString(mapSpeedDefault[mi]), true, false);
+            std::string _value = vocaStore.getValue(spdKey, toString(mapSpeedDefault[mi]), true, false);
             uint16_t speed = atoi(_value.c_str());
             virtualBoxes[i]->setSpeedForMode(mi, speed);
         }
@@ -602,6 +631,8 @@ void ConnectVirtualBox::initVirtualBoxes()
         value = vocaStore.getValue(key, "50", true, false);
         setVirtualBoxBrightness(i, atoi(value.c_str()));
     }
+    bool musicModeState = !vocaStore.getValue("msMd", "false", true, false).compare("true");
+    setMusicMode(musicModeState);
     vocaStore.updateStore();
 };
 void ConnectVirtualBox::beginVirtualBoxes()
@@ -611,6 +642,10 @@ void ConnectVirtualBox::beginVirtualBoxes()
     {
         virtualBoxes[i] = new VirtualBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
     }
+
+    // Music mode chỉ chạy ở layer đầu tiên
+    virtualBoxes[0]->setCustomMode(musicBox.musicEffectShow);
+    musicBox.setMusicLayer(virtualBoxes[0]);
 };
 
 ConnectVirtualBox::~ConnectVirtualBox()

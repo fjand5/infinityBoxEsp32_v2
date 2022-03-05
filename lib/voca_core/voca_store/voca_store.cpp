@@ -46,7 +46,7 @@ bool VocaStore::loadFileToContent()
             std::string val = strLine.substr(splitPos + 1);
 
             storeContent[key] = val;
-            log_w("[%s: %s]", key.c_str(), val.c_str());
+            // log_w("[%s: %s]", key.c_str(), val.c_str());
             delete line;
         }
 
@@ -112,7 +112,7 @@ bool VocaStore::checkValidValue(std::string value)
 void VocaStore::setValue(std::string key, std::string value, const bool save)
 {
 
-    log_d("Setting Value: key: %s; value: %s\n", key.c_str(), value.c_str());
+    // log_d("Setting Value: key: %s; value: %s\n", key.c_str(), value.c_str());
     bool isNoChange = false;
     if (checkKey(key))
     {
@@ -129,7 +129,7 @@ void VocaStore::setValue(std::string key, std::string value, const bool save)
         {
             return;
         }
-        log_d("checked ValidKey Value: key: %s; value: %s\n", key.c_str(), value.c_str());
+        // log_d("checked ValidKey Value: key: %s; value: %s\n", key.c_str(), value.c_str());
 
         if (xSemaphoreTake(semStoreContent, portMAX_DELAY) == pdTRUE)
         {

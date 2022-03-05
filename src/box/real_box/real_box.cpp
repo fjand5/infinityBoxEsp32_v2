@@ -1,6 +1,5 @@
 #include "real_box.h"
 RealBox realBox(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-
 RealBox::RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type) : WS2812FX(num_leds, pin, type)
 {
 }
@@ -179,7 +178,7 @@ void RealBox::commandHandle()
             
             else if (commandInfo.cmd == BoxCommand_SetMusicMode)
             {
-                setMusicMode(commandInfo.layer, commandInfo.musicModeState);
+                setMusicMode(commandInfo.musicModeState);
                 responseResult(commandInfo);
             }else
             {
@@ -194,12 +193,11 @@ bool RealBox::isCustomMode(uint8_t mode)
 }
 void RealBox::begin()
 {
-    BaseType_t xReturned;
     log_w("setup_box starting: %d", xPortGetCoreID());
     beginVirtualBoxes();
     box_status = xEventGroupCreate();
 
-    xReturned = xTaskCreatePinnedToCore(
+    xTaskCreatePinnedToCore(
         [](void *prams)
         {
             RealBox *_realBox = (RealBox *)prams;

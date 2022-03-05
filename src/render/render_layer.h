@@ -52,26 +52,28 @@ void setup_render_layer()
                 }
             },
             NULL);
+        if (i == 0)
+        {
 
-        vocaRender.renderSwitch(
-            tab_name.c_str(), "msMd",
-            R"({
+            vocaRender.renderSwitch(
+                tab_name.c_str(), "msMd",
+                R"({
                     "name":"Music Mode",
                     "newLine":true
                 })",
-            [](std::string key, std::string value, void *param)
-            {
-                int li = *((int *)param);
-                if (!value.compare("true"))
+                [](std::string key, std::string value, void *param)
                 {
-                    box_setMusicMode(li, true);
-                }
-                else
-                {
-                    box_setMusicMode(li, false);
-                }
-            },
-            (void *)index);
+                    if (!value.compare("true"))
+                    {
+                        box_setMusicMode(true);
+                    }
+                    else
+                    {
+                        box_setMusicMode(false);
+                    }
+                },
+                NULL);
+        }
 
         key = "save_layer_";
         key += std::string(iStr);
@@ -209,8 +211,7 @@ void setup_render_layer()
     "options":[
     "00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20",
     "21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40",
-    "41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60",
-    "61","62","63","64"],
+    "41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56"],
     "span":{
         "xs":24,
         "sm":24,

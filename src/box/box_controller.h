@@ -41,19 +41,16 @@ void box_disable(int8_t layer)
                             delete request;
                         });
 }
-void box_setMusicMode(int8_t layer, bool state)
+void box_setMusicMode(bool state)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
     request->cmd = BoxCommand_SetMusicMode;
-    request->layer = layer;
     request->musicModeState = state;
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            std::string key = "msMd_";
-                            key += toString(result.layer);
                             vocaStore.setValue(
-                                key,
+                                "msMd",
                                 result.musicModeState ? "true" : "false",
                                 false);
                             delete request;

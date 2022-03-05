@@ -8,8 +8,8 @@
 
 #include "connect_virtual_box.h"
 #include "microphone/microphone.h"
-
 #define NUM_OF_COMMAND_WAITING 8
+
 
 typedef struct
 {
@@ -71,6 +71,7 @@ private:
     BaseType_t checkCommand(RealBoxCommandBundle *realBoxCommandBundle);
     void commandHandle();
     bool isCustomMode(uint8_t mode);
+
 
 public:
     RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type);
