@@ -549,8 +549,6 @@ void ConnectVirtualBox::serviceVirtualBoxes()
 }
 void ConnectVirtualBox::onBeatVirtualBoxes(double val, double freq)
 {
-   
-        // virtualBoxes[i]->onBeat(val, freq);
     musicBox.onBeat(val, freq);
 }
 void ConnectVirtualBox::setMusicMode(bool state)

@@ -28,6 +28,7 @@ void RealBox::boxHandle()
         //     lastUxHighWaterMark = uxHighWaterMark;
         //     log_w("uxTaskGetStackHighWaterMark: %d", lastUxHighWaterMark);
         // }
+
         microphone.handleMicrophone(
             [](void *param, double val, double freq)
             {

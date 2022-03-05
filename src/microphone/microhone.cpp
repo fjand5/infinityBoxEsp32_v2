@@ -47,8 +47,6 @@ void Microphone::begin()
     log_d("I2S driver installed.");
     setMicGain(20);
     setTakeBeat(50);
-    // setMicGain(getValue("micGain_sld", "10").toDouble());
-    // setTakeBeat(getValue("takeBeat_sld", "50").toDouble());
 };
 double Microphone::mapf(double x, double in_min, double in_max, double out_min, double out_max)
 {
@@ -152,7 +150,6 @@ double Microphone::handleMicrophone(void (*onChangeMax)(void* param, double val,
 void Microphone::setMicGain(double gain)
 {
     micGain = gain;
-    // setValue("micGain_sld", String(gain));
 }
 double Microphone::getMicGain()
 {
@@ -161,7 +158,6 @@ double Microphone::getMicGain()
 void Microphone::setTakeBeat(double beat)
 {
     takeBeat = beat;
-    // setValue("takeBeat_sld", String(beat));
 }
 double Microphone::getTakeBeat()
 {

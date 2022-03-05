@@ -1,21 +1,15 @@
 #include <WS2812FX.h>
-#include "../utils.h"
+#include "utils.h"
+#include "list_effect.h"
 
 #define STAR_BEAT_SPEED 10
-
-#define STAR_BEAT_MODE_1 0
-#define STAR_BEAT_MODE_2 1
-int starBeatMode = STAR_BEAT_MODE_1;
-void starBeatInit(WS2812FX *leds, int mode = STAR_BEAT_MODE_1)
+void starBeatInit(WS2812FX *leds)
 {
-    setSymmetry(leds, SYM_VERTEX);
-
     for (int i = 0; i < leds->getNumSegments(); i++)
     {
         WS2812FX::Segment *seg = leds->getSegment(i);
         seg->speed = STAR_BEAT_SPEED;
     }
-    starBeatMode = mode;
 }
 void starBeatOnBeat(WS2812FX *leds, double val, double freq)
 {
@@ -25,19 +19,11 @@ void starBeatOnBeat(WS2812FX *leds, double val, double freq)
     {
         WS2812FX::Segment *seg = leds->getSegment(i);
         int seglen = seg->stop - seg->start + 1;
-        if (starBeatMode == STAR_BEAT_MODE_1)
-            for (uint16_t j = 0; j < double(seglen) * val / 1000; j++)
-            {
-         
-                    leds->setPixelColor(seg->start + leds->random16(seglen), seg->colors[leds->random16(3)]);
-            }
-        else
-            for (uint16_t j = 0; j < double(seglen) * val / 1000; j++)
-            {
-                uint32_t color = leds->ColorHSV(65535.0 * freq / 100);
+        for (uint16_t j = 0; j < double(seglen) * val / 1000; j++)
+        {
 
-                leds->setPixelColor(seg->start + leds->random16(seglen), color);
-            }
+            leds->setPixelColor(seg->start + leds->random16(seglen), seg->colors[leds->random16(3)]);
+        }
     }
 }
 

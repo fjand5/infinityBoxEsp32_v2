@@ -1,49 +1,61 @@
 #include "music_box.h"
+
 MusicBox musicBox;
+int musicEffect;
 WS2812FX *musicLayer;
 MusicBox::MusicBox(/* args */)
 {
 }
-void MusicBox::onBeat(double val, double freq){
-    if(val<5)
-    return;
-   for (int i = 0; i < musicLayer->getNumSegments(); i++)
+void MusicBox::onBeat(double val, double freq)
+{
+    switch (musicEffect)
     {
-        WS2812FX::Segment *seg = musicLayer->getSegment(i);
-        WS2812FX::Segment_runtime *segrt = musicLayer->getSegmentRuntime(i);
+    case MusicEffect_OverflowBegin:
+        overflowBeginOnBeat(musicLayer, val, freq);
+        break;
+    case MusicEffect_StarBeat:
+        starBeatOnBeat(musicLayer, val, freq);
+        break;
 
-        // musicLayer->setPixelColor(seg->stop, 0x0000ff);
-        musicLayer->setPixelColor(seg->start, 0x00ffff);
-        seg->speed = (100 - val)/2;
+    default:
+        break;
     }
-
 };
 
 uint16_t MusicBox::musicEffectShow()
 {
-    // log_w("dang handle music box: %d", musicLayer);
-    WS2812FX::Segment *seg = musicLayer->getSegment(); // get the current segment
-    WS2812FX::Segment_runtime *segrt = musicLayer->getSegmentRuntime();
-    int seglen = seg->stop - seg->start + 1;
-    int *tmp = new int[seglen - 1];      // 0 -> 10
-    for (int i = 0; i < seglen - 1; i++) // 0->10
+    switch (musicEffect)
     {
-        tmp[i] = musicLayer->getPixelColor(seg->start + i);
-    }
-    musicLayer->setPixelColor(seg->start, segrt->counter_mode_step);
-    for (int i = 1; i < seglen; i++) // 1->11
-    {
-        // 1->11   // 0->10
-        musicLayer->setPixelColor(seg->start + i, tmp[i - 1]);
-    }
+    case MusicEffect_OverflowBegin:
+        return overflowBeginHandler(musicLayer);
+        break;
+    case MusicEffect_StarBeat:
+        return starBeatHandler(musicLayer);
+        break;
 
-    segrt->counter_mode_step = 0;
-    delete tmp;
-    return seg->speed;
+    default:
+        return 0;
+        break;
+    }
 };
 void MusicBox::setMusicLayer(WS2812FX *layer)
 {
     musicLayer = layer;
+};
+void MusicBox::setEffect(int mode)
+{
+    musicEffect = mode;
+    switch (musicEffect)
+    {
+    case MusicEffect_OverflowBegin:
+        overflowBeginInit(musicLayer);
+        break;
+    case MusicEffect_StarBeat:
+        starBeatInit(musicLayer);
+        break;
+    default:
+        break;
+    }
 };
 MusicBox::~MusicBox()
 {

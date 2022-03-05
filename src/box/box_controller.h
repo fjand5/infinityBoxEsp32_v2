@@ -56,7 +56,6 @@ void box_setMusicMode(bool state)
                             delete request;
                         });
 }
-
 void box_setMode(int8_t layer, uint8_t mode)
 {
     RealBoxCommandBundle *request = new RealBoxCommandBundle;
@@ -215,7 +214,6 @@ void box_setBrightness(int8_t layer, uint8_t brightness)
     realBox.feedCommand(request,
                         [request](RealBoxCommandBundle result)
                         {
-                            char buff[8];
                             std::string key = "brgLyr_";
                             key += toString(result.layer);
 

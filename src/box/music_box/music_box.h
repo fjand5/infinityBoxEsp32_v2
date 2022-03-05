@@ -1,7 +1,6 @@
-
 #include <Arduino.h>
 #include <WS2812FX.h>
-// #include "./listEffect/overflowBegin.h"
+#include "./listEffect/list_effect.h"
 typedef enum
 {
     // Phải bắt đầu là 0 để có thể đếm
@@ -33,6 +32,7 @@ public:
     void onBeat(double val, double freq);
     static uint16_t musicEffectShow();
     static void setMusicLayer(WS2812FX* layer);
+    static void setEffect(int mode);
     ~MusicBox();
 };
 extern MusicBox musicBox;
