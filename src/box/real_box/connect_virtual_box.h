@@ -21,7 +21,6 @@ class ConnectVirtualBox
 {
 private:
     bool _isConfig = false;
-    bool _isMusicMode = false;
     void splitSegment(VirtualBox *layer, int type = SPLIT_SEGMENT_TYPE_VERTEX);
     SemaphoreHandle_t Sem_WaitSetModeFinish;
 

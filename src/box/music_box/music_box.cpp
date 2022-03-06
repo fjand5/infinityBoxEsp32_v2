@@ -13,6 +13,9 @@ void MusicBox::onBeat(double val, double freq)
     case MusicEffect_OverflowBegin:
         overflowBeginOnBeat(musicLayer, val, freq);
         break;
+    case MusicEffect_OverflowMiddle:
+        overflowMidOnBeat(musicLayer, val, freq);
+        break;
     case MusicEffect_StarBeat:
         starBeatOnBeat(musicLayer, val, freq);
         break;
@@ -28,6 +31,9 @@ uint16_t MusicBox::musicEffectShow()
     {
     case MusicEffect_OverflowBegin:
         return overflowBeginHandler(musicLayer);
+        break;
+    case MusicEffect_OverflowMiddle:
+        return overflowMidHandler(musicLayer);
         break;
     case MusicEffect_StarBeat:
         return starBeatHandler(musicLayer);
@@ -49,6 +55,9 @@ void MusicBox::setEffect(int mode)
     {
     case MusicEffect_OverflowBegin:
         overflowBeginInit(musicLayer);
+        break;
+    case MusicEffect_OverflowMiddle:
+        overflowMidInit(musicLayer);
         break;
     case MusicEffect_StarBeat:
         starBeatInit(musicLayer);

@@ -5,7 +5,6 @@ typedef enum
 {
     // Phải bắt đầu là 0 để có thể đếm
     MusicEffect_OverflowBegin = 0,
-    MusicEffect_OverflowBegin2,
     MusicEffect_OverflowMiddle,
     MusicEffect_StarBeat,
     MusicEffect_StarBeat2,

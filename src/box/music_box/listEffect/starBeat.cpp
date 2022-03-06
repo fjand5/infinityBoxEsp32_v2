@@ -13,7 +13,7 @@ void starBeatInit(WS2812FX *leds)
 }
 void starBeatOnBeat(WS2812FX *leds, double val, double freq)
 {
-    if (val <= 5.0)
+    if (val <= 2.0)
         return;
     for (int i = 0; i < leds->getNumSegments(); i++)
     {

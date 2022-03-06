@@ -66,7 +66,7 @@ private:
     QueueHandle_t queueCommand;
 
     std::map<uint32_t, ResponseCommand> responseCommandIndex;
-    static void IRAM_ATTR boxShow();
+    static void boxShow();
     void responseResult(RealBoxCommandBundle realBoxCommandBundle);
     BaseType_t checkCommand(RealBoxCommandBundle *realBoxCommandBundle);
     void commandHandle();

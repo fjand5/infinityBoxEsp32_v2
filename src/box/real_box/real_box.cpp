@@ -4,7 +4,7 @@ RealBox::RealBox(uint16_t num_leds, uint8_t pin, neoPixelType type) : WS2812FX(n
 {
 }
 
-void IRAM_ATTR RealBox::boxShow()
+void RealBox::boxShow()
 {
     mixVirtualBox(realBox.getPixels(), realBox.getNumBytes());
     rmt_write_sample(RMT_CHANNEL, realBox.getPixels(), realBox.getNumBytes(), false); // channel 0
