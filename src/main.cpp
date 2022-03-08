@@ -31,5 +31,5 @@ void loop(void)
     log_e("Free Ram: %d", ESP.getFreeHeap());
     lastFreeRam = ESP.getFreeHeap();
   }
-  delay(1000);
+  delay(5000);
 }

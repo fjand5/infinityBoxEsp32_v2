@@ -15,7 +15,7 @@ class VocaEventBus
 private:
     int32_t idAutoIncrease = 1;
     esp_event_loop_args_t eventBusArgs = {
-        .queue_size = 32,
+        .queue_size = NUM_OF_EVENT_WAITING,
         .task_name = VOCA_EVENTBUS_NAME,
         .task_priority = 0,
         .task_stack_size = 2048,

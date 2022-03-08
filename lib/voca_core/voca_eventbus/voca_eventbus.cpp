@@ -7,7 +7,7 @@ VocaEventBus::VocaEventBus(/* args */)
 }
 
 int32_t VocaEventBus::addEventBus(
-    const char* name, EventBusFunction cbEventBus, void *prams, bool anyId)
+    const char *name, EventBusFunction cbEventBus, void *prams, bool anyId)
 {
     typedef struct
     {
@@ -40,6 +40,7 @@ int32_t VocaEventBus::addEventBus(
         {
             AddEventBusBundle *_addEventBusBundle = (AddEventBusBundle *)event_handler_arg;
             EventBusData *eventBusData = (EventBusData *)event_data;
+            log_w("key: %s, value: %s", eventBusData->key.c_str(), eventBusData->val.c_str());
             _addEventBusBundle->func(eventBusData->key, eventBusData->val, _addEventBusBundle->p);
         },
         (void *)addEventBusBundle);
@@ -47,7 +48,7 @@ int32_t VocaEventBus::addEventBus(
 };
 
 void VocaEventBus::executeEventBus(
-    const char* name, int32_t id,
+    const char *name, int32_t id,
     void *data,
     size_t data_size)
 {
@@ -58,7 +59,6 @@ void VocaEventBus::executeEventBus(
         data,
         data_size,
         portMAX_DELAY);
-
 };
 VocaEventBus::~VocaEventBus()
 {

@@ -14,6 +14,7 @@
 #define APID "vocaui"
 #define APPW "12345678"
 
+#define NUM_OF_EVENT_WAITING 16
 
 #define MAX_CHAR_IN_LINE 1024
 #define CONFIG_FILE "/config.txt"

@@ -147,7 +147,6 @@ void VocaStore::setValue(std::string key, std::string value, const bool save)
     eventBusData->val = value;
     vocaEventBus.executeEventBus(VOCA_STORE_NAME, 0, (void *)eventBusData, sizeof(EventBusData));
     // dữ liệu đã được copy nên có thể xóa
-    delete eventBusData;
     // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
     if (
         !save ||
@@ -156,6 +155,7 @@ void VocaStore::setValue(std::string key, std::string value, const bool save)
         return;
     }
     updateStore();
+    delete eventBusData;
 };
 bool VocaStore::updateStore()
 {
