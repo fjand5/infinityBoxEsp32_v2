@@ -65,15 +65,25 @@ void blendRange(WS2812FX *leds, int start, int stop, uint32_t color, uint8_t rat
     leds->setPixelColor(i, _color);
   }
 }
-int countZeroPixel(WS2812FX *leds, int start, int stop)
+uint16_t countZeroPixel(WS2812FX *leds, int start, int stop)
 {
-  int ret = 0;
+  uint16_t ret = 0;
   for (int j = start; j <= stop; j++)
   {
     if (leds->getPixelColor(j) == 0)
     {
       ret++;
     };
+  }
+  return ret;
+}
+
+float calcTotalValuePixel(WS2812FX *leds, int start, int stop)
+{
+  float ret = 0;
+  for (int j = start; j <= stop; j++)
+  {
+    ret +=leds->getPixelColor(j);
   }
   return ret;
 }

@@ -9,7 +9,7 @@ void ConnectVirtualBox::mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes)
 {
     bool hasMusicPixel = false;
     static float musicFactor = 1;
-    musicFactor = musicFactor * 0.9;
+    musicFactor = musicFactor * 0.95;
     for (uint16_t i = 0; i < numBytes; i++)
     {
         uint32_t sumPixelsValue = 0;
@@ -19,7 +19,7 @@ void ConnectVirtualBox::mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes)
             hasMusicPixel = virtualBoxes[0]->getPixels()[i];
             if (hasMusicPixel)
             {
-                musicFactor = 1000;
+                musicFactor = 50000.0;
                 memcpy(pPixels, virtualBoxes[0]->getPixels(), numBytes);
                 break;
             }
@@ -32,7 +32,7 @@ void ConnectVirtualBox::mixVirtualBox(uint8_t *pPixels, const uint16_t numBytes)
                 sumPixelsValue += virtualBoxes[li]->getPixels()[i];
             }
         }
-        if (count != 0)
+        if (count != 0 && musicFactor < 100.0)
         {
 
             pPixels[i] = sumPixelsValue / (count + musicFactor);
@@ -452,9 +452,9 @@ void ConnectVirtualBox::setVirtualBoxMode(uint8_t index, uint8_t mode, uint16_t 
 
                 delay(TRANSITION_TIME / numOfSegment);
             };
-            delete setModeBundle;
 
             xSemaphoreGive(setModeBundle->sem);
+            delete setModeBundle;
 
             vTaskDelete(NULL);
         },

@@ -3,7 +3,7 @@
 #include <WS2812FX.h>
 #include "list_effect.h"
 #include "utils.h"
-#define OVER_FLOW_BEGIN_SPEED 65
+#define OVER_FLOW_BEGIN_SPEED 75
 void overflowBeginInit(WS2812FX *leds)
 {
     for (int i = 0; i < leds->getNumSegments(); i++)
@@ -21,7 +21,7 @@ void overflowBeginOnBeat(WS2812FX *leds, double val, double freq)
         WS2812FX::Segment *seg = leds->getSegment(i);
 
         // cường độ càng cao thì lấy chỉ số màu càng lớn
-        uint32_t color = seg->colors[int(val) / 33 - 1];
+        uint32_t color = seg->colors[int(freq) / 33 - 1];
         leds->setPixelColor(seg->start, color);
         // seg->speed = OVER_FLOW_BEGIN_SPEED;
     }
@@ -33,6 +33,9 @@ uint16_t overflowBeginHandler(WS2812FX *leds)
     int _seg_len = _seg->stop - _seg->start + 1;
     leds->copyPixels(_seg->start + 1, _seg->start, _seg_len - 1);
     leds->setPixelColor(_seg->start, 0);
-    return _seg->speed;
+
+    float total = countZeroPixel(leds,_seg->start,_seg->stop);
+    total = total / (float)_seg_len;
+    return OVER_FLOW_BEGIN_SPEED*total;
 }
 #endif

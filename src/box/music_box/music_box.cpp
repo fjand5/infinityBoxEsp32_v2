@@ -19,6 +19,12 @@ void MusicBox::onBeat(double val, double freq)
     case MusicEffect_StarBeat:
         starBeatOnBeat(musicLayer, val, freq);
         break;
+    case MusicEffect_Lazy:
+        lazyOnBeat(musicLayer, val, freq);
+        break;
+    case MusicEffect_Rain:
+        rainOnBeat(musicLayer, val, freq);
+        break;
 
     default:
         break;
@@ -37,6 +43,12 @@ uint16_t MusicBox::musicEffectShow()
         break;
     case MusicEffect_StarBeat:
         return starBeatHandler(musicLayer);
+        break;
+    case MusicEffect_Lazy:
+        return lazyHandler(musicLayer);
+        break;
+    case MusicEffect_Rain:
+        return rainHandler(musicLayer);
         break;
 
     default:
@@ -61,6 +73,12 @@ void MusicBox::setEffect(int mode)
         break;
     case MusicEffect_StarBeat:
         starBeatInit(musicLayer);
+        break;
+    case MusicEffect_Lazy:
+        lazyInit(musicLayer);
+        break;
+    case MusicEffect_Rain:
+        rainInit(musicLayer);
         break;
     default:
         break;

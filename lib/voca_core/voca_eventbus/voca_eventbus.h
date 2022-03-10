@@ -5,10 +5,16 @@
 
 typedef std::function<void(std::string, std::string, void *)> EventBusFunction;
 
+// typedef struct
+// {
+//     std::string key;
+//     std::string val;
+// } EventBusData;
+
 typedef struct
 {
-    std::string key;
-    std::string val;
+    char key[64];
+    char val[64];
 } EventBusData;
 class VocaEventBus
 {

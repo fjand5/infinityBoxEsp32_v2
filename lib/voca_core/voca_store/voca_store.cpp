@@ -143,9 +143,11 @@ void VocaStore::setValue(std::string key, std::string value, const bool save)
     }
 
     EventBusData *eventBusData = new EventBusData;
-    eventBusData->key = key;
-    eventBusData->val = value;
+    strcpy(eventBusData->key,key.c_str());
+    strcpy(eventBusData->val,value.c_str());
     vocaEventBus.executeEventBus(VOCA_STORE_NAME, 0, (void *)eventBusData, sizeof(EventBusData));
+    delete eventBusData;
+
     // dữ liệu đã được copy nên có thể xóa
     // nếu không yêu cầu lưu vào flash hoặc giá trị như cũ
     if (
@@ -153,9 +155,9 @@ void VocaStore::setValue(std::string key, std::string value, const bool save)
         isNoChange)
     {
         return;
+
     }
     updateStore();
-    delete eventBusData;
 };
 bool VocaStore::updateStore()
 {

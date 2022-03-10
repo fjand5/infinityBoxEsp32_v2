@@ -113,7 +113,7 @@ void box_setTimerRandomMode(bool state)
     {
         randomModeTimer = xTimerCreate(
             "randomModeTimer",
-            5000 / portTICK_PERIOD_MS,
+            15000 / portTICK_PERIOD_MS,
             pdTRUE, (void *)0,
             [](TimerHandle_t xTimer)
             {
@@ -384,7 +384,7 @@ void box_setTimerRandomColor(bool state)
     {
         randomColorTimer = xTimerCreate(
             "randomColorTimer",
-            5000 / portTICK_PERIOD_MS,
+            15000 / portTICK_PERIOD_MS,
             pdTRUE, (void *)0,
             [](TimerHandle_t xTimer)
             {

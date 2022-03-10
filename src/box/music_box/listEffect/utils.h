@@ -17,6 +17,8 @@ void hsv2rgb(float h, float s, float b, uint32_t *rgb);
 uint32_t wheelColor(WS2812FX *leds, byte WheelPos);
 
 void blendRange(WS2812FX *leds, int start, int stop, uint32_t color, uint8_t ratio = 128);
-int countZeroPixel(WS2812FX *leds, int start, int stop);
+uint16_t countZeroPixel(WS2812FX *leds, int start, int stop);
+float calcTotalValuePixel(WS2812FX *leds, int start, int stop);
+
 int setPixelInSegment(WS2812FX *leds, WS2812FX::Segment *_seg, int index, uint32_t color);
 void clearPixelInSegment(WS2812FX *leds, WS2812FX::Segment *_seg);

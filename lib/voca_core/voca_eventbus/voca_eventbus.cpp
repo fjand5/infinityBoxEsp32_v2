@@ -40,7 +40,7 @@ int32_t VocaEventBus::addEventBus(
         {
             AddEventBusBundle *_addEventBusBundle = (AddEventBusBundle *)event_handler_arg;
             EventBusData *eventBusData = (EventBusData *)event_data;
-            log_w("key: %s, value: %s", eventBusData->key.c_str(), eventBusData->val.c_str());
+            log_w("key: %s, value: %s", eventBusData->key, eventBusData->val);
             _addEventBusBundle->func(eventBusData->key, eventBusData->val, _addEventBusBundle->p);
         },
         (void *)addEventBusBundle);
