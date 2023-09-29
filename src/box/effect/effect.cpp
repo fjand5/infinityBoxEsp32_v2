@@ -83,6 +83,28 @@ void Effect::nextPalette()
     return;
   }
 };
+void Effect::setAutoChangeMode(bool enable)
+{
+  _autoChangeMode = enable;
+  if (_autoChangeMode)
+  {
+    if (getOnMicrophone())
+      button.setButtonLedMode(ButtonLedMode_FastFade);
+    else
+      button.setButtonLedMode(ButtonLedMode_FastBlink);
+  }
+  else
+  {
+    if (getOnMicrophone())
+      button.setButtonLedMode(ButtonLedMode_Fade);
+    else
+      button.setButtonLedMode(ButtonLedMode_Blink);
+  }
+};
+bool Effect::getAutoChangeMode()
+{
+  return _autoChangeMode;
+};
 
 void Effect::setRouter()
 {
@@ -129,18 +151,21 @@ void Effect::onBeat(double val, double freq)
 void Effect::handle()
 {
   /* testing */
-  // static uint32_t timer__ = millis();
-  // static uint32_t timer___ = millis();
-  // if (millis() - timer__ > 10000)
-  // {
-  //   timer__ = millis();
-  //   nextEffect();
-  // }
-  // if (millis() - timer___ > 15000)
-  // {
-  //   timer___ = millis();
-  //   nextPalette();
-  // }
+  if (_autoChangeMode)
+  {
+    static uint32_t timer__ = millis();
+    static uint32_t timer___ = millis();
+    if (millis() - timer__ > 30000)
+    {
+      timer__ = millis();
+      nextEffect();
+    }
+    if (millis() - timer___ > 15000)
+    {
+      timer___ = millis();
+      nextPalette();
+    }
+  }
   if (_changePaletteTransition > 0)
   {
     for (uint8_t i = 0; i < 16; i++)

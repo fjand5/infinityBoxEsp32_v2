@@ -2,6 +2,7 @@
 #include <FastLED.h>
 #include "../accessPixels.h"
 #include "web/web.h"
+#include "button/button.h"
 typedef enum
 {
   EffectName_RunPaletteFace,
@@ -22,6 +23,7 @@ private:
   CRGBPalette16 _newPalette = CRGBPalette16(ForestColors_p);
   uint8_t _changePaletteTransition = 0;
 
+  bool _autoChangeMode = false;
 
   EffectName _effectName = EffectName_RunPaletteSegment;
   EffectName _lastEffectName = EffectName_OverflowFace;
@@ -35,6 +37,11 @@ public:
   void nextEffect();
   void nextPalette();
   void setRouter();
+
+  virtual bool getOnMicrophone()=0;
+
+  void setAutoChangeMode(bool enable);
+  bool getAutoChangeMode();
 
   void setPalette(CRGBPalette16 palette);
   CRGBPalette16 getPalette();

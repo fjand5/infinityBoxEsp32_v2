@@ -19,13 +19,15 @@ void Box::handle(void *param)
 
   while (1)
   {
-    microphone.handleMicrophone(
-        [](void *param, double val, double freq)
-        {
-
-          box.Effect::onBeat(val, freq);
-        },
-        nullptr);
+    if (box._onMicrophone)
+    {
+      microphone.handleMicrophone(
+          [](void *param, double val, double freq)
+          {
+            box.Effect::onBeat(val, freq);
+          },
+          nullptr);
+    }
     box.Effect::handle();
     box.show();
   }
@@ -38,6 +40,12 @@ void Box::setRouter()
       "/setBoxBrightness",
       getBrightness(), {
         setBrightness(value.toInt());
+      },
+      1000)
+  ADD_SETTER_ROUTE(
+      "/setOnMicrophone",
+      getOnMicrophone(), {
+        setOnMicrophone(value == "true");
       },
       1000)
 };
@@ -59,6 +67,8 @@ void Box::begin()
   _brightness = 255;
   microphone.begin();
   setRouter();
+  setAutoChangeMode(false);
+  setOnMicrophone(false);
   xTaskCreatePinnedToCore(
       handle,
       PREF_BOX_NAME,
@@ -76,6 +86,38 @@ void Box::setBrightness(uint8_t brightness)
 uint8_t Box::getBrightness()
 {
   return _brightness;
+};
+
+void Box::setOnMicrophone(bool onMicrophone)
+{
+  _onMicrophone = onMicrophone;
+  if (_onMicrophone)
+  {
+
+    if (getAutoChangeMode())
+    {
+      button.setButtonLedMode(ButtonLedMode_FastFade);
+    }
+    else
+    {
+      button.setButtonLedMode(ButtonLedMode_Fade);
+    }
+  }
+  else
+  {
+    if (getAutoChangeMode())
+    {
+      button.setButtonLedMode(ButtonLedMode_FastBlink);
+    }
+    else
+    {
+      button.setButtonLedMode(ButtonLedMode_Blink);
+    }
+  }
+};
+bool Box::getOnMicrophone()
+{
+  return _onMicrophone;
 };
 ICRGB *Box::getPixels()
 {

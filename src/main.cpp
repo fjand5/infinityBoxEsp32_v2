@@ -88,8 +88,26 @@ void setup()
     {
         delay(1000 * 60 * 60);
     }
-    button.setOnClick([]()
-                      { box.nextPalette(); });
+    button.setOnClick(
+        []()
+        {
+            // Nhấn thả (click) để chuyển đến hiệu ứng tiếp theo
+            box.nextEffect();
+        });
+    button.setOnLongClick(
+        [](uint32_t time)
+        {
+            // Nhấn thả lâu 3s (longclick) để bật tắt chế độ tự động chuyển
+
+            box.setAutoChangeMode(!box.getAutoChangeMode());
+        });
+    button.setOnLongLongClick(
+        [](uint32_t time)
+        {
+            // Nhấn thả rất lâu 6s (longlongclick) để bật tắt microphone
+
+            box.setOnMicrophone(!box.getOnMicrophone());
+        });
     button.begin();
     box.begin();
     vTaskDelete(NULL);

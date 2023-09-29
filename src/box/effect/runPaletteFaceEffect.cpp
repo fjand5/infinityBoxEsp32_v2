@@ -1,6 +1,6 @@
 #include "effect.h"
 static uint16_t runner = 0;
-static uint16_t width = 0;
+static uint16_t width = 6;
 static uint32_t timer = 0;
 static uint32_t speed = 0;
 
@@ -12,7 +12,7 @@ void Effect::runPaletteFaceEffectOnBeat(double val, double freq)
 };
 void Effect::runPaletteFaceEffectHandle(uint8_t brightness)
 {
-  ICRGB colors[LED_FACE_COUNT]={ICRGB(CRGB::Black, EffectName_RunPaletteFace)}; // box.getPixels() + box.getSegmentPosition(sn);
+  ICRGB colors[LED_FACE_COUNT] = {ICRGB(CRGB::Black, EffectName_RunPaletteFace)}; // box.getPixels() + box.getSegmentPosition(sn);
 
   for (uint16_t i = runner; i < width + runner; i++)
   {
@@ -28,17 +28,17 @@ void Effect::runPaletteFaceEffectHandle(uint8_t brightness)
     colors[_i] = getColorPaletteRing(getPalette(), LED_FACE_COUNT, _i, brightness);
   }
 
-  if (width > 6)
-  {
-    width -= 2;
-    speed = 0;
-  }
-  else
-  {
-    speed = 75;
-  }
   if (millis() - timer > speed)
   {
+    if (width > 6)
+    {
+      width -= 2;
+      speed = 10;
+    }
+    else
+    {
+      speed = 75;
+    }
     runner++;
     if (runner >= LED_FACE_COUNT)
       runner = 0;
