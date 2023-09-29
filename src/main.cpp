@@ -1,35 +1,101 @@
+// #define MAC_ADDRESS "78e36d091a64"
+// #define UPLOADER
+#include "env.h"
 #include <Arduino.h>
-#include "voca_core.h"
-#include "render/render.h"
-#include "controller.h"
-
-void setup(void)
+#if defined UPLOADER
+#include "uploader.h"
+#else
+// #include "esp_ota_ops.h"
+#include <nvs_flash.h>
+#include "wifi/wifi.h"
+#include "web/web.h"
+#include "ui/ui.h"
+#include "box/box.h"
+#include "button/button.h"
+// extern Box box;
+// extern Button button;
+boolean waitForUpdate = false;
+void setup()
 {
-  Serial.begin(115200);
-  delay(111);
-  log_w("main starting: %d", xPortGetCoreID());
-  settupSystem();
-  setup_voca();
+    // if (
+    //     esp_reset_reason() != ESP_RST_POWERON ||
+    //     esp_reset_reason() != ESP_RST_SW ||
+    //     esp_reset_reason() != ESP_RST_BROWNOUT
 
-  render();
+    // )
+    // {
+    //     // Nếu quá trình khởi động bị lỗi thì chuyển sang phân vùng nhỏ để chạy upload
+    //     esp_partition_iterator_t pi = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, "ota_0");
+    //     const esp_partition_t *p = esp_partition_get(pi);
+    //     esp_ota_set_boot_partition(p);
+    // }
+    pinMode(BUTTON_PIN, OUTPUT);
+    digitalWrite(BUTTON_PIN, HIGH);
+    if (digitalRead(BUTTON_PIN) == LOW)
+    {
+        waitForUpdate = true;
+    }
+    if (waitForUpdate)
+    {
+        wifiBegin(true);
+        webBegin(true);
+    }
+    else
+    {
+        wifiBegin(false);
+        webBegin(false);
+    }
+    addRoute("/reset",
+             [](AsyncWebServerRequest *request)
+             {
+                 AsyncWebServerResponse *response =
+                     request->beginResponse(200);
+                 request->send(response);
 
-  std::string compile_date(__TIME__ " " __DATE__);
-  vocaStore.setValue("_version", compile_date, true);
+                 delay(111);
+                 ESP.restart();
+             });
+    addRoute("/format",
+             [](AsyncWebServerRequest *request)
+             {
+                 AsyncWebServerResponse *response =
+                     request->beginResponse(200);
+                 request->send(response);
 
-  std::string value = vocaStore.getValue("_countBoot", "0");
-  uint32_t count = atoi(value.c_str());
-  vocaStore.setValue("_countBoot", toString(count), true);
+                 delay(111);
+                 nvs_flash_erase(); // erase the NVS partition.
+                 nvs_flash_init();  // initialize the NVS partition.
+                 ESP.restart();
+             });
+    addRoute("/status",
+             [](AsyncWebServerRequest *request)
+             {
+                 DynamicJsonDocument _doc(1000);
+                 JsonObject obj = _doc.to<JsonObject>();
+                 obj["freeRam"] = ESP.getFreeHeap();
+                 obj["waitForUpdate"] = waitForUpdate;
+                 String ret;
+                 serializeJson(obj, ret);
 
-  // vTaskDelete(NULL);
+                 AsyncWebServerResponse *response =
+                     request->beginResponse(200, String("application/json"), ret);
+                 request->send(response);
+             });
+
+    uiBegin();
+
+    if (waitForUpdate == true)
+    {
+        delay(1000 * 60 * 60);
+    }
+    button.setOnClick([]()
+                      { box.nextPalette(); });
+    button.begin();
+    box.begin();
+    vTaskDelete(NULL);
 }
 
-void loop(void)
+void loop()
 {
-  static uint32_t lastFreeRam = ESP.getFreeHeap();
-  if (ESP.getFreeHeap() != lastFreeRam)
-  {
-    log_e("Free Ram: %d", ESP.getFreeHeap());
-    lastFreeRam = ESP.getFreeHeap();
-  }
-  delay(5000);
 }
+#endif

@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.ct-green-led-button {
+  background: #49fb35;
+  box-shadow: 0 0 10px 2px #49fb35;
+}
+
+@layer base {
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+.tabs-component {
+  @apply text-base ;
+}
+.tabs-component-tabs {
+  @apply flex justify-start gap-4 uppercase font-semibold border-led-100 border-b-[1px] pb-1;
+}
+.tabs-component-tab {
+  @apply border-[1px] px-[4px] py-[1px] border-led-100 rounded-lg transition-all;
+}
+.tabs-component-tab.is-active {
+  @apply  border-b-[1px] border-b-led-400 rounded-b-none rounded-sm  translate-y-[5px];
+}
+/* .tabs-component-tab.is-inactive {
+  @apply   translate-y-[-4px];
+} */
