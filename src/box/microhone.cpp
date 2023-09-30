@@ -27,6 +27,7 @@ void Microphone::setRoute()
 void Microphone::begin()
 {
     setRoute();
+    Pref::begin(PREF_MICROPHONE_NAME);
     esp_err_t err;
 
     // The I2S config as per the example
@@ -66,8 +67,9 @@ void Microphone::begin()
             ;
     }
     log_d("I2S driver installed.");
-    setMicGain(20);
-    setTakeBeat(50);
+
+    setMicGain(_preferences.getUChar("gain", 20));
+    setTakeBeat(_preferences.getUChar("beat", 50));
 };
 double Microphone::mapf(double x, double in_min, double in_max, double out_min, double out_max)
 {
@@ -171,6 +173,8 @@ double Microphone::handleMicrophone(void (*onChangeMax)(void *param, double val,
 void Microphone::setMicGain(double gain)
 {
     micGain = gain;
+
+    _preferences.putUChar("gain", getMicGain());
 }
 double Microphone::getMicGain()
 {
@@ -178,7 +182,9 @@ double Microphone::getMicGain()
 }
 void Microphone::setTakeBeat(double beat)
 {
+
     takeBeat = beat;
+    _preferences.putUChar("beat", getTakeBeat());
 }
 double Microphone::getTakeBeat()
 {

@@ -21,27 +21,27 @@ class Effect : public AccessPixels
 private:
   CRGBPalette16 _palette = CRGBPalette16(ForestColors_p);
   CRGBPalette16 _newPalette = CRGBPalette16(ForestColors_p);
-  uint8_t _changePaletteTransition = 0;
-
-  bool _autoChangeMode = false;
+  int8_t _changePaletteTransition = 0;
 
   EffectName _effectName = EffectName_RunPaletteSegment;
   EffectName _lastEffectName = EffectName_OverflowFace;
   uint8_t _changeEffectTransition = 0;
 
   CRGB getColorPaletteRing(CRGBPalette16 palette, uint16_t perimeter, uint16_t index, uint8_t brightness = 255);
- 
+
+protected:
+  bool _autoChangeMode;
+
 public:
   Effect(/* args */);
 
   void nextEffect();
   void nextPalette();
-  void setRouter();
+  // void setRouter();
 
-  virtual bool getOnMicrophone()=0;
+  // virtual bool getOnMicrophone() = 0;
+  // virtual void saveEffect()=0;
 
-  void setAutoChangeMode(bool enable);
-  bool getAutoChangeMode();
 
   void setPalette(CRGBPalette16 palette);
   CRGBPalette16 getPalette();

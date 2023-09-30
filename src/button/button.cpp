@@ -183,7 +183,7 @@ void Button::begin(/* args */)
   xTaskCreatePinnedToCore(
       handleButton,
       PREF_BUTTON_NAME "-btn",
-      1000,
+      2000,
       NULL,
       99,
       NULL,

@@ -17,6 +17,8 @@ void Effect::setPalette(CRGBPalette16 palette)
 {
   _newPalette = palette;
   _changePaletteTransition = 100;
+  // saveEffect();
+
 };
 CRGBPalette16 Effect::getPalette()
 {
@@ -28,6 +30,8 @@ void Effect::setEffectName(EffectName effectName)
   _lastEffectName = _effectName;
   _effectName = effectName;
   _changeEffectTransition = 255;
+  // saveEffect();
+
 };
 EffectName Effect::getEffectName()
 {
@@ -83,47 +87,11 @@ void Effect::nextPalette()
     return;
   }
 };
-void Effect::setAutoChangeMode(bool enable)
-{
-  _autoChangeMode = enable;
-  if (_autoChangeMode)
-  {
-    if (getOnMicrophone())
-      button.setButtonLedMode(ButtonLedMode_FastFade);
-    else
-      button.setButtonLedMode(ButtonLedMode_FastBlink);
-  }
-  else
-  {
-    if (getOnMicrophone())
-      button.setButtonLedMode(ButtonLedMode_Fade);
-    else
-      button.setButtonLedMode(ButtonLedMode_Blink);
-  }
-};
-bool Effect::getAutoChangeMode()
-{
-  return _autoChangeMode;
-};
 
-void Effect::setRouter()
-{
-  ADD_SETTER_ROUTE(
-      "/setEffectPalette", paletteToString(getPalette()), {
-        setPalette(stringToPalette(value));
-      },
-      1000);
-  ADD_SETTER_ROUTE(
-      "/setNextEffectPalette", paletteToString(getPalette()), {
-        nextPalette();
-      },
-      1000);
-  ADD_SETTER_ROUTE(
-      "/setEffectName", effectNameToString(getEffectName()), {
-        setEffectName(stringToEffectName(value));
-      },
-      1000);
-};
+// void Effect::setRouter()
+// {
+  
+// };
 
 void Effect::onBeat(double val, double freq)
 {
@@ -172,7 +140,7 @@ void Effect::handle()
     {
       _palette[i] = mixColor(_palette[i], _newPalette[i], _changePaletteTransition);
     }
-    _changePaletteTransition -= 1;
+    _changePaletteTransition -= 2;
   }
   if (_changeEffectTransition > 0)
   {
