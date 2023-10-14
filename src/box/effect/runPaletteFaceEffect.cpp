@@ -25,7 +25,7 @@ void Effect::runPaletteFaceEffectHandle(uint8_t brightness)
     {
       _i = i;
     }
-    colors[_i] = getColorPaletteRing(getPalette(), LED_FACE_COUNT, _i, brightness);
+    colors[_i] = getColorPaletteRing(getPalette(), LED_FACE_COUNT,0, _i, brightness);
   }
 
   if (millis() - timer > speed)

@@ -25,7 +25,7 @@ void Effect::runPaletteSegmentEffectHandle(uint8_t brightness)
     {
       _i = i;
     }
-    colors[_i] = getColorPaletteRing(getPalette(), LED_SEGMENT_COUNT, _i, brightness);
+    colors[_i] = getColorPaletteRing(getPalette(), LED_SEGMENT_COUNT,0, _i, brightness);
   }
 
   if (millis() - timer > speed)

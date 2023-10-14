@@ -68,7 +68,7 @@ void Microphone::begin()
     }
     log_d("I2S driver installed.");
 
-    setMicGain(_preferences.getUChar("gain", 20));
+    setMicGain(_preferences.getUChar("gain", 3));
     setTakeBeat(_preferences.getUChar("beat", 50));
 };
 double Microphone::mapf(double x, double in_min, double in_max, double out_min, double out_max)

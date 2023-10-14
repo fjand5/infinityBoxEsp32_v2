@@ -1,57 +1,47 @@
 #include "effect.h"
 
-CRGB Effect::getColorPaletteRing(CRGBPalette16 palette, uint16_t perimeter, uint16_t index, uint8_t brightness)
+CRGB Effect::getColorPaletteRing(CRGBPalette16 palette, uint16_t perimeter, uint16_t padding, uint16_t index, uint8_t brightness)
 {
-  index = index % perimeter;
-  if (index >= perimeter)
+  uint16_t _perimeter = perimeter + padding;
+  index = index % _perimeter;
+  if (index >= _perimeter)
   {
-    index = perimeter - index;
+    index = _perimeter - index;
   }
-  return ColorFromPalette(palette, index * 256 / perimeter, brightness);
+  if (index > perimeter)
+    return CRGB::Black;
+  if (index == perimeter)
+    return mixColor(ColorFromPalette(palette, index * 256 / _perimeter, brightness), CRGB::Black, 25);
+  return ColorFromPalette(palette, index * 256 / _perimeter, brightness);
 }
 Effect::Effect(/* args */)
 {
 }
-
-void Effect::setPalette(CRGBPalette16 palette)
-{
-  _newPalette = palette;
-  _changePaletteTransition = 100;
-  // saveEffect();
-
-};
-CRGBPalette16 Effect::getPalette()
-{
-  return _newPalette;
-};
-
-void Effect::setEffectName(EffectName effectName)
-{
-  _lastEffectName = _effectName;
-  _effectName = effectName;
-  _changeEffectTransition = 255;
-  // saveEffect();
-
-};
-EffectName Effect::getEffectName()
-{
-  return _effectName;
-};
 void Effect::nextEffect()
 {
   if ((int)getEffectName() + 1 == EffectName_Count)
     setEffectName((EffectName)0);
   else
     setEffectName(EffectName((int)getEffectName() + 1));
+
+  setStop(false);
+};
+void Effect::previousEffect()
+{
+  if ((int)getEffectName() - 1 == 0)
+    setEffectName((EffectName)(EffectName_Count - 1));
+  else
+    setEffectName(EffectName((int)getEffectName() - 1));
+  setStop(false);
 };
 void Effect::nextPalette()
 {
+  // if (getPalette() == CloudColors_p)
+  // {
+  //   setPalette(LavaColors_p);
+  //   return;
+  // }
   if (getPalette() == CloudColors_p)
-  {
-    setPalette(LavaColors_p);
-    return;
-  }
-  if (getPalette() == LavaColors_p)
   {
     setPalette(OceanColors_p);
     return;
@@ -90,7 +80,7 @@ void Effect::nextPalette()
 
 // void Effect::setRouter()
 // {
-  
+
 // };
 
 void Effect::onBeat(double val, double freq)
@@ -110,6 +100,18 @@ void Effect::onBeat(double val, double freq)
   case EffectName_OverflowFace:
     overflowFaceEffectOnBeat(val, freq);
     break;
+  case EffectName_VUMeterSegment:
+    vUMeterSegmentEffectOnBeat(val, freq);
+    break;
+  case EffectName_ShowPaletteFace:
+    showPaletteFaceEffectOnBeat(val, freq);
+    break;
+  case EffectName_VUMeterHalfSegment:
+    vUMeterHalfSegmentEffectOnBeat(val, freq);
+    break;
+  case EffectName_StarSegment:
+    starEffectOnBeat(val, freq);
+    break;
 
   default:
     break;
@@ -121,16 +123,16 @@ void Effect::handle()
   /* testing */
   if (_autoChangeMode)
   {
-    static uint32_t timer__ = millis();
-    static uint32_t timer___ = millis();
-    if (millis() - timer__ > 30000)
+    static uint32_t colorTimer = millis();
+    static uint32_t effecttimer = millis();
+    if (millis() - effecttimer > _timeAutoMode)
     {
-      timer__ = millis();
+      effecttimer = millis();
       nextEffect();
     }
-    if (millis() - timer___ > 15000)
+    if (millis() - colorTimer > _timeAutoMode / 2)
     {
-      timer___ = millis();
+      colorTimer = millis();
       nextPalette();
     }
   }
@@ -140,7 +142,7 @@ void Effect::handle()
     {
       _palette[i] = mixColor(_palette[i], _newPalette[i], _changePaletteTransition);
     }
-    _changePaletteTransition -= 2;
+    _changePaletteTransition -= 1;
   }
   if (_changeEffectTransition > 0)
   {
@@ -158,11 +160,24 @@ void Effect::handle()
     case EffectName_OverflowFace:
       overflowFaceEffectHandle(_changeEffectTransition);
       break;
+    case EffectName_VUMeterSegment:
+      vUMeterSegmentEffectHandle(_changeEffectTransition);
+      break;
+    case EffectName_ShowPaletteFace:
+      showPaletteFaceEffectHandle(_changeEffectTransition);
+      break;
+    case EffectName_VUMeterHalfSegment:
+      vUMeterHalfSegmentEffectHandle(_changeEffectTransition);
+      break;
+    case EffectName_StarSegment:
+      starEffectHandle(_changeEffectTransition);
+      break;
 
     default:
       break;
     }
-    _changeEffectTransition -= 1;
+    // Phải trừ một lượng chia hết cho 255
+    _changeEffectTransition -= 5;
   }
   switch (_effectName)
   {
@@ -177,6 +192,18 @@ void Effect::handle()
     break;
   case EffectName_OverflowFace:
     overflowFaceEffectHandle(255 - _changeEffectTransition);
+    break;
+  case EffectName_VUMeterSegment:
+    vUMeterSegmentEffectHandle(255 - _changeEffectTransition);
+    break;
+  case EffectName_ShowPaletteFace:
+    showPaletteFaceEffectHandle(255 - _changeEffectTransition);
+    break;
+  case EffectName_VUMeterHalfSegment:
+    vUMeterHalfSegmentEffectHandle(255 - _changeEffectTransition);
+    break;
+  case EffectName_StarSegment:
+    starEffectHandle(255 - _changeEffectTransition);
     break;
 
   default:

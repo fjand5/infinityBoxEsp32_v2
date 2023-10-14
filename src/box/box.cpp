@@ -3,15 +3,41 @@ Box box;
 Box::Box()
 {
 }
+
+void Box::setPalette(CRGBPalette16 palette)
+{
+  _newPalette = palette;
+  _changePaletteTransition = 100;
+  _preferences.putString("palette", paletteToString(palette));
+};
+CRGBPalette16 Box::getPalette()
+{
+  return _newPalette;
+};
+
+void Box::setEffectName(EffectName effectName)
+{
+  _lastEffectName = _effectName;
+  _effectName = effectName;
+  _changeEffectTransition = 255;
+  _preferences.putString("effectName", effectNameToString(effectName));
+};
+EffectName Box::getEffectName()
+{
+  return _effectName;
+};
 void Box::show()
 {
+
   for (size_t i = 0; i < FastLED.size(); i++)
   {
     FastLED.leds()[i] = _pixels[i];
     _pixels[i] = 0;
   }
-
-  FastLED.show(getBrightness());
+  if (_powerOn)
+    FastLED.show(getBrightness());
+  else
+    FastLED.show(0);
 };
 
 void Box::handle(void *param)
@@ -28,8 +54,11 @@ void Box::handle(void *param)
           },
           nullptr);
     }
-    box.Effect::handle();
-    box.show();
+    if (!box.getStop())
+    {
+      box.Effect::handle();
+      box.show();
+    }
   }
 };
 
@@ -41,8 +70,23 @@ void Box::setRouter()
       },
       1000);
   ADD_SETTER_ROUTE(
+      "/setTimeAutoChangeMode", getTimeAutoChangeMode(), {
+        setTimeAutoChangeMode(value.toInt());
+      },
+      1000);
+  ADD_SETTER_ROUTE(
       "/setNextEffectPalette", paletteToString(getPalette()), {
         nextPalette();
+      },
+      1000);
+  ADD_SETTER_ROUTE(
+      "/setNextEffect", effectNameToString(getEffectName()), {
+        nextEffect();
+      },
+      1000);
+  ADD_SETTER_ROUTE(
+      "/setPreviousEffect", effectNameToString(getEffectName()), {
+        previousEffect();
       },
       1000);
   ADD_SETTER_ROUTE(
@@ -68,11 +112,28 @@ void Box::setRouter()
         setOnMicrophone(value == "true");
       },
       1000)
+  ADD_SETTER_ROUTE(
+      "/setStop",
+      getStop(), {
+        setStop(value == "true");
+      },
+      1000)
+  ADD_SETTER_ROUTE(
+      "/setPowerOn",
+      getPowerOn(), {
+        setPowerOn(value == "true");
+      },
+      1000)
   ADD_GETTER_ROUTE(
       "/getBox", {
         obj["autoMode"] = getAutoChangeMode();
         obj["onMicrophone"] = getOnMicrophone();
         obj["brightness"] = getBrightness();
+        obj["effectName"] = effectNameToString(getEffectName());
+        obj["palette"] = paletteToString(getPalette());
+        obj["stop"] = getStop();
+        obj["powerOn"] = getPowerOn();
+        obj["timeAutoChangeMode"] = getTimeAutoChangeMode();
       },
       1000);
 };
@@ -98,6 +159,9 @@ void Box::begin()
   setBrightness(_preferences.getUChar("brightness", 255));
   setAutoChangeMode(_preferences.getBool("autoMode", false));
   setOnMicrophone(_preferences.getBool("onMicrophone", false));
+  setEffectName(stringToEffectName(_preferences.getString("effectName", "EffectName_RunPaletteFace")));
+  setPalette(stringToPalette(_preferences.getString("palette", "RainbowStripeColors_p")));
+  setTimeAutoChangeMode(_preferences.getUInt("timeAutoMode", 10000));
   xTaskCreatePinnedToCore(
       handle,
       PREF_BOX_NAME,
@@ -132,6 +196,34 @@ void Box::setAutoChangeMode(bool enable)
 bool Box::getAutoChangeMode()
 {
   return _autoChangeMode;
+};
+
+void Box::setTimeAutoChangeMode(uint32_t time)
+{
+  if(time<5000) return;
+  _timeAutoMode = time;
+  _preferences.putUInt("timeAutoMode", _timeAutoMode);
+};
+uint32_t Box::getTimeAutoChangeMode()
+{
+  return _timeAutoMode;
+};
+void Box::setStop(bool stop)
+{
+  _stop = stop;
+};
+bool Box::getStop()
+{
+  return _stop;
+};
+
+void Box::setPowerOn(bool powerOn)
+{
+  _powerOn = powerOn;
+};
+bool Box::getPowerOn()
+{
+  return _powerOn;
 };
 void Box::setBrightness(uint8_t brightness)
 {

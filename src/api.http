@@ -1,0 +1,25 @@
+
+# @name setEffectPalette
+# Rainbow_gp, HeatColors_p
+GET http://192.168.2.24/setEffectPalette?value=HeatColors_p
+
+###
+# @name setOnMicrophone false
+http://192.168.2.24/setOnMicrophone?value=false
+###
+# @name setOnMicrophone true
+http://192.168.2.24/setOnMicrophone?value=true
+
+
+
+###
+# @name 
+#  EffectName_RunPaletteFace,
+# EffectName_RunPaletteSegment,
+# EffectName_OverflowSegment,
+# EffectName_OverflowFace,
+# EffectName_VUMeterSegment,
+# EffectName_ShowPaletteFace,
+# EffectName_VUMeterHalfSegment,
+# EffectName_StarSegment,
+http://192.168.2.24/setEffectName?value=EffectName_StarSegment

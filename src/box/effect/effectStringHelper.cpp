@@ -18,6 +18,22 @@ EffectName stringToEffectName(String string)
   {
     return EffectName_OverflowFace;
   }
+  if (string == "EffectName_VUMeterSegment")
+  {
+    return EffectName_VUMeterSegment;
+  }
+  if (string == "EffectName_ShowPaletteFace")
+  {
+    return EffectName_ShowPaletteFace;
+  }
+  if (string == "EffectName_VUMeterHalfSegment")
+  {
+    return EffectName_VUMeterHalfSegment;
+  }
+  if (string == "EffectName_StarSegment")
+  {
+    return EffectName_StarSegment;
+  }
 };
 String effectNameToString(EffectName effectName)
 {
@@ -37,14 +53,31 @@ String effectNameToString(EffectName effectName)
   {
     return "EffectName_OverflowFace";
   }
+  if (effectName == EffectName_VUMeterSegment)
+  {
+    return "EffectName_VUMeterSegment";
+  }
+  if (effectName == EffectName_ShowPaletteFace)
+  {
+    return "EffectName_ShowPaletteFace";
+  }
+  if (effectName == EffectName_VUMeterHalfSegment)
+  {
+    return "EffectName_VUMeterHalfSegment";
+  }
+  if (effectName == EffectName_StarSegment)
+  {
+    return "EffectName_StarSegment";
+  }
 };
 
 CRGBPalette16 stringToPalette(String string)
 {
   if (string == "CloudColors_p")
     return CRGBPalette16(CloudColors_p);
-  if (string == "LavaColors_p")
-    return CRGBPalette16(LavaColors_p);
+  // palette này xấu
+  // if (string == "LavaColors_p")
+  //   return CRGBPalette16(LavaColors_p);
   if (string == "OceanColors_p")
     return CRGBPalette16(OceanColors_p);
   if (string == "ForestColors_p")
@@ -64,8 +97,8 @@ String paletteToString(CRGBPalette16 palette)
 
   if (palette == CloudColors_p)
     return "CloudColors_p";
-  if (palette == LavaColors_p)
-    return "LavaColors_p";
+  // if (palette == LavaColors_p)
+  //   return "LavaColors_p";
   if (palette == OceanColors_p)
     return "OceanColors_p";
   if (palette == ForestColors_p)

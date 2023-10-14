@@ -1,30 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.ct-green-led-button {
-  background: #49fb35;
-  box-shadow: 0 0 10px 2px #49fb35;
-}
-
 @layer base {
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  html {
+    @apply text-dark-500;
   }
 }
-.tabs-component {
-  @apply text-base ;
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
 }
-.tabs-component-tabs {
-  @apply flex justify-start gap-4 uppercase font-semibold border-led-100 border-b-[1px] pb-1;
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
-.tabs-component-tab {
-  @apply border-[1px] px-[4px] py-[1px] border-led-100 rounded-lg transition-all;
+
+
+.bounce-enter-active {
+  animation: bounce-in 0.8s;
 }
-.tabs-component-tab.is-active {
-  @apply  border-b-[1px] border-b-led-400 rounded-b-none rounded-sm  translate-y-[5px];
+
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
 }
-/* .tabs-component-tab.is-inactive {
-  @apply   translate-y-[-4px];
-} */
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

@@ -7,7 +7,7 @@ static ICRGB colors[LED_HALFFACE_COUNT + 1] = {ICRGB(CRGB::Black, EffectName_Ove
 
 void Effect::overflowFaceEffectOnBeat(double val, double freq)
 {
-  if (val < 5)
+  if (val < 10)
     return;
   if (operator!=(colors[0], CRGB::Black))
   {
@@ -17,13 +17,7 @@ void Effect::overflowFaceEffectOnBeat(double val, double freq)
     }
   }
   colors[0] = ColorFromPalette(getPalette(), freq * 256 / 100);
-  // colors[1] = ColorFromPalette(getPalette(), freq * 256 / 100);
-  // colors[2] = ColorFromPalette(getPalette(), freq * 256 / 100);
-  // colors[3] = ColorFromPalette(getPalette(), freq * 256 / 100);
   colors[0].i = EffectName_OverflowFace;
-  // colors[1].i = 0;
-  // colors[2].i = 0;
-  // colors[3].i = 0;
 };
 void Effect::overflowFaceEffectHandle(uint8_t brightness)
 {
@@ -61,7 +55,7 @@ void Effect::overflowFaceEffectHandle(uint8_t brightness)
       {
         if (i == runLoop)
         {
-          colors[i] = getColorPaletteRing(getPalette(), LED_HALFFACE_COUNT, runner, brightness);
+          colors[i] = getColorPaletteRing(getPalette(), LED_HALFFACE_COUNT,0, runner, brightness);
           colors[i].i = -EffectName_OverflowFace;
         }
         else

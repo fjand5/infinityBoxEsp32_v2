@@ -9,6 +9,10 @@ typedef enum
   EffectName_RunPaletteSegment,
   EffectName_OverflowSegment,
   EffectName_OverflowFace,
+  EffectName_VUMeterSegment,
+  EffectName_ShowPaletteFace,
+  EffectName_VUMeterHalfSegment,
+  EffectName_StarSegment,
   EffectName_Count,
 } EffectName;
 EffectName stringToEffectName(String string);
@@ -19,6 +23,8 @@ String paletteToString(CRGBPalette16 palette);
 class Effect : public AccessPixels
 {
 private:
+
+protected:
   CRGBPalette16 _palette = CRGBPalette16(ForestColors_p);
   CRGBPalette16 _newPalette = CRGBPalette16(ForestColors_p);
   int8_t _changePaletteTransition = 0;
@@ -27,27 +33,26 @@ private:
   EffectName _lastEffectName = EffectName_OverflowFace;
   uint8_t _changeEffectTransition = 0;
 
-  CRGB getColorPaletteRing(CRGBPalette16 palette, uint16_t perimeter, uint16_t index, uint8_t brightness = 255);
-
-protected:
   bool _autoChangeMode;
+
+  uint32_t _timeAutoMode = 1000;
 
 public:
   Effect(/* args */);
 
+  CRGB getColorPaletteRing(CRGBPalette16 palette, uint16_t perimeter, uint16_t padding, uint16_t index, uint8_t brightness = 255);
+
   void nextEffect();
+  void previousEffect();
   void nextPalette();
-  // void setRouter();
 
-  // virtual bool getOnMicrophone() = 0;
-  // virtual void saveEffect()=0;
+  virtual void setPalette(CRGBPalette16 palette) = 0;
+  virtual CRGBPalette16 getPalette() = 0;
 
+  virtual void setEffectName(EffectName EffectName) = 0;
+  virtual EffectName getEffectName() = 0;
 
-  void setPalette(CRGBPalette16 palette);
-  CRGBPalette16 getPalette();
-
-  void setEffectName(EffectName EffectName);
-  EffectName getEffectName();
+  virtual void setStop(bool stop) = 0;
 
   void handle();
   void onBeat(double val, double freq);
@@ -63,5 +68,17 @@ public:
 
   void runPaletteSegmentEffectOnBeat(double val, double freq);
   void runPaletteSegmentEffectHandle(uint8_t brightness);
+
+  void vUMeterSegmentEffectOnBeat(double val, double freq);
+  void vUMeterSegmentEffectHandle(uint8_t brightness);
+
+  void showPaletteFaceEffectOnBeat(double val, double freq);
+  void showPaletteFaceEffectHandle(uint8_t brightness);
+
+  void vUMeterHalfSegmentEffectOnBeat(double val, double freq);
+  void vUMeterHalfSegmentEffectHandle(uint8_t brightness);
+
+  void starEffectOnBeat(double val, double freq);
+  void starEffectHandle(uint8_t brightness);
   ~Effect();
 };

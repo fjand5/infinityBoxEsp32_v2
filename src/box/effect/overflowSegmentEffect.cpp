@@ -7,7 +7,7 @@ static ICRGB colors[LED_SEGMENT_COUNT + 1]={ICRGB(CRGB::Black, EffectName_Overfl
 
 void Effect::overflowSegmentEffectOnBeat(double val, double freq)
 {
-  if (val < 5)
+  if (val < 10)
     return;
   if (operator!=(colors[0], CRGB::Black))
   {
@@ -55,7 +55,7 @@ void Effect::overflowSegmentEffectHandle(uint8_t brightness)
       {
         if (i == runLoop)
         {
-          colors[i] = getColorPaletteRing(getPalette(), LED_SEGMENT_COUNT, runner,brightness);
+          colors[i] = getColorPaletteRing(getPalette(), LED_SEGMENT_COUNT,0, runner,brightness);
           colors[i].i = -EffectName_OverflowSegment;
         }
         else
